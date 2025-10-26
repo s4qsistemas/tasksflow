@@ -4,3 +4,5 @@ git status
 git add .
 git commit -m "..."
 git push origin main
+
+git restore -- .gitignore
