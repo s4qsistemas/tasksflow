@@ -5,4 +5,5 @@ git add .
 git commit -m "..."
 git push origin main
 
-git restore -- .gitignore
+git restore -- .gitignoregit 
+git add -A :/
