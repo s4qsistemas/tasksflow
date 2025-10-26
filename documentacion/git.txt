@@ -1,0 +1,6 @@
+git switch main
+git pull --rebase origin main   
+git status
+git add .
+git commit -m "..."
+git push origin main

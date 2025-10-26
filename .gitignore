@@ -2,3 +2,8 @@
 *.xlsx
 *.epub
 *.pdf
+*.txt
+
+
+# PERO permite dentro de /documentacion
+!/documentacion/**
