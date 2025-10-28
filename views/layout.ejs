@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/styles.css"> <!-- generado por Tailwind -->
+</head>
+<body class="min-h-dvh bg-gray-50 text-gray-800">
+  <header class="border-b bg-white">
+    <nav class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
+      <a href="/" class="font-semibold">Tasksflow</a>
+      <div class="space-x-4">
+        <a class="text-sm hover:underline" href="/">Inicio</a>
+        <a class="text-sm hover:underline" href="/login">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-8">
+    <%- body %>
+  </main>
+
+  <footer class="border-t bg-white">
+    <div class="mx-auto max-w-5xl px-4 py-6 text-sm text-gray-500">
+      © <%= new Date().getFullYear() %> Tasksflow
+    </div>
+  </footer>
+</body>
+</html>

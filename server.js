@@ -8,6 +8,10 @@ const routes = require('./routes/routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Middleware
 // Procesar JSON y datos URL-encoded
 app.use(express.json());
@@ -24,13 +28,19 @@ app.use(cors(corsOptions));
 // Servir archivos estáticos carpeta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Vistas
+app.get('/', (req, res) => res.render('index', { title: 'Inicio' }));
+app.get('/login', (req, res) => res.render('login', { title: 'Login' }));
+
+/*
 // Ruta para servir el index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+*/
 
 // Rutas de la API
-app.use('/api', routes);
+//app.use('/api', routes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
@@ -52,3 +62,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
+
+// npm run dev:css
+// node server.js
