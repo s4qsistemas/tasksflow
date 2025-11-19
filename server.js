@@ -1,67 +1,58 @@
 const express = require('express');
+const expressLayouts = require('express-ejs-layouts');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const routes = require('./routes/routes');
+const session = require('express-session');
 
+const routes = require('./routes/routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// EJS
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'cambia_este_secreto',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { sameSite: 'lax', httpOnly: true, secure: false }
+}));
+
+// View engine: configura el motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layout');
 
-// Middleware
-// Procesar JSON y datos URL-encoded
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Configuración CORS
-const corsOptions = {
-    origin: process.env.CORS_ALLOWED_ORIGINS.split(','),
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-};
-app.use(cors(corsOptions));
-
-// Servir archivos estáticos carpeta 'public'
+// Static: configura la entrega de archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+//app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
-// Vistas
-app.get('/', (req, res) => res.render('index', { title: 'Inicio' }));
-app.get('/login', (req, res) => res.render('login', { title: 'Login' }));
+// Middleware: procesar el cuerpo de la solicitud (Body Parsing)
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-/*
-// Ruta para servir el index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-*/
+// CORS: configura las políticas de origen cruzado
+app.use(cors({ origin: true }));
 
-// Rutas de la API
-//app.use('/api', routes);
+// ✅ NUEVO: silenciar ruido DevTools (evita 404 en /.well-known/...)
+app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => res.sendStatus(204));
 
-// Manejo de errores
+// Rutas: configura el enrutador principa
+app.use(routes);
+
+// Errores
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-    console.error(err.stack); // Log de errores
-
-    const isProduction = process.env.NODE_ENV === 'production' || false;
-
-    // Código de error
-    let statusCode = err.status || 500;
-
-    // Enviar la respuesta
-    res.status(statusCode).json({
-        message: isProduction ? 'Error interno del servidor' : err.message,
-        ...(isProduction ? {} : { stack: err.stack }) // Stack en desarrollo
-    });
+  console.error(err);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const statusCode = err.status || 500;
+  res.status(statusCode).json({
+    message: isProduction ? 'Error interno del servidor' : err.message,
+    ...(isProduction ? {} : { stack: err.stack })
+  });
 });
 
-// Iniciar el servidor
+//const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+  console.log(`http://localhost:${PORT}`);
 });
-
-// npm run dev:css
-// node server.js

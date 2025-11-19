@@ -1,0 +1,29 @@
+<!-- Navbar (privadas) -->
+<nav class="bg-white shadow">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- Izquierda: logo -->
+    <a href="/" class="flex items-center gap-2">
+      <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
+    </a>
+
+    <!-- Derecha: único link Logout -->
+    <div>
+      <a href="/logout"
+        onclick="return doLogout()"
+        class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444]">
+        Logout
+      </a>
+    </div>
+  </div>
+</nav>
+
+<section class="bg-white rounded-2xl shadow p-6 max-w-6xl mx-auto my-8">
+  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Root</h2>
+  <p class="text-sm text-gray-600 mb-4">Acciones de administración global.</p>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <a href="/admin/usuarios" class="block p-4 rounded-xl border hover:shadow">Gestión de usuarios</a>
+    <a href="/admin/areas" class="block p-4 rounded-xl border hover:shadow">Gestión de áreas</a>
+    <a href="/admin/roles" class="block p-4 rounded-xl border hover:shadow">Roles y permisos</a>
+  </div>
+</section>

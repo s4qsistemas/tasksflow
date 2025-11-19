@@ -1,0 +1,77 @@
+<!-- Navbar -->
+<nav class="bg-white shadow">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2">
+      <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
+    </a>
+    <div class="space-x-6 text-sm">
+      <a href="/" class="text-gray-700 hover:text-[#2E7D32]">Inicio</a>
+      <a href="/#caracteristicas" class="text-gray-700 hover:text-[#2E7D32]">Características</a>
+      <a href="/#contacto" class="text-gray-700 hover:text-[#2E7D32]">Contacto</a>
+      <button onclick="toggleModal('loginModal', true)" class="px-3 py-1 rounded-lg bg-[#FACC15] text-[#111827] font-medium hover:bg-[#EAB308]">
+        Iniciar sesión
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="inicio" class="flex-grow bg-gradient-to-b from-white to-[#F8FAFC]">
+  <div class="max-w-5xl mx-auto py-20 px-6 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-[#2E7D32] mb-4">Organiza. Colabora. Evoluciona.</h1>
+    <p class="text-gray-700 text-lg max-w-2xl mx-auto">
+      <b>TasksFlow</b> es una plataforma web tipo <b>Kanban</b> con trazabilidad inspirada en <b> Git </b> para equipos que buscan
+      productividad y transparencia entre áreas, supervisores y trabajadores.
+    </p>
+    <div class="mt-8 flex justify-center gap-4">
+      <button onclick="toggleModal('loginModal', true)" class="px-6 py-3 rounded-xl bg-[#2E7D32] text-white hover:bg-[#256028] shadow transition">
+        Comienza ahora
+      </button>
+      <button onclick="document.getElementById('caracteristicas').scrollIntoView({behavior:'smooth'})" class="px-6 py-3 rounded-xl bg-[#FB923C] text-white hover:bg-[#F97316] shadow transition">
+        Saber más
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="caracteristicas" class="max-w-6xl mx-auto py-16 px-6">
+  <h2 class="text-2xl font-semibold text-center mb-10 text-[#2E7D32]">Características Principales</h2>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#2E7D32]">
+      <h3 class="font-semibold text-lg mb-2 text-[#2E7D32]">Gestión Visual</h3>
+      <p class="text-gray-600 text-sm">Tableros Kanban intuitivos y claros.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#FB923C]">
+      <h3 class="font-semibold text-lg mb-2 text-[#FB923C]">Trazabilidad Total</h3>
+      <p class="text-gray-600 text-sm">Registro de acciones versión-a-versión.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#FACC15]">
+      <h3 class="font-semibold text-lg mb-2 text-[#FACC15]">Jerarquía de Roles</h3>
+      <p class="text-gray-600 text-sm">Áreas, supervisores y trabajadores con permisos claros.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#2E7D32]">
+      <h3 class="font-semibold text-lg mb-2 text-[#2E7D32]">Reportes en Tiempo Real</h3>
+      <p class="text-gray-600 text-sm">Monitorea avance y desempeño.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#FB923C]">
+      <h3 class="font-semibold text-lg mb-2 text-[#FB923C]">Integración API</h3>
+      <p class="text-gray-600 text-sm">Node.js + Express + MySQL2 (REST).</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-6 text-center border-t-4 border-[#FACC15]">
+      <h3 class="font-semibold text-lg mb-2 text-[#FACC15]">Código Abierto</h3>
+      <p class="text-gray-600 text-sm">Licencia GPLv3 para colaborar mejor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contacto" class="bg-white py-16">
+  <div class="max-w-4xl mx-auto text-center px-6">
+    <h2 class="text-2xl font-semibold mb-6 text-[#2E7D32]">¿Tienes dudas o sugerencias?</h2>
+    <p class="text-gray-600 mb-8">Contáctanos para conocer cómo TasksFlow puede transformar tus procesos internos.</p>
+    <button onclick="toggleModal('contactModal', true)" class="px-6 py-3 rounded-xl bg-[#FB923C] text-white hover:bg-[#F97316] shadow transition">
+      Escríbenos
+    </button>
+  </div>
+</section>

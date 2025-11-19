@@ -1,5 +1,6 @@
 .env
 /node_modules
+/argon2
 
 *.docx
 *.xlsx
@@ -10,3 +11,5 @@
 
 # PERO permite dentro de /documentacion
 !/documentacion/**
+
+# git status --ignored
