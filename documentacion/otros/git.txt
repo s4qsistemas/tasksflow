@@ -1,0 +1,15 @@
+git switch main
+git pull --rebase origin main   
+git status
+git add .
+git commit -m "..."
+git push origin main
+
+git restore -- .gitignoregit 
+git add -A :/
+git commit --amend -m "En ./tasksflow: se ..."
+git restore --staged documentacion/git.txt
+git update-index --assume-unchanged documentacion/git.txt
+# Para revertir esto después:
+# git update-index --no-assume-unchanged documentacion/git.txt
+git status
