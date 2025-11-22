@@ -3,21 +3,447 @@
   <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
     <!-- Izquierda: logo -->
     <a href="/" class="flex items-center gap-2">
-      <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
+      <img src="/img/logo.png" alt="TasksFlow" class="h-16 w-auto">
+      <span class="font-semibold text-lg text-[#2E7D32] hidden sm:inline">
+        TasksFlow · Admin
+      </span>
     </a>
 
-    <!-- Derecha: único link Logout -->
-    <div>
+    <!-- Derecha: acciones admin + logout -->
+    <div class="flex items-center gap-3">
+      <!-- Botón: Registrar usuario -->
+      <button
+        type="button"
+        onclick="toggleModal('modalNuevoUsuario', true)"
+        class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#2E7D32] text-white text-sm hover:bg-[#1B5E20]">
+        <span class="material-icons text-base">person_add</span>
+        Nuevo usuario
+      </button>
+
+      <!-- Botón: Nueva área/equipo -->
+      <button
+        type="button"
+        onclick="toggleModal('modalNuevaArea', true)"
+        class="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#0288D1] text-white text-sm hover:bg-[#0277BD]">
+        <span class="material-icons text-base">group_add</span>
+        Nueva área / equipo
+      </button>
+
+      <!-- Menú simple para móviles -->
+      <div class="sm:hidden">
+        <select
+          class="border rounded-lg px-2 py-1 text-sm"
+          onchange="handleAdminQuickAction(this)">
+          <option value="">Acciones</option>
+          <option value="nuevoUsuario">Nuevo usuario</option>
+          <option value="nuevaArea">Nueva área/equipo</option>
+        </select>
+      </div>
+
+      <!-- Logout -->
       <a href="/logout"
         onclick="return doLogout()"
-        class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444]">
+        class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444] text-sm">
         Logout
       </a>
     </div>
   </div>
 </nav>
 
-<section class="max-w-6xl mx-auto my-8 bg-white rounded-2xl p-6 shadow">
-  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Admin</h2>
-  <p class="text-sm text-gray-600">Herramientas de administración.</p>
+<!-- Contenedor principal -->
+<section class="max-w-6xl mx-auto my-8">
+  <!-- Título -->
+  <div class="bg-white rounded-2xl p-6 shadow mb-6">
+    <h2 class="text-2xl font-semibold text-[#2E7D32] mb-1">Panel Admin</h2>
+    <p class="text-sm text-gray-600">
+      Control y monitoreo general de áreas, equipos y tareas.
+    </p>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div class="grid gap-4 md:grid-cols-4 mb-6">
+    <div class="bg-white p-4 rounded-2xl shadow">
+      <p class="text-xs uppercase tracking-wide text-gray-500">Áreas activas</p>
+      <p class="text-3xl font-semibold text-[#2E7D32] mt-1">4</p>
+      <p class="text-xs text-gray-500 mt-1">Operaciones, Calidad, TI, RRHH</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl shadow">
+      <p class="text-xs uppercase tracking-wide text-gray-500">Equipos</p>
+      <p class="text-3xl font-semibold text-[#0288D1] mt-1">9</p>
+      <p class="text-xs text-gray-500 mt-1">Incluye turnos y células de trabajo</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl shadow">
+      <p class="text-xs uppercase tracking-wide text-gray-500">Usuarios activos</p>
+      <p class="text-3xl font-semibold text-[#F9A825] mt-1">27</p>
+      <p class="text-xs text-gray-500 mt-1">Con acceso al sistema</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-2xl shadow">
+      <p class="text-xs uppercase tracking-wide text-gray-500">Tareas abiertas</p>
+      <p class="text-3xl font-semibold text-[#E64A19] mt-1">18</p>
+      <p class="text-xs text-gray-500 mt-1">Pendientes (To Do + In Progress)</p>
+    </div>
+  </div>
+
+  <!-- Grilla principal: Áreas/Equipos - Tareas -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <!-- Panel Áreas y equipos -->
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-800">Áreas y equipos</h3>
+        <button
+          type="button"
+          onclick="toggleModal('modalNuevaArea', true)"
+          class="text-xs px-2 py-1 rounded-lg border border-[#0288D1] text-[#0288D1] hover:bg-[#E1F5FE]">
+          + Nueva área/equipo
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 border-b text-xs uppercase">
+              <th class="py-2 pr-3">Área</th>
+              <th class="py-2 pr-3">Equipo / Grupo</th>
+              <th class="py-2 pr-3">Usuarios</th>
+              <th class="py-2">Tareas abiertas</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y text-xs sm:text-sm">
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Operaciones</td>
+              <td class="py-2 pr-3">Turno Noche Planta</td>
+              <td class="py-2 pr-3">8</td>
+              <td class="py-2 text-[#E64A19] font-semibold">5</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Operaciones</td>
+              <td class="py-2 pr-3">Turno Día Despacho</td>
+              <td class="py-2 pr-3">5</td>
+              <td class="py-2 text-[#E64A19] font-semibold">3</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Calidad</td>
+              <td class="py-2 pr-3">Control de proceso</td>
+              <td class="py-2 pr-3">4</td>
+              <td class="py-2 text-[#F9A825] font-semibold">4</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">TI</td>
+              <td class="py-2 pr-3">Soporte interno</td>
+              <td class="py-2 pr-3">3</td>
+              <td class="py-2 text-[#2E7D32] font-semibold">1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel Tareas recientes -->
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-800">Tareas recientes</h3>
+        <span class="text-xs text-gray-500">Últimas actualizaciones</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 border-b text-xs uppercase">
+              <th class="py-2 pr-3">Tarea</th>
+              <th class="py-2 pr-3">Asignado a</th>
+              <th class="py-2 pr-3">Estado</th>
+              <th class="py-2">Área</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y text-xs sm:text-sm">
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Ajuste turnos torniquetes</td>
+              <td class="py-2 pr-3">Juan Soto</td>
+              <td class="py-2 pr-3">
+                <span class="px-2 py-0.5 rounded-full bg-[#FFF3E0] text-[#E64A19] text-[11px] font-semibold">
+                  In Progress
+                </span>
+              </td>
+              <td class="py-2">Operaciones</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Revisión checklist calidad</td>
+              <td class="py-2 pr-3">María Rojas</td>
+              <td class="py-2 pr-3">
+                <span class="px-2 py-0.5 rounded-full bg-[#FFFDE7] text-[#F9A825] text-[11px] font-semibold">
+                  To Do
+                </span>
+              </td>
+              <td class="py-2">Calidad</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Actualizar DSN satélites VB6</td>
+              <td class="py-2 pr-3">Diego A.</td>
+              <td class="py-2 pr-3">
+                <span class="px-2 py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-[11px] font-semibold">
+                  Done
+                </span>
+              </td>
+              <td class="py-2">TI</td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">Capacitación nuevo supervisor</td>
+              <td class="py-2 pr-3">Carolina V.</td>
+              <td class="py-2 pr-3">
+                <span class="px-2 py-0.5 rounded-full bg-[#FFFDE7] text-[#F9A825] text-[11px] font-semibold">
+                  To Do
+                </span>
+              </td>
+              <td class="py-2">RRHH</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de monitoreo rápido (opcional) -->
+  <div class="mt-6 bg-white rounded-2xl shadow p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold text-gray-800">Monitoreo rápido</h3>
+      <span class="text-xs text-gray-500">Vista general del día</span>
+    </div>
+    <div class="grid gap-4 md:grid-cols-3 text-xs sm:text-sm">
+      <div>
+        <p class="text-gray-500 mb-1">Tareas por estado</p>
+        <ul class="space-y-1">
+          <li class="flex justify-between">
+            <span>To Do</span>
+            <span class="font-semibold text-[#F9A825]">9</span>
+          </li>
+          <li class="flex justify-between">
+            <span>In Progress</span>
+            <span class="font-semibold text-[#E64A19]">6</span>
+          </li>
+          <li class="flex justify-between">
+            <span>Done (hoy)</span>
+            <span class="font-semibold text-[#2E7D32]">3</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-gray-500 mb-1">Áreas con más carga</p>
+        <ul class="space-y-1">
+          <li>Operaciones · <span class="font-semibold">8 tareas</span></li>
+          <li>Calidad · <span class="font-semibold">4 tareas</span></li>
+          <li>TI · <span class="font-semibold">3 tareas</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-gray-500 mb-1">Observaciones</p>
+        <ul class="space-y-1">
+          <li>✔ Revisión de DSN completada en TI</li>
+          <li>⚠ Alta carga en turno noche planta</li>
+          <li>ℹ Pendiente capacitación supervisor nuevo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </section>
+
+<!-- MODAL: Nuevo usuario -->
+<div
+  id="modalNuevoUsuario"
+  class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
+    <div class="px-5 py-3 border-b flex justify-between items-center">
+      <h3 class="text-base font-semibold text-gray-800">Registrar nuevo usuario</h3>
+      <button
+        type="button"
+        class="text-gray-500 hover:text-gray-700"
+        onclick="toggleModal('modalNuevoUsuario', false)">
+        ✕
+      </button>
+    </div>
+    <form class="px-5 py-4 space-y-3 text-sm">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+        <input
+          type="text"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+          placeholder="Ej: Juan Pérez">
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+        <input
+          type="email"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+          placeholder="usuario@empresa.cl">
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+          <select
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+            <option value="">Seleccionar…</option>
+            <option value="admin">Admin</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="user">Trabajador</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+          <select
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+            <option value="activo">Activo</option>
+            <option value="suspendido">Suspendido</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Select de áreas -->
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+        <select
+          class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+          <option value="">Seleccionar área…</option>
+          <option value="operaciones">Operaciones</option>
+          <option value="calidad">Calidad</option>
+          <option value="ti">TI</option>
+          <option value="rrhh">RRHH</option>
+        </select>
+      </div>
+
+      <!-- Select de grupos/equipos -->
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Grupo / equipo de trabajo</label>
+        <select
+          class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+          <option value="">Seleccionar grupo…</option>
+          <option value="turnoNochePlanta">Turno Noche Planta</option>
+          <option value="turnoDiaDespacho">Turno Día Despacho</option>
+          <option value="controlProceso">Control de proceso</option>
+          <option value="soporteInterno">Soporte interno</option>
+        </select>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          onclick="toggleModal('modalNuevoUsuario', false)"
+          class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+          Guardar (UI)
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Nueva área / equipo -->
+<div
+  id="modalNuevaArea"
+  class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
+    <div class="px-5 py-3 border-b flex justify-between items-center">
+      <h3 class="text-base font-semibold text-gray-800">Registrar área / equipo</h3>
+      <button
+        type="button"
+        class="text-gray-500 hover:text-gray-700"
+        onclick="toggleModal('modalNuevaArea', false)">
+        ✕
+      </button>
+    </div>
+    <form class="px-5 py-4 space-y-3 text-sm">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del área</label>
+        <input
+          type="text"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+          placeholder="Ej: Operaciones">
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del equipo / grupo</label>
+        <input
+          type="text"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+          placeholder="Ej: Turno Noche Planta">
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+          <select
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+            <option value="">Seleccionar…</option>
+            <option value="area">Área</option>
+            <option value="equipo">Equipo</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+          <select
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+        <textarea
+          rows="2"
+          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+          placeholder="Notas o alcance del área/equipo…"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          onclick="toggleModal('modalNuevaArea', false)"
+          class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-xs bg-[#0288D1] text-white hover:bg-[#0277BD]">
+          Guardar (UI)
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Helpers JS mínimos para los modals en caso de no existir en main.js -->
+<script>
+  function toggleModal(id, show) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (show) {
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    } else {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+  }
+
+  function handleAdminQuickAction(selectEl) {
+    const value = selectEl.value;
+    if (!value) return;
+    if (value === 'nuevoUsuario') {
+      toggleModal('modalNuevoUsuario', true);
+    }
+    if (value === 'nuevaArea') {
+      toggleModal('modalNuevaArea', true);
+    }
+    // reset
+    selectEl.value = '';
+  }
+</script>
