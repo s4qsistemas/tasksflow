@@ -6,6 +6,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'tasksflow',
+  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -27,3 +28,6 @@ module.exports = { connectDB, closeConnection, pool };
 // touch db.js | echo > db.js
 // rm db.js | del db.js
 // rm -r config | RMDIR /S /Q config
+
+// chcp 65001
+// mysql -u root -p --default-character-set=utf8mb4 tasksflow
