@@ -6,8 +6,21 @@
       <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
     </a>
 
-    <!-- Derecha: único link Logout -->
-    <div>
+    <!-- Derecha: toggle Kanban + Logout -->
+    <div class="flex items-center gap-4">
+      <!-- Toggle vista Kanban -->
+      <label
+        id="kanbanToggleLabel"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg border text-sm cursor-pointer bg-white text-gray-700 hover:bg-[#E8F5E9]">
+        <input
+          id="kanbanToggle"
+          type="checkbox"
+          class="sr-only"
+          onchange="toggleKanbanView(this)">
+        <span class="material-icons text-base">view_module</span>
+        <span>Kanban</span>
+      </label>
+
       <a href="/logout"
         onclick="return doLogout()"
         class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444]">
@@ -17,7 +30,58 @@
   </div>
 </nav>
 
-<section class="max-w-6xl mx-auto my-8 bg-white rounded-2xl p-6 shadow">
-  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Usuario</h2>
-  <p class="text-sm text-gray-600">Tus tareas y actividad.</p>
-</section>
+<main class="max-w-6xl mx-auto my-8">
+
+  <!-- VISTA DASHBOARD USUARIO -->
+  <section
+    id="userDashboardView"
+    class="bg-white rounded-2xl p-6 shadow">
+    <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Usuario</h2>
+    <p class="text-sm text-gray-600 mb-4">
+      Tus tareas y actividad reciente.
+    </p>
+
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="bg-[#F1F8E9] rounded-xl p-4">
+        <p class="text-xs text-gray-500 mb-1">Tareas asignadas</p>
+        <p class="text-2xl font-semibold text-[#33691E]">0</p>
+      </div>
+      <div class="bg-[#E3F2FD] rounded-xl p-4">
+        <p class="text-xs text-gray-500 mb-1">En progreso</p>
+        <p class="text-2xl font-semibold text-[#1565C0]">0</p>
+      </div>
+      <div class="bg-[#FFF3E0] rounded-xl p-4">
+        <p class="text-xs text-gray-500 mb-1">Completadas</p>
+        <p class="text-2xl font-semibold text-[#EF6C00]">0</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
+  <section
+    id="userKanbanView"
+    class="bg-white rounded-2xl p-6 shadow hidden">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
+        <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
+      </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="bg-[#F1F8E9] rounded-xl p-3">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">To Do</h3>
+        <p class="text-xs text-gray-500">Tareas pendientes por comenzar.</p>
+      </div>
+      <div class="bg-[#E3F2FD] rounded-xl p-3">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">In Progress</h3>
+        <p class="text-xs text-gray-500">Lo que estás trabajando ahora.</p>
+      </div>
+      <div class="bg-[#FFF3E0] rounded-xl p-3">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Done</h3>
+        <p class="text-xs text-gray-500">Tareas que ya completaste ✅</p>
+      </div>
+    </div>
+  </section>
+
+</main>
