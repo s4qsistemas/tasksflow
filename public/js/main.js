@@ -34,15 +34,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // helper: toggle modal
+  // helper: toggle modal (versión con reset + tabs para admin)
   function toggleModal(id, show) {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle('hidden', !show);
+
+    if (show) {
+      // Mostrar modal
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    } else {
+      // 🔹 Al cerrar el modal, reseteamos todos los formularios internos
+      const forms = el.querySelectorAll('form');
+      forms.forEach((f) => f.reset());
+
+      // 🔹 Y, si aplica, volvemos siempre a la pestaña "Registrar"
+      if (id === 'modalNuevaArea' && typeof window.switchAreaTab === 'function') {
+        window.switchAreaTab('registrar');
+      }
+      if (id === 'modalNuevoUsuario' && typeof window.switchUsuarioTab === 'function') {
+        window.switchUsuarioTab('registrar');
+      }
+      // modalNuevoGrupo y modalEditarGrupo no tienen tabs, con reset() basta
+
+      // Ocultar modal
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
   }
 
   // Exponer toggleModal globalmente (para usar en onclick en el HTML)
   window.toggleModal = toggleModal;
+
+    // ============================
+  // TOGGLE DASHBOARD / KANBAN (Admin, Supervisor, User)
+  // ============================
+  function toggleKanbanView(checkbox) {
+    const candidates = [
+      { dashId: 'adminDashboardView',       kanbanId: 'adminKanbanView' },
+      { dashId: 'supervisorDashboardView',  kanbanId: 'supervisorKanbanView' },
+      { dashId: 'userDashboardView',        kanbanId: 'userKanbanView' }
+    ];
+
+    let dash = null;
+    let kanban = null;
+
+    for (const cfg of candidates) {
+      const d = document.getElementById(cfg.dashId);
+      const k = document.getElementById(cfg.kanbanId);
+      if (d && k) {
+        dash = d;
+        kanban = k;
+        break;
+      }
+    }
+
+    if (!dash || !kanban) return;
+
+    const label = document.getElementById('kanbanToggleLabel');
+    const isOn = checkbox && checkbox.checked;
+
+    if (isOn) {
+      dash.classList.add('hidden');
+      kanban.classList.remove('hidden');
+
+      if (label) {
+        label.style.backgroundColor = '#C6FF00';
+        label.style.color = '#111827';
+        label.style.borderColor = '#AEEA00';
+      }
+    } else {
+      kanban.classList.add('hidden');
+      dash.classList.remove('hidden');
+
+      if (label) {
+        label.style.backgroundColor = '';
+        label.style.color = '';
+        label.style.borderColor = '';
+      }
+    }
+  }
+
+  window.toggleKanbanView = toggleKanbanView;
+
+  const kanbanToggle = document.getElementById('kanbanToggle');
+  if (kanbanToggle) {
+    toggleKanbanView(kanbanToggle);
+  }
 
   // ================
   // LOGIN
@@ -138,6 +216,37 @@ document.addEventListener('DOMContentLoaded', () => {
         notify({
           ok: false,
           message: 'Error inesperado al crear el área'
+        });
+      }
+    });
+  }
+
+    // ================
+  // USUARIOS: alta desde el modal
+  // ================
+  const formNuevoUsuario = document.getElementById('formNuevoUsuario');
+
+  if (formNuevoUsuario) {
+    formNuevoUsuario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const resp = await postForm('/api/users', formNuevoUsuario);
+        // resp = { ok, message, data }
+
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalNuevoUsuario', false);
+          formNuevoUsuario.reset();
+          // recargar para ver el nuevo usuario donde lo muestres
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        notify({
+          ok: false,
+          message: 'Error inesperado al crear el usuario'
         });
       }
     });
