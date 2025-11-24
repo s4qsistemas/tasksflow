@@ -25,7 +25,9 @@ async function postLogin(req, res) {
       id: user.id,
       name: user.name,
       role_id: user.role_id,
-      role_name: user.role_name
+      role_name: user.role_name,
+      company_id: user.company_id,
+      area_id: user.area_id || null
     };
 
     const role = String(user.role_name || '').toLowerCase();
