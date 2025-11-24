@@ -1,5 +1,5 @@
 // controllers/authController.js
-const { verifyLogin } = require('../models/userModel');
+const { verifyLogin } = require('../models/authModel');
 
 const RoleRoutes = {
   root: '/root',
