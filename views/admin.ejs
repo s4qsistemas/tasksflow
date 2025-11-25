@@ -3,10 +3,10 @@
   <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
     <!-- Izquierda: logo más bienvenida -->
-    <a href="/" class="flex items-center gap-2">
+    <a href="javascript:void(0)" class="flex items-center gap-2">
       <img src="/img/logo.png" alt="TasksFlow" class="h-16 w-auto">
       <span class="font-semibold text-lg text-[#2E7D32] hidden sm:inline">
-        TasksFlow · Admin
+        <%= user ? user.name : 'TasksFlow' %>
       </span>
     </a>
 
@@ -389,7 +389,7 @@
             <button
               type="submit"
               class="px-3 py-1.5 rounded-lg text-xs bg-[#0288D1] text-white hover:bg-[#0277BD]">
-              Guardar (UI)
+              Guardar
             </button>
           </div>
         </form>
@@ -466,7 +466,7 @@
             <button
               type="submit"
               class="px-3 py-1.5 rounded-lg text-xs bg-[#0288D1] text-white hover:bg-[#0277BD]">
-              Guardar cambios (UI)
+              Guardar cambios
             </button>
           </div>
         </form>
@@ -560,11 +560,13 @@
                 name="role"
                 class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
                 required>
-                <option value="">Seleccionar…</option>
-                <option value="admin">Admin</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="user">Trabajador</option>
+                <!-- Como admin, solo crearás supervisores: el backend fuerza role_id = 3 -->
+                <option value="supervisor" selected>Supervisor</option>
               </select>
+              <p class="mt-1 text-[11px] text-gray-400">
+                * Como Admin, solo puedes registrar usuarios de tipo Supervisor.
+                El sistema asigna automáticamente al Admin actual como jefe directo.
+              </p>
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
@@ -579,10 +581,11 @@
 
           <!-- Área -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Área (activas)</label>
             <select
               name="area_id"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
               <option value="" disabled selected>Seleccionar área…</option>
               <% if (areas && areas.length) { %>
                 <% areas.forEach(function(area) { %>
@@ -592,19 +595,8 @@
                 <% }) %>
               <% } %>
             </select>
-          </div>
-
-          <!-- Jefe directo -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Jefe directo (opcional)</label>
-            <select
-              name="manager_id"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-              <option value="">Sin jefe asignado…</option>
-              <!-- Después se puede poblar con admins/supervisores -->
-            </select>
             <p class="mt-1 text-[11px] text-gray-400">
-              * Generalmente: un admin como jefe de supervisores, y un supervisor como jefe de trabajadores.
+              * El área es obligatoria para crear un supervisor.
             </p>
           </div>
 
@@ -619,7 +611,7 @@
             <button
               type="submit"
               class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
-              Guardar (UI)
+              Guardar
             </button>
           </div>
         </form>
@@ -633,7 +625,7 @@
 
           <!-- Selector de usuario -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Usuario a editar</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Supervisor a editar</label>
             <select
               id="selectUsuarioEditar"
               name="user_id"
@@ -642,6 +634,9 @@
               <option value="">Seleccionar usuario…</option>
               <!-- Se rellena vía JS con /api/users -->
             </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              * Como Admin, solo podrás editar supervisores de tu empresa.
+            </p>
           </div>
 
           <!-- Nombre -->
@@ -683,10 +678,9 @@
               <select
                 id="editarUsuarioRole"
                 name="role"
-                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-                <option value="admin">Admin</option>
-                <option value="supervisor">Supervisor</option>
-                <option value="user">Trabajador</option>
+                class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600"
+                disabled>
+                <option value="supervisor" selected>Supervisor</option>
               </select>
             </div>
             <div>
@@ -708,20 +702,18 @@
               id="editarUsuarioArea"
               name="area_id"
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-              <option value="">Sin área…</option>
-              <!-- Podrías poblar con las mismas areas -->
+              <option value="">Seleccionar área…</option>
+              <% if (areas && areas.length) { %>
+                <% areas.forEach(function(area) { %>
+                  <% if (area.status === 'active') { %>
+                    <option value="<%= area.id %>"><%= area.name %></option>
+                  <% } %>
+                <% }) %>
+              <% } %>
             </select>
-          </div>
-
-          <!-- Jefe directo -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Jefe directo</label>
-            <select
-              id="editarUsuarioManager"
-              name="manager_id"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-              <option value="">Sin jefe asignado…</option>
-            </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              * El área es obligatoria para supervisores.
+            </p>
           </div>
 
           <!-- Footer Editar -->
@@ -733,7 +725,7 @@
               Cancelar
             </button>
 
-            <!-- NUEVO: Resetear contraseña a la genérica -->
+            <!-- Resetear contraseña a la genérica -->
             <button
               type="button"
               onclick="resetPasswordUsuarioAdmin()"
@@ -744,7 +736,7 @@
             <button
               type="submit"
               class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
-              Guardar cambios (UI)
+              Guardar cambios
             </button>
           </div>
         </form>
@@ -1175,22 +1167,27 @@
       const res = await fetch('/api/users', { credentials: 'same-origin' });
       const data = await res.json();
 
-      if (!data.ok) {
+      if (!data.ok || !Array.isArray(data.data)) {
         alert(data.message || 'No se pudieron cargar los usuarios');
         return;
       }
+
+      if (!selectUsuarioEditar) return;
 
       // Limpiar opciones actuales (menos el placeholder)
       while (selectUsuarioEditar.options.length > 1) {
         selectUsuarioEditar.remove(1);
       }
 
-      data.data.forEach((u) => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = `${u.name} (${u.email})`;
-        selectUsuarioEditar.appendChild(opt);
-      });
+      // Solo mostrar SUPERVISORES (role_id = 3) para edición por Admin
+      data.data
+        .filter(u => u.role_id === 3)
+        .forEach((u) => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `${u.name} (${u.email})`;
+          selectUsuarioEditar.appendChild(opt);
+        });
     } catch (err) {
       console.error(err);
       alert('Error al cargar usuarios');
@@ -1212,28 +1209,53 @@
         });
         const data = await res.json();
 
-        if (!data.ok) {
+        if (!data.ok || !data.data) {
           alert(data.message || 'No se pudo cargar el usuario');
           return;
         }
 
-        const u = data.data;
-        inputUsuarioName.value = u.name || '';
-        inputUsuarioEmail.value = u.email || '';
-        inputUsuarioTel.value = u.telephone || '';
+        const u = data.data || {};
 
-        // Rol: mapeamos por role_id si quieres, pero por ahora por defecto 'user'
-        if (u.role_id === 2) selectUsuarioRole.value = 'admin';
-        else if (u.role_id === 3) selectUsuarioRole.value = 'supervisor';
-        else selectUsuarioRole.value = 'user';
+        // Campos básicos
+        if (inputUsuarioName) {
+          inputUsuarioName.value = u.name || '';
+        }
+        if (inputUsuarioEmail) {
+          inputUsuarioEmail.value = u.email || '';
+        }
+        if (inputUsuarioTel) {
+          inputUsuarioTel.value = u.telephone || '';
+        }
 
-        selectUsuarioStatus.value = u.status || 'active';
+        // Rol (informativo: en Admin siempre debería ser supervisor)
+        if (selectUsuarioRole) {
+          if (u.role_id === 2) selectUsuarioRole.value = 'admin';
+          else if (u.role_id === 3) selectUsuarioRole.value = 'supervisor';
+          else selectUsuarioRole.value = 'user';
+        }
 
-        if (u.area_id) selectUsuarioArea.value = String(u.area_id);
-        else selectUsuarioArea.value = '';
+        // Estado
+        if (selectUsuarioStatus) {
+          selectUsuarioStatus.value = u.status || 'active';
+        }
 
-        if (u.manager_id) selectUsuarioManager.value = String(u.manager_id);
-        else selectUsuarioManager.value = '';
+        // Área
+        if (selectUsuarioArea) {
+          if (u.area_id) {
+            selectUsuarioArea.value = String(u.area_id);
+          } else {
+            selectUsuarioArea.value = '';
+          }
+        }
+
+        // Jefe directo (solo informativo en UI; backend forzará manager_id = admin)
+        if (selectUsuarioManager) {
+          if (u.manager_id) {
+            selectUsuarioManager.value = String(u.manager_id);
+          } else {
+            selectUsuarioManager.value = '';
+          }
+        }
       } catch (err) {
         console.error(err);
         alert('Error al cargar el usuario');
@@ -1275,7 +1297,7 @@
     });
   }
 
-    async function resetPasswordUsuarioAdmin() {
+  async function resetPasswordUsuarioAdmin() {
     if (!selectUsuarioEditar) {
       alert('No se encontró el selector de usuarios.');
       return;
@@ -1304,11 +1326,6 @@
 
       const data = await res.json();
       alert(data.message || 'Operación realizada.');
-
-      // Si todo OK, podrías recargar la página (no es estrictamente necesario)
-      // if (data.ok) {
-      //   window.location.reload();
-      // }
     } catch (err) {
       console.error(err);
       alert('Error al resetear la contraseña.');

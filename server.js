@@ -17,6 +17,11 @@ app.use(session({
   cookie: { sameSite: 'lax', httpOnly: true, secure: false }
 }));
 
+app.use((req, res, next) => {
+  res.locals.user = req.session?.user || null;
+  next();
+});
+
 // View engine: configura el motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

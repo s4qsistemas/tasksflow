@@ -1,9 +1,13 @@
 <!-- Navbar (privadas) -->
 <nav class="bg-white shadow">
   <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-    <!-- Izquierda: logo -->
-    <a href="/" class="flex items-center gap-2">
-      <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
+
+    <!-- Izquierda: logo más bienvenida -->
+    <a href="javascript:void(0)" class="flex items-center gap-2">
+      <img src="/img/logo.png" alt="TasksFlow" class="h-16 w-auto">
+      <span class="font-semibold text-lg text-[#2E7D32] hidden sm:inline">
+        <%= user ? user.name : 'TasksFlow' %>
+      </span>
     </a>
 
     <!-- Derecha: único link Logout -->

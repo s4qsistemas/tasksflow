@@ -1,12 +1,16 @@
 <!-- Navbar (privadas) -->
 <nav class="bg-white shadow">
   <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-    <!-- Izquierda: logo -->
-    <a href="/" class="flex items-center gap-2">
-      <img src="/img/logo.png" alt="TasksFlow" class="h-24 w-auto">
+
+    <!-- Izquierda: logo más bienvenida -->
+    <a href="javascript:void(0)" class="flex items-center gap-2">
+      <img src="/img/logo.png" alt="TasksFlow" class="h-16 w-auto">
+      <span class="font-semibold text-lg text-[#2E7D32] hidden sm:inline">
+        <%= user ? user.name : 'TasksFlow' %>
+      </span>
     </a>
 
-    <!-- Derecha: toggle Kanban + Logout -->
+    <!-- Derecha: toggle Kanban + Nuevo usuario + Logout -->
     <div class="flex items-center gap-4">
       <!-- Toggle vista Kanban -->
       <label
@@ -20,6 +24,15 @@
         <span class="material-icons text-base">view_module</span>
         <span>Kanban</span>
       </label>
+
+      <!-- NUEVO: botón para registrar trabajador -->
+      <button
+        type="button"
+        onclick="toggleModal('modalNuevoUsuario', true)"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#2E7D32] text-white text-sm hover:bg-[#1B5E20]">
+        <span class="material-symbols-outlined text-sm">person_add</span>
+        <span>Nuevo usuario</span>
+      </button>
 
       <a href="/logout"
         onclick="return doLogout()"
@@ -85,5 +98,105 @@
       </div>
     </div>
   </section>
+
+  <!-- MODAL: Registrar nuevo trabajador (Supervisor) -->
+  <div
+    id="modalNuevoUsuario"
+    class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
+      <!-- Header -->
+      <div class="px-5 py-3 border-b flex justify-between items-center">
+        <h3 class="text-base font-semibold text-gray-800">
+          Registrar usuario (equipo)
+        </h3>
+        <button
+          type="button"
+          class="text-gray-500 hover:text-gray-700"
+          onclick="toggleModal('modalNuevoUsuario', false)">
+          ✕
+        </button>
+      </div>
+
+      <!-- Contenido -->
+      <div class="px-5 py-4 text-sm">
+        <form
+          id="formNuevoUsuario"
+          class="space-y-3">
+
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+            <input
+              type="text"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="Ej: Juan Pérez"
+              required>
+          </div>
+
+          <!-- Correo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+            <input
+              type="email"
+              name="email"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="usuario@empresa.cl"
+              required>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <input
+              type="text"
+              name="telephone"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="+569...">
+          </div>
+
+          <!-- Rol fijo / Estado -->
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+              <input
+                type="text"
+                value="Trabajador"
+                disabled
+                class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 text-xs">
+              <p class="mt-1 text-[11px] text-gray-400">
+                * Como Supervisor, solo puedes registrar usuarios de tipo Trabajador.
+                El sistema asigna automáticamente el rol, el área y el jefe directo.
+              </p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+              <select
+                name="status"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                <option value="active">Activo</option>
+                <option value="suspended">Suspendido</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalNuevoUsuario', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 </main>
