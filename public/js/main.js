@@ -1,4 +1,3 @@
-// public/js/main.js
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   const contactForm = document.getElementById('contactForm');
@@ -66,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Exponer toggleModal globalmente (para usar en onclick en el HTML)
   window.toggleModal = toggleModal;
 
-    // ============================
+  // ============================
   // TOGGLE DASHBOARD / KANBAN (Admin, Supervisor, User)
   // ============================
   function toggleKanbanView(checkbox) {
@@ -130,9 +129,22 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       try {
         const resp = await postForm('/login', loginForm);
-        // resp = { ok, message, redirect } (JSON)
+        // resp = { ok, message, redirect, mustChangePassword? } (JSON)
 
         if (resp.ok && resp.redirect) {
+          if (resp.mustChangePassword) {
+            // Fuerza flujo de cambio obligatorio
+            alert(
+              'Estás usando la contraseña genérica del sistema. ' +
+              'Debes cambiarla antes de continuar.'
+            );
+            toggleModal('loginModal', false);
+            loginForm.reset();
+            window.location.href = '/cambiar-password';
+            return;
+          }
+
+          // Caso normal: no requiere cambio
           toggleModal('loginModal', false);
           loginForm.reset();
           window.location.href = resp.redirect;
@@ -221,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-    // ================
+  // ================
   // USUARIOS: alta desde el modal
   // ================
   const formNuevoUsuario = document.getElementById('formNuevoUsuario');

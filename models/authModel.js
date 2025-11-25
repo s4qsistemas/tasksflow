@@ -34,11 +34,23 @@ async function verifyLogin(login, plainPassword) {
   const user = await getUserByEmailOrName(login);
   if (!user) return null;
 
-  const ok = await argon2.verify(user.password, plainPassword + PEPPER);
+  // La columna real en la DB se llama "password"
+  const hashedPassword = user.password;
+
+  // Verificamos la contraseña ingresada + PEPPER
+  const ok = await argon2.verify(hashedPassword, plainPassword + PEPPER);
   if (!ok) return null;
 
-  // Nunca devolvemos el hash a capas superiores
-  const { password, ...safeUser } = user;
+  // No exponemos el campo "password" con ese nombre,
+  // pero lo dejamos disponible como "password_hash" para capas superiores
+  // (authController) que NECESITAN compararlo con DEFAULT_PASSWORD_HASH.
+  const { password, ...rest } = user;
+
+  const safeUser = {
+    ...rest,
+    password_hash: hashedPassword
+  };
+
   return safeUser;
 }
 

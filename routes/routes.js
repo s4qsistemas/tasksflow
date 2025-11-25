@@ -2,8 +2,14 @@
 const express = require('express');
 const router = express.Router();
 
-const { postLogin } = require('../controllers/authController');
-const { requireAuth } = require('../middlewares/auth');
+const {
+  postLogin,
+  // NUEVO: vistas de cambio de contraseña
+  mostrarFormularioCambioPassword,
+  procesarCambioPassword
+} = require('../controllers/authController');
+
+const { requireAuth, requireRole } = require('../middlewares/auth');
 
 const {
   listarAreasView,
@@ -15,7 +21,17 @@ const {
   activarArea
 } = require('../controllers/areaController');
 
+const {
+  listarUsuariosJSON,
+  obtenerUsuarioJSON,
+  crearUsuario,
+  actualizarUsuario,
+  resetearPassword // 👈 NUEVO
+} = require('../controllers/userController');
+
+// ===============================
 // Home -> portal
+// ===============================
 router.get('/', (req, res) =>
   res.render('portal', { title: 'TasksFlow — Portal' })
 );
@@ -24,18 +40,50 @@ router.get('/', (req, res) =>
 router.post('/login', postLogin);
 
 // ===============================
+// Cambio de contraseña obligatoria
+// ===============================
+
+// Formulario cambio de contraseña (cualquier usuario logueado)
+router.get(
+  '/cambiar-password',
+  requireAuth,
+  mostrarFormularioCambioPassword
+);
+
+// Procesar cambio de contraseña
+router.post(
+  '/cambiar-password',
+  requireAuth,
+  procesarCambioPassword
+);
+
+// ===============================
 // Vistas por rol
 // ===============================
-router.get('/root', requireAuth, (req, res) =>
+
+// Panel Root (solo root)
+router.get('/root', requireAuth, requireRole('root'), (req, res) =>
   res.render('root', { title: 'Panel Root' })
 );
 
-router.get('/admin', requireAuth, listarAreasView);
-
-router.get('/supervisor', requireAuth, (req, res) =>
-  res.render('supervisor', { title: 'Panel Supervisor' })
+// Panel Admin (admin + root)
+router.get(
+  '/admin',
+  requireAuth,
+  requireRole('admin', 'root'),
+  listarAreasView
 );
-router.get('/user', requireAuth, (req, res) =>
+
+// Panel Supervisor (supervisor + root)
+router.get(
+  '/supervisor',
+  requireAuth,
+  requireRole('supervisor', 'root'),
+  (req, res) => res.render('supervisor', { title: 'Panel Supervisor' })
+);
+
+// Panel Usuario (user + root)
+router.get('/user', requireAuth, requireRole('user', 'root'), (req, res) =>
   res.render('user', { title: 'Panel Usuario' })
 );
 
@@ -43,31 +91,104 @@ router.get('/user', requireAuth, (req, res) =>
 // ÁREAS
 // ===============================
 
-// (Opcional) si quieres mantener una ruta específica para solo áreas:
-router.get('/admin/areas', requireAuth, listarAreasView);
+// Vista Admin de áreas (admin + root)
+router.get(
+  '/admin/areas',
+  requireAuth,
+  requireRole('admin', 'root'),
+  listarAreasView
+);
 
-// API ÁREAS (JSON) - prefijo /api
+// API ÁREAS (JSON)
+router.get(
+  '/api/areas',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  listarAreasJSON
+);
 
-// Listar todas las áreas de la empresa actual
-router.get('/api/areas', requireAuth, listarAreasJSON);
+router.get(
+  '/api/areas/:id',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  obtenerAreaJSON
+);
 
-// Obtener una sola área por id
-router.get('/api/areas/:id', requireAuth, obtenerAreaJSON);
+router.post(
+  '/api/areas',
+  requireAuth,
+  requireRole('admin', 'root'),
+  crearArea
+);
 
-// Crear área (JSON) - para integraciones / fetch
-router.post('/api/areas', requireAuth, crearArea);
+router.post(
+  '/api/areas/:id/edit',
+  requireAuth,
+  requireRole('admin', 'root'),
+  actualizarArea
+);
 
-// Actualizar área (nombre, descripción, status)
-router.post('/api/areas/:id/edit', requireAuth, actualizarArea);
+router.post(
+  '/api/areas/:id/delete',
+  requireAuth,
+  requireRole('admin', 'root'),
+  desactivarArea
+);
 
-// Desactivar área (soft delete: status = 'inactive')
-router.post('/api/areas/:id/delete', requireAuth, desactivarArea);
-
-// Activar área (status = 'active')
-router.post('/api/areas/:id/activate', requireAuth, activarArea);
+router.post(
+  '/api/areas/:id/activate',
+  requireAuth,
+  requireRole('admin', 'root'),
+  activarArea
+);
 
 // Alias para mantener compatible tu formulario actual (postForm('/areas', ...))
-router.post('/areas', requireAuth, crearArea);
+router.post(
+  '/areas',
+  requireAuth,
+  requireRole('admin', 'root'),
+  crearArea
+);
+
+// ===============================
+// USUARIOS
+// ===============================
+
+router.get(
+  '/api/users',
+  requireAuth,
+  requireRole('root', 'admin', 'supervisor'),
+  listarUsuariosJSON
+);
+
+router.get(
+  '/api/users/:id',
+  requireAuth,
+  requireRole('root', 'admin', 'supervisor'),
+  obtenerUsuarioJSON
+);
+
+router.post(
+  '/api/users',
+  requireAuth,
+  requireRole('root', 'admin', 'supervisor'),
+  crearUsuario
+);
+
+router.post(
+  '/api/users/:id/edit',
+  requireAuth,
+  requireRole('root', 'admin', 'supervisor'),
+  actualizarUsuario
+);
+
+// 🔐 Resetear contraseña a la genérica
+router.post(
+  '/api/users/:id/reset-password',
+  requireAuth,
+  requireRole('root', 'admin', 'supervisor'),
+  resetearPassword
+);
 
 // ===============================
 // Logout

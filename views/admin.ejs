@@ -409,7 +409,7 @@
               name="area_id"
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
               required>
-              <option value="">Seleccionar área…</option>
+              <option value="" disabled selected>Seleccionar área…</option>
               <% if (typeof areas !== 'undefined' && areas.length) { %>
                 <% areas.forEach(function(area) { %>
                   <option value="<%= area.id %>">
@@ -476,14 +476,16 @@
   </div>
 </div>
 
-<!-- MODAL: Nuevo usuario -->
+<!-- MODAL: Registrar / Editar usuario -->
 <div
   id="modalNuevoUsuario"
   class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
   <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
     <!-- Header -->
     <div class="px-5 py-3 border-b flex justify-between items-center">
-      <h3 class="text-base font-semibold text-gray-800">Registrar nuevo usuario</h3>
+      <h3 class="text-base font-semibold text-gray-800">
+        Gestión de usuarios
+      </h3>
       <button
         type="button"
         class="text-gray-500 hover:text-gray-700"
@@ -492,108 +494,263 @@
       </button>
     </div>
 
-    <!-- Form -->
-    <form
-      id="formNuevoUsuario"
-      class="px-5 py-4 space-y-3 text-sm">
+    <!-- Tabs -->
+    <div class="px-5 pt-3 border-b flex gap-4 text-sm">
+      <button
+        id="tabUsuarioRegistrar"
+        type="button"
+        class="pb-2 border-b-2 border-[#2E7D32] text-[#2E7D32] font-medium"
+        onclick="switchUsuarioTab('registrar')">
+        Registrar usuario
+      </button>
+      <button
+        id="tabUsuarioEditar"
+        type="button"
+        class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        onclick="switchUsuarioTab('editar')">
+        Editar usuario
+      </button>
+    </div>
 
-      <!-- Nombre -->
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
-        <input
-          type="text"
-          name="name"
-          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-          placeholder="Ej: Juan Pérez"
-          required>
+    <!-- Contenido -->
+    <div class="px-5 py-4 text-sm">
+      <!-- TAB: REGISTRAR -->
+      <div id="tabContentUsuarioRegistrar" class="space-y-3">
+        <form
+          id="formNuevoUsuario"
+          class="space-y-3">
+
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+            <input
+              type="text"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="Ej: Juan Pérez"
+              required>
+          </div>
+
+          <!-- Correo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+            <input
+              type="email"
+              name="email"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="usuario@empresa.cl"
+              required>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <input
+              type="text"
+              name="telephone"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="+569...">
+          </div>
+
+          <!-- Rol / Estado -->
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+              <select
+                name="role"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                required>
+                <option value="">Seleccionar…</option>
+                <option value="admin">Admin</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="user">Trabajador</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+              <select
+                name="status"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                <option value="active">Activo</option>
+                <option value="suspended">Suspendido</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Área -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+            <select
+              name="area_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="" disabled selected>Seleccionar área…</option>
+              <% if (areas && areas.length) { %>
+                <% areas.forEach(function(area) { %>
+                  <% if (area.status === 'active') { %>
+                    <option value="<%= area.id %>"><%= area.name %></option>
+                  <% } %>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+
+          <!-- Jefe directo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Jefe directo (opcional)</label>
+            <select
+              name="manager_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="">Sin jefe asignado…</option>
+              <!-- Después se puede poblar con admins/supervisores -->
+            </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              * Generalmente: un admin como jefe de supervisores, y un supervisor como jefe de trabajadores.
+            </p>
+          </div>
+
+          <!-- Footer Registrar -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalNuevoUsuario', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar (UI)
+            </button>
+          </div>
+        </form>
       </div>
 
-      <!-- Correo -->
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
-        <input
-          type="email"
-          name="email"
-          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-          placeholder="usuario@empresa.cl"
-          required>
-      </div>
+      <!-- TAB: EDITAR -->
+      <div id="tabContentUsuarioEditar" class="space-y-3 hidden">
+        <form
+          id="formEditarUsuario"
+          class="space-y-3">
 
-      <!-- Teléfono -->
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
-        <input
-          type="text"
-          name="telephone"
-          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-          placeholder="+569...">
-      </div>
+          <!-- Selector de usuario -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Usuario a editar</label>
+            <select
+              id="selectUsuarioEditar"
+              name="user_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="">Seleccionar usuario…</option>
+              <!-- Se rellena vía JS con /api/users -->
+            </select>
+          </div>
 
-      <!-- Rol / Estado -->
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
-          <select
-            name="role"
-            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-            required>
-            <option value="">Seleccionar…</option>
-            <option value="admin">Admin</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="user">Trabajador</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
-          <select
-            name="status"
-            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-            <option value="active">Activo</option>
-            <option value="suspended">Suspendido</option>
-          </select>
-        </div>
-      </div>
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+            <input
+              type="text"
+              id="editarUsuarioName"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
 
-      <!-- Área -->
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
-        <select
-          name="area_id"
-          class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-          <option value="">Seleccionar área…</option>
-          <!-- Opciones dinámicas desde backend: areas de la company del admin -->
-        </select>
-      </div>
+          <!-- Correo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+            <input
+              type="email"
+              id="editarUsuarioEmail"
+              name="email"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
 
-      <!-- Jefe directo (manager_id) -->
-      <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">Jefe directo (opcional)</label>
-        <select
-          name="manager_id"
-          class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-          <option value="">Sin jefe asignado…</option>
-          <!-- Rellenar con admins/supervisores según lógica -->
-        </select>
-        <p class="mt-1 text-[11px] text-gray-400">
-          * Generalmente: un admin como jefe de supervisores, y un supervisor como jefe de trabajadores.
-        </p>
-      </div>
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <input
+              type="text"
+              id="editarUsuarioTelephone"
+              name="telephone"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+          </div>
 
-      <!-- Footer -->
-      <div class="flex justify-end gap-2 pt-2">
-        <button
-          type="submit"
-          onclick="toggleModal('modalNuevoUsuario', false)"
-          class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
-          Guardar (UI)
-        </button>
+          <!-- Rol / Estado -->
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+              <select
+                id="editarUsuarioRole"
+                name="role"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                <option value="admin">Admin</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="user">Trabajador</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+              <select
+                id="editarUsuarioStatus"
+                name="status"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                <option value="active">Activo</option>
+                <option value="suspended">Suspendido</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Área -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+            <select
+              id="editarUsuarioArea"
+              name="area_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="">Sin área…</option>
+              <!-- Podrías poblar con las mismas areas -->
+            </select>
+          </div>
+
+          <!-- Jefe directo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Jefe directo</label>
+            <select
+              id="editarUsuarioManager"
+              name="manager_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="">Sin jefe asignado…</option>
+            </select>
+          </div>
+
+          <!-- Footer Editar -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalNuevoUsuario', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+
+            <!-- NUEVO: Resetear contraseña a la genérica -->
+            <button
+              type="button"
+              onclick="resetPasswordUsuarioAdmin()"
+              class="px-3 py-1.5 rounded-lg text-xs border border-amber-400 text-amber-600 hover:bg-amber-50">
+              Reset pass genérica
+            </button>
+
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar cambios (UI)
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+
   </div>
 </div>
 
@@ -679,7 +836,7 @@
       <!-- Footer -->
       <div class="flex justify-end gap-2 pt-2">
         <button
-          type="submit"
+          type="button"
           onclick="toggleModal('modalNuevoGrupo', false)"
           class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
           Cancelar
@@ -835,7 +992,7 @@
     <div class="px-5 py-3 border-t flex justify-end gap-2">
       <button
         type="button"
-        onclick="toggleModal('modalEditarMiembrosGrupo', false)"
+        onclick="toggleModal('modalEditarGrupo', false)"
         class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
         Cerrar
       </button>
@@ -850,58 +1007,25 @@
 
 <!-- Helpers JS mínimos para los modals -->
 <script>
-  function toggleModal(id, show) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (show) {
-      el.classList.remove('hidden');
-      el.classList.add('flex');
-    } else {
-      el.classList.add('hidden');
-      el.classList.remove('flex');
-    }
-  }
-
   function handleAdminQuickAction(selectEl) {
     const value = selectEl.value;
     if (!value) return;
+
     if (value === 'nuevoUsuario') {
       toggleModal('modalNuevoUsuario', true);
     }
     if (value === 'nuevaArea') {
       toggleModal('modalNuevaArea', true);
     }
-    // reset
-    selectEl.value = '';
-  }
-
-  // Toggle Dashboard <-> Kanban
-  function toggleKanbanView(checkbox) {
-    const dashboard = document.getElementById('adminDashboardView');
-    const kanban = document.getElementById('adminKanbanView');
-    const label = document.getElementById('kanbanToggleLabel');
-
-    if (!dashboard || !kanban || !label) return;
-
-    if (checkbox.checked) {
-      // Mostrar Kanban, ocultar Dashboard
-      dashboard.classList.add('hidden');
-      kanban.classList.remove('hidden');
-
-      // "Prender" el botón con verde fluorescente
-      label.style.backgroundColor = '#C6FF00';
-      label.style.color = '#111827';
-      label.style.borderColor = '#AEEA00';
-    } else {
-      // Volver al Dashboard
-      dashboard.classList.remove('hidden');
-      kanban.classList.add('hidden');
-
-      // Volver al estilo original del botón
-      label.style.backgroundColor = '';
-      label.style.color = '';
-      label.style.borderColor = '';
+    if (value === 'nuevoGrupo') {
+      toggleModal('modalNuevoGrupo', true);
     }
+    if (value === 'editarGrupo') {
+      toggleModal('modalEditarGrupo', true);
+    }
+
+    // reset del select
+    selectEl.value = '';
   }
 </script>
 
@@ -1002,5 +1126,192 @@
         alert('Error al actualizar el área');
       }
     });
+  }
+</script>
+
+<!-- Script: Control de pestañas para registrar / editar usuarios -->
+<script>
+  function switchUsuarioTab(tab) {
+    const tabRegistrar = document.getElementById('tabUsuarioRegistrar');
+    const tabEditar = document.getElementById('tabUsuarioEditar');
+    const contentRegistrar = document.getElementById('tabContentUsuarioRegistrar');
+    const contentEditar = document.getElementById('tabContentUsuarioEditar');
+
+    if (tab === 'registrar') {
+      tabRegistrar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabRegistrar.classList.remove('border-transparent', 'text-gray-500');
+      tabEditar.classList.add('border-transparent', 'text-gray-500');
+      tabEditar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentRegistrar.classList.remove('hidden');
+      contentEditar.classList.add('hidden');
+    } else {
+      tabEditar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabEditar.classList.remove('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.add('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentEditar.classList.remove('hidden');
+      contentRegistrar.classList.add('hidden');
+    }
+  }
+</script>
+
+<!-- Función: Editar usuarios (flujo completo) -->
+<script>
+  const selectUsuarioEditar = document.getElementById('selectUsuarioEditar');
+  const formEditarUsuario = document.getElementById('formEditarUsuario');
+
+  const inputUsuarioName = document.getElementById('editarUsuarioName');
+  const inputUsuarioEmail = document.getElementById('editarUsuarioEmail');
+  const inputUsuarioTel = document.getElementById('editarUsuarioTelephone');
+  const selectUsuarioRole = document.getElementById('editarUsuarioRole');
+  const selectUsuarioStatus = document.getElementById('editarUsuarioStatus');
+  const selectUsuarioArea = document.getElementById('editarUsuarioArea');
+  const selectUsuarioManager = document.getElementById('editarUsuarioManager');
+
+  async function cargarUsuariosParaEditar() {
+    try {
+      const res = await fetch('/api/users', { credentials: 'same-origin' });
+      const data = await res.json();
+
+      if (!data.ok) {
+        alert(data.message || 'No se pudieron cargar los usuarios');
+        return;
+      }
+
+      // Limpiar opciones actuales (menos el placeholder)
+      while (selectUsuarioEditar.options.length > 1) {
+        selectUsuarioEditar.remove(1);
+      }
+
+      data.data.forEach((u) => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.name} (${u.email})`;
+        selectUsuarioEditar.appendChild(opt);
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Error al cargar usuarios');
+    }
+  }
+
+  if (selectUsuarioEditar && formEditarUsuario) {
+    // Cargamos lista de usuarios al abrir la vista
+    cargarUsuariosParaEditar();
+
+    // Cuando se selecciona un usuario, traemos sus datos
+    selectUsuarioEditar.addEventListener('change', async () => {
+      const id = selectUsuarioEditar.value;
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/users/${id}`, {
+          credentials: 'same-origin'
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          alert(data.message || 'No se pudo cargar el usuario');
+          return;
+        }
+
+        const u = data.data;
+        inputUsuarioName.value = u.name || '';
+        inputUsuarioEmail.value = u.email || '';
+        inputUsuarioTel.value = u.telephone || '';
+
+        // Rol: mapeamos por role_id si quieres, pero por ahora por defecto 'user'
+        if (u.role_id === 2) selectUsuarioRole.value = 'admin';
+        else if (u.role_id === 3) selectUsuarioRole.value = 'supervisor';
+        else selectUsuarioRole.value = 'user';
+
+        selectUsuarioStatus.value = u.status || 'active';
+
+        if (u.area_id) selectUsuarioArea.value = String(u.area_id);
+        else selectUsuarioArea.value = '';
+
+        if (u.manager_id) selectUsuarioManager.value = String(u.manager_id);
+        else selectUsuarioManager.value = '';
+      } catch (err) {
+        console.error(err);
+        alert('Error al cargar el usuario');
+      }
+    });
+
+    // Enviar cambios
+    formEditarUsuario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = selectUsuarioEditar.value;
+
+      if (!id) {
+        alert('Selecciona un usuario primero');
+        return;
+      }
+
+      try {
+        const body = new URLSearchParams(new FormData(formEditarUsuario));
+
+        const res = await fetch(`/api/users/${id}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body,
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        alert(data.message || 'Cambios guardados');
+
+        if (data.ok) {
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al actualizar el usuario');
+      }
+    });
+  }
+
+    async function resetPasswordUsuarioAdmin() {
+    if (!selectUsuarioEditar) {
+      alert('No se encontró el selector de usuarios.');
+      return;
+    }
+
+    const id = selectUsuarioEditar.value;
+    if (!id) {
+      alert('Selecciona un usuario primero.');
+      return;
+    }
+
+    const confirmar = confirm(
+      '¿Seguro que deseas resetear la contraseña de este usuario ' +
+      'a la contraseña genérica del sistema?'
+    );
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        credentials: 'same-origin'
+      });
+
+      const data = await res.json();
+      alert(data.message || 'Operación realizada.');
+
+      // Si todo OK, podrías recargar la página (no es estrictamente necesario)
+      // if (data.ok) {
+      //   window.location.reload();
+      // }
+    } catch (err) {
+      console.error(err);
+      alert('Error al resetear la contraseña.');
+    }
   }
 </script>
