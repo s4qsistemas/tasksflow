@@ -2,14 +2,14 @@
 /node_modules
 /argon2
 
+# Ignora archivos de documentación fuera del directorio permitido
 *.docx
 *.xlsx
 *.epub
 *.pdf
 *.txt
 
-
-# PERO permite dentro de /documentacion
+# Permite dentro de /documentacion
 !/documentacion/**
 
 # git status --ignored

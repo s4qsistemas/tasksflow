@@ -2,4 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aquí puedes agregar utilidades personalizadas si quieres */
+/* 
+Aquí se pueden agregar utilidades personalizadas:
+
+    @layer utilities { ... }
+    @layer components { ... }
+
+    <button class="inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium bg-[#2E7D32] text-white hover:bg-[#1B5E20] transition-colors duration-150">
+         Guardar
+    </button>
+
+    @layer components {
+        .btn-primary {
+            @apply inline-flex items-center justify-center px-4 py-2 rounded-lg
+                font-medium bg-[#2E7D32] text-white hover:bg-[#1B5E20]
+                transition-colors duration-150;
+        }
+    }
+
+    <button class="btn-primary">Guardar</button>
+*/
