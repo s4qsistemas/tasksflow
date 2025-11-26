@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 
+const companyController = require('../controllers/companyController');
+
 const {
   postLogin,
-  // NUEVO: vistas de cambio de contraseña
   mostrarFormularioCambioPassword,
   procesarCambioPassword
 } = require('../controllers/authController');
@@ -26,7 +27,7 @@ const {
   obtenerUsuarioJSON,
   crearUsuario,
   actualizarUsuario,
-  resetearPassword // 👈 NUEVO
+  resetearPassword
 } = require('../controllers/userController');
 
 // ===============================
@@ -62,8 +63,11 @@ router.post(
 // ===============================
 
 // Panel Root (solo root)
-router.get('/root', requireAuth, requireRole('root'), (req, res) =>
-  res.render('root', { title: 'Panel Root' })
+router.get(
+  '/root',
+  requireAuth,
+  requireRole('root'),
+  companyController.listarCompaniesView
 );
 
 // Panel Admin (admin + root)
@@ -188,6 +192,59 @@ router.post(
   requireAuth,
   requireRole('root', 'admin', 'supervisor'),
   resetearPassword
+);
+
+// ===============================
+// COMPANY
+// ===============================
+// Listar todas (JSON)
+
+// Listar todas (JSON)
+router.get(
+  '/api/companies',
+  requireAuth,
+  requireRole('root'),
+  companyController.listarCompaniesJSON
+);
+
+// Obtener una
+router.get(
+  '/api/companies/:id',
+  requireAuth,
+  requireRole('root'),
+  companyController.obtenerCompanyJSON
+);
+
+// Crear
+router.post(
+  '/api/companies',
+  requireAuth,
+  requireRole('root'),
+  companyController.crearCompany
+);
+
+// Actualizar (puedes cambiar a PUT si quieres)
+router.post(
+  '/api/companies/:id/edit',
+  requireAuth,
+  requireRole('root'),
+  companyController.actualizarCompany
+);
+
+// Desactivar (soft delete)
+router.post(
+  '/api/companies/:id/delete',
+  requireAuth,
+  requireRole('root'),
+  companyController.desactivarCompany
+);
+
+// Activar
+router.post(
+  '/api/companies/:id/activate',
+  requireAuth,
+  requireRole('root'),
+  companyController.activarCompany
 );
 
 // ===============================

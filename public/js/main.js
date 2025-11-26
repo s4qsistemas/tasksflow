@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // helper: toggle modal (versión con reset + tabs para admin)
+  // helper: toggle modal (versión con reset + tabs para admin/root)
   function toggleModal(id, show) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -51,10 +51,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (id === 'modalNuevaArea' && typeof window.switchAreaTab === 'function') {
         window.switchAreaTab('registrar');
       }
+
       if (id === 'modalNuevoUsuario' && typeof window.switchUsuarioTab === 'function') {
         window.switchUsuarioTab('registrar');
       }
-      // modalNuevoGrupo y modalEditarGrupo no tienen tabs, con reset() basta
+
+      // 🔹 Companies (root)
+      if (id === 'modalNuevaCompany' && typeof window.switchCompanyTab === 'function') {
+        window.switchCompanyTab('registrar');
+      }
+
+      // 🔹 Grupos de trabajo (admin): por ahora sin tabs, solo reset de formularios
+      if (id === 'modalNuevoGrupo' || id === 'modalEditarGrupo') {
+        // Aquí ya se ejecutó el reset() de los forms.
+        // Si más adelante agregas tabs para teams, puedes crear un switchTeamTab()
+        // y llamarlo desde acá igual que con áreas/usuarios/companies.
+      }
 
       // Ocultar modal
       el.classList.add('hidden');
@@ -260,6 +272,34 @@ document.addEventListener('DOMContentLoaded', () => {
           ok: false,
           message: 'Error inesperado al crear el usuario'
         });
+      }
+    });
+  }
+
+  // ================
+  // Compañias: alta desde el modal
+  // ================
+  const formNuevaCompany = document.getElementById('formNuevaCompany');
+
+  if (formNuevaCompany) {
+    formNuevaCompany.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const resp = await postForm('/api/companies', formNuevaCompany);
+        // resp = { ok: true/false, message, data }
+
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalNuevaCompany', false);
+          formNuevaCompany.reset();
+          // Por ahora, lo simple:
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        notify({ ok: false, message: 'Error inesperado al crear la empresa' });
       }
     });
   }

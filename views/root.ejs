@@ -10,8 +10,17 @@
       </span>
     </a>
 
-    <!-- Derecha: único link Logout -->
-    <div>
+    <!-- Derecha: botón Nueva company + Logout -->
+    <div class="flex items-center gap-4">
+      <!-- Botón: registrar nueva empresa -->
+      <button
+        type="button"
+        onclick="toggleModal('modalNuevaCompany', true)"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#2E7D32] text-white text-sm hover:bg-[#1B5E20]">
+        <span class="material-symbols-outlined text-sm">business</span>
+        <span>Nueva empresa</span>
+      </button>
+
       <a href="/logout"
         onclick="return doLogout()"
         class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444]">
@@ -21,13 +30,344 @@
   </div>
 </nav>
 
+<!-- Section: Empresas registradas -->
+<section class="bg-white rounded-2xl shadow p-6 max-w-6xl mx-auto my-8">
+  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Empresas registradas</h2>
+  <p class="text-sm text-gray-600 mb-4">
+    Gestión de companies (solo root).
+  </p>
+
+  <div class="flex justify-end mb-3">
+    <button
+      type="button"
+      onclick="toggleModal('modalNuevaCompany', true)"
+      class="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-[#2E7D32] text-[#2E7D32] text-xs hover:bg-[#E8F5E9]">
+      <span class="material-symbols-outlined text-sm">add</span>
+      <span>Nueva empresa</span>
+    </button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b text-xs uppercase">
+          <th class="py-2 pr-3">Nombre</th>
+          <th class="py-2 pr-3">Descripción</th>
+          <th class="py-2 pr-3">Estado</th>
+          <th class="py-2 pr-3">Creada</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-xs sm:text-sm">
+        <% if (companies && companies.length) { %>
+          <% companies.forEach(function(c) { %>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800"><%= c.name %></td>
+              <td class="py-2 pr-3"><%= c.description || '-' %></td>
+              <td class="py-2 pr-3">
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold
+                  <%= c.status === 'active' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-gray-100 text-gray-600' %>">
+                  <%= c.status === 'active' ? 'Activa' : 'Inactiva' %>
+                </span>
+              </td>
+              <td class="py-2 pr-3"><%= c.created_at ? c.created_at.toISOString().slice(0,10) : '' %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="4" class="py-4 text-center text-gray-500">
+              No hay empresas registradas aún.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Section: Panel root -->
 <section class="bg-white rounded-2xl shadow p-6 max-w-6xl mx-auto my-8">
   <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Root</h2>
   <p class="text-sm text-gray-600 mb-4">Acciones de administración global.</p>
 
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <a href="/admin/usuarios" class="block p-4 rounded-xl border hover:shadow">Gestión de usuarios</a>
-    <a href="/admin/areas" class="block p-4 rounded-xl border hover:shadow">Gestión de áreas</a>
-    <a href="/admin/roles" class="block p-4 rounded-xl border hover:shadow">Roles y permisos</a>
+    <a href="#" class="block p-4 rounded-xl border hover:shadow">Gestión de usuarios</a>
+    <a href="#" class="block p-4 rounded-xl border hover:shadow">Gestión de áreas</a>
+    <a href="#" class="block p-4 rounded-xl border hover:shadow">Roles y permisos</a>
   </div>
 </section>
+
+<!-- MODAL: Registrar / Editar empresa -->
+<div
+  id="modalNuevaCompany"
+  class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
+    
+    <!-- Header -->
+    <div class="px-5 py-3 border-b flex justify-between items-center">
+      <h3 class="text-base font-semibold text-gray-800">
+        Gestión de empresas
+      </h3>
+      <button
+        type="button"
+        class="text-gray-500 hover:text-gray-700"
+        onclick="toggleModal('modalNuevaCompany', false)">
+        ✕
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="px-5 pt-3 border-b flex gap-4 text-sm">
+      <button
+        id="tabCompanyRegistrar"
+        type="button"
+        class="pb-2 border-b-2 border-[#2E7D32] text-[#2E7D32] font-medium"
+        onclick="switchCompanyTab('registrar')">
+        Registrar empresa
+      </button>
+      <button
+        id="tabCompanyEditar"
+        type="button"
+        class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        onclick="switchCompanyTab('editar')">
+        Editar empresa
+      </button>
+    </div>
+
+    <!-- Contenido -->
+    <div class="px-5 py-4 text-sm">
+      <!-- TAB: REGISTRAR -->
+      <div id="tabContentCompanyRegistrar" class="space-y-3">
+        <form
+          id="formNuevaCompany"
+          class="space-y-3">
+
+          <!-- Nombre de la empresa -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre de la empresa</label>
+            <input
+              type="text"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="Ej: Empresa TasksFlow"
+              required>
+          </div>
+
+          <!-- Descripción -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea
+              name="description"
+              rows="2"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              placeholder="Notas o alcance de la empresa…"></textarea>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+            <select
+              name="status"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="active">Activa</option>
+              <option value="inactive">Inactiva</option>
+            </select>
+          </div>
+
+          <!-- Footer (Registrar) -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalNuevaCompany', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB: EDITAR -->
+      <div id="tabContentCompanyEditar" class="space-y-3 hidden">
+        <form
+          id="formEditarCompany"
+          class="space-y-3">
+          
+          <!-- Selector de empresa -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Empresa a editar</label>
+            <select
+              id="selectCompanyEditar"
+              name="company_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="" disabled selected>Seleccionar empresa…</option>
+              <% if (companies && companies.length) { %>
+                <% companies.forEach(function(c) { %>
+                  <option value="<%= c.id %>">
+                    <%= c.name %> (<%= c.status === 'active' ? 'Activa' : 'Inactiva' %>)
+                  </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre de la empresa</label>
+            <input
+              type="text"
+              id="editarCompanyName"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
+
+          <!-- Descripción -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea
+              id="editarCompanyDescription"
+              name="description"
+              rows="2"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"></textarea>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+            <select
+              id="editarCompanyStatus"
+              name="status"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="active">Activa</option>
+              <option value="inactive">Inactiva</option>
+            </select>
+          </div>
+
+          <!-- Footer (Editar) -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalNuevaCompany', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Script: Control de pestañas para registrar / editar companies -->
+<script>
+  function switchCompanyTab(tab) {
+    const tabRegistrar = document.getElementById('tabCompanyRegistrar');
+    const tabEditar = document.getElementById('tabCompanyEditar');
+    const contentRegistrar = document.getElementById('tabContentCompanyRegistrar');
+    const contentEditar = document.getElementById('tabContentCompanyEditar');
+
+    if (tab === 'registrar') {
+      tabRegistrar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabRegistrar.classList.remove('border-transparent', 'text-gray-500');
+      tabEditar.classList.add('border-transparent', 'text-gray-500');
+      tabEditar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentRegistrar.classList.remove('hidden');
+      contentEditar.classList.add('hidden');
+    } else {
+      tabEditar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabEditar.classList.remove('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.add('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentEditar.classList.remove('hidden');
+      contentRegistrar.classList.add('hidden');
+    }
+  }
+
+  // lo dejamos en window por si lo llama toggleModal
+  window.switchCompanyTab = switchCompanyTab;
+</script>
+
+<!-- Función: Editar companies (flujo completo) -->
+<script>
+  const selectCompanyEditar = document.getElementById('selectCompanyEditar');
+  const formEditarCompany = document.getElementById('formEditarCompany');
+  const inputEditarCompanyName = document.getElementById('editarCompanyName');
+  const inputEditarCompanyDesc = document.getElementById('editarCompanyDescription');
+  const selectEditarCompanyStatus = document.getElementById('editarCompanyStatus');
+
+  if (selectCompanyEditar && formEditarCompany) {
+    // 1) Cuando se elije una empresa del combo, se cargan sus datos desde la API
+    selectCompanyEditar.addEventListener('change', async () => {
+      const id = selectCompanyEditar.value;
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/companies/${id}`, {
+          credentials: 'same-origin'
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+          alert(data.message || 'No se pudo cargar la empresa');
+          return;
+        }
+
+        const c = data.data;
+        inputEditarCompanyName.value = c.name || '';
+        inputEditarCompanyDesc.value = c.description || '';
+        selectEditarCompanyStatus.value = c.status || 'active';
+      } catch (err) {
+        console.error(err);
+        alert('Error al cargar la empresa');
+      }
+    });
+
+    // 2) Al enviar el formulario, se mandan los cambios a /api/companies/:id/edit
+    formEditarCompany.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = selectCompanyEditar.value;
+
+      if (!id) {
+        alert('Selecciona una empresa primero');
+        return;
+      }
+
+      try {
+        const body = new URLSearchParams(new FormData(formEditarCompany));
+
+        const res = await fetch(`/api/companies/${id}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body,
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        alert(data.message || 'Cambios guardados');
+
+        if (data.ok) {
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al actualizar la empresa');
+      }
+    });
+  }
+</script>
