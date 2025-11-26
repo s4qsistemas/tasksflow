@@ -45,6 +45,11 @@
 
 <main class="max-w-6xl mx-auto my-8">
 
+<script>
+  // Id del supervisor actual para filtrar solo sus trabajadores
+  window.currentUserId = `<%= user ? user.id : '' %>`;
+</script>
+
   <!-- VISTA DASHBOARD SUPERVISOR -->
   <section
     id="supervisorDashboardView"
@@ -99,7 +104,7 @@
     </div>
   </section>
 
-  <!-- MODAL: Registrar nuevo trabajador (Supervisor) -->
+  <!-- MODAL: Registrar / Editar usuario (Supervisor -> Trabajadores) -->
   <div
     id="modalNuevoUsuario"
     class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
@@ -107,7 +112,7 @@
       <!-- Header -->
       <div class="px-5 py-3 border-b flex justify-between items-center">
         <h3 class="text-base font-semibold text-gray-800">
-          Registrar usuario (equipo)
+          Gestión de usuarios del equipo
         </h3>
         <button
           type="button"
@@ -117,86 +122,386 @@
         </button>
       </div>
 
+      <!-- Tabs -->
+      <div class="px-5 pt-3 border-b flex gap-4 text-sm">
+        <button
+          id="tabUsuarioRegistrar"
+          type="button"
+          class="pb-2 border-b-2 border-[#2E7D32] text-[#2E7D32] font-medium"
+          onclick="switchUsuarioTab('registrar')">
+          Registrar usuario
+        </button>
+        <button
+          id="tabUsuarioEditar"
+          type="button"
+          class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+          onclick="switchUsuarioTab('editar')">
+          Editar usuario
+        </button>
+      </div>
+
       <!-- Contenido -->
       <div class="px-5 py-4 text-sm">
-        <form
-          id="formNuevoUsuario"
-          class="space-y-3">
+        <!-- TAB: REGISTRAR -->
+        <div id="tabContentUsuarioRegistrar" class="space-y-3">
+          <form
+            id="formNuevoUsuario"
+            class="space-y-3">
 
-          <!-- Nombre -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
-            <input
-              type="text"
-              name="name"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-              placeholder="Ej: Juan Pérez"
-              required>
-          </div>
-
-          <!-- Correo -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
-            <input
-              type="email"
-              name="email"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-              placeholder="usuario@empresa.cl"
-              required>
-          </div>
-
-          <!-- Teléfono -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
-            <input
-              type="text"
-              name="telephone"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
-              placeholder="+569...">
-          </div>
-
-          <!-- Rol fijo / Estado -->
-          <div class="grid gap-3 sm:grid-cols-2">
+            <!-- Nombre -->
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
               <input
                 type="text"
-                value="Trabajador"
-                disabled
-                class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 text-xs">
+                name="name"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                placeholder="Ej: Juan Pérez"
+                required>
+            </div>
+
+            <!-- Correo -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+              <input
+                type="email"
+                name="email"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                placeholder="usuario@empresa.cl"
+                required>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+              <input
+                type="text"
+                name="telephone"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                placeholder="+569...">
+            </div>
+
+            <!-- Rol fijo / Estado -->
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+                <input
+                  type="text"
+                  value="Trabajador"
+                  disabled
+                  class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600 text-xs">
+                <p class="mt-1 text-[11px] text-gray-400">
+                  * Como Supervisor, solo puedes registrar usuarios de tipo Trabajador.
+                  El sistema asigna automáticamente el rol, el área y el jefe directo.
+                </p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+                <select
+                  name="status"
+                  class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                  <option value="active">Activo</option>
+                  <option value="suspended">Suspendido</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onclick="toggleModal('modalNuevoUsuario', false)"
+                class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+                Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB: EDITAR -->
+        <div id="tabContentUsuarioEditar" class="space-y-3 hidden">
+          <form
+            id="formEditarUsuario"
+            class="space-y-3">
+
+            <!-- Selector de usuario -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Trabajador a editar</label>
+              <select
+                id="selectUsuarioEditar"
+                name="user_id"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                required>
+                <option value="">Seleccionar usuario…</option>
+                <!-- Se rellena vía JS con /api/users (solo tus trabajadores) -->
+              </select>
               <p class="mt-1 text-[11px] text-gray-400">
-                * Como Supervisor, solo puedes registrar usuarios de tipo Trabajador.
-                El sistema asigna automáticamente el rol, el área y el jefe directo.
+                * Solo verás usuarios de tipo Trabajador que estén a tu cargo.
               </p>
             </div>
+
+            <!-- Nombre -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+              <input
+                type="text"
+                id="editarUsuarioName"
+                name="name"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                required>
+            </div>
+
+            <!-- Correo -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+              <input
+                type="email"
+                id="editarUsuarioEmail"
+                name="email"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+                required>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+              <input
+                type="text"
+                id="editarUsuarioTelephone"
+                name="telephone"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+            </div>
+
+            <!-- Estado (rol y área quedan fijos según backend) -->
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
               <select
+                id="editarUsuarioStatus"
                 name="status"
                 class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
                 <option value="active">Activo</option>
                 <option value="suspended">Suspendido</option>
               </select>
+              <p class="mt-1 text-[11px] text-gray-400">
+                * Rol, área y jefe directo se mantienen según configuración del sistema.
+              </p>
             </div>
-          </div>
 
-          <!-- Footer -->
-          <div class="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onclick="toggleModal('modalNuevoUsuario', false)"
-              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
-              Guardar
-            </button>
-          </div>
-        </form>
+            <!-- Footer Editar -->
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onclick="toggleModal('modalNuevoUsuario', false)"
+                class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+
+              <!-- Resetear contraseña a la genérica -->
+              <button
+                type="button"
+                onclick="resetPasswordUsuarioSupervisor()"
+                class="px-3 py-1.5 rounded-lg text-xs border border-amber-400 text-amber-600 hover:bg-amber-50">
+                Reset pass genérica
+              </button>
+
+              <button
+                type="submit"
+                class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+
     </div>
   </div>
 
 </main>
+
+<!-- Script: Control de pestañas para registrar / editar users -->
+<script>
+  function switchUsuarioTab(tab) {
+    const tabRegistrar = document.getElementById('tabUsuarioRegistrar');
+    const tabEditar = document.getElementById('tabUsuarioEditar');
+    const contentRegistrar = document.getElementById('tabContentUsuarioRegistrar');
+    const contentEditar = document.getElementById('tabContentUsuarioEditar');
+
+    if (!tabRegistrar || !tabEditar || !contentRegistrar || !contentEditar) return;
+
+    if (tab === 'registrar') {
+      tabRegistrar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabRegistrar.classList.remove('border-transparent', 'text-gray-500');
+      tabEditar.classList.add('border-transparent', 'text-gray-500');
+      tabEditar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentRegistrar.classList.remove('hidden');
+      contentEditar.classList.add('hidden');
+    } else {
+      tabEditar.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabEditar.classList.remove('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.add('border-transparent', 'text-gray-500');
+      tabRegistrar.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+
+      contentEditar.classList.remove('hidden');
+      contentRegistrar.classList.add('hidden');
+    }
+  }
+</script>
+
+<!-- Función: Editar usuarios (users) -->
+<script>
+  const selectUsuarioEditar = document.getElementById('selectUsuarioEditar');
+  const formEditarUsuario = document.getElementById('formEditarUsuario');
+
+  const inputUsuarioName = document.getElementById('editarUsuarioName');
+  const inputUsuarioEmail = document.getElementById('editarUsuarioEmail');
+  const inputUsuarioTel = document.getElementById('editarUsuarioTelephone');
+  const selectUsuarioStatus = document.getElementById('editarUsuarioStatus');
+
+  async function cargarUsuariosParaEditarSupervisor() {
+    if (!selectUsuarioEditar) return;
+
+    try {
+      const res = await fetch('/api/users', { credentials: 'same-origin' });
+      const data = await res.json();
+
+      if (!data.ok || !Array.isArray(data.data)) {
+        alert(data.message || 'No se pudieron cargar los usuarios');
+        return;
+      }
+
+      const currentId = Number(window.currentUserId || 0);
+
+      // Limpiar opciones actuales (menos el placeholder)
+      while (selectUsuarioEditar.options.length > 1) {
+        selectUsuarioEditar.remove(1);
+      }
+
+      // Solo mostrar TRABAJADORES (role_id = 4) que estén a cargo del supervisor actual
+      data.data
+        .filter((u) => u.role_id === 4 && Number(u.manager_id) === currentId)
+        .forEach((u) => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          opt.textContent = `${u.name} (${u.email})`;
+          selectUsuarioEditar.appendChild(opt);
+        });
+    } catch (err) {
+      console.error(err);
+      alert('Error al cargar usuarios');
+    }
+  }
+
+  if (selectUsuarioEditar && formEditarUsuario) {
+    // 1) Cargamos la lista de usuarios al entrar a la vista
+    cargarUsuariosParaEditarSupervisor();
+
+    // 2) Cuando se selecciona un usuario, traemos sus datos
+    selectUsuarioEditar.addEventListener('change', async () => {
+      const id = selectUsuarioEditar.value;
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/users/${id}`, {
+          credentials: 'same-origin'
+        });
+        const data = await res.json();
+
+        if (!data.ok || !data.data) {
+          alert(data.message || 'No se pudo cargar el usuario');
+          return;
+        }
+
+        const u = data.data || {};
+
+        if (inputUsuarioName)  inputUsuarioName.value  = u.name || '';
+        if (inputUsuarioEmail) inputUsuarioEmail.value = u.email || '';
+        if (inputUsuarioTel)   inputUsuarioTel.value   = u.telephone || '';
+        if (selectUsuarioStatus) {
+          selectUsuarioStatus.value = u.status || 'active';
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al cargar el usuario');
+      }
+    });
+
+    // 3) Enviar cambios al backend (actualizarUsuario, branch supervisor)
+    formEditarUsuario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = selectUsuarioEditar.value;
+
+      if (!id) {
+        alert('Selecciona un usuario primero');
+        return;
+      }
+
+      try {
+        const body = new URLSearchParams(new FormData(formEditarUsuario));
+
+        const res = await fetch(`/api/users/${id}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body,
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        alert(data.message || 'Cambios guardados');
+
+        if (data.ok) {
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al actualizar el usuario');
+      }
+    });
+  }
+
+  // 4) Resetear contraseña a la genérica (solo trabajadores a cargo)
+  async function resetPasswordUsuarioSupervisor() {
+    if (!selectUsuarioEditar) {
+      alert('No se encontró el selector de usuarios.');
+      return;
+    }
+
+    const id = selectUsuarioEditar.value;
+    if (!id) {
+      alert('Selecciona un usuario primero.');
+      return;
+    }
+
+    const confirmar = confirm(
+      '¿Seguro que deseas resetear la contraseña de este usuario ' +
+      'a la contraseña genérica del sistema?'
+    );
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        credentials: 'same-origin'
+      });
+
+      const data = await res.json();
+      alert(data.message || 'Operación realizada.');
+    } catch (err) {
+      console.error(err);
+      alert('Error al resetear la contraseña.');
+    }
+  }
+
+  // Exponer función al scope global para usarla en onclick
+  window.resetPasswordUsuarioSupervisor = resetPasswordUsuarioSupervisor;
+</script>
