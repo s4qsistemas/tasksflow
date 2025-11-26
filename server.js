@@ -2,50 +2,74 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const cors = require('cors');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
-const session = require('express-session');
-
 const routes = require('./routes/routes');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ========================
+// 1) Sesión + user global
+// ========================
+if (!process.env.SESSION_SECRET) {
+  throw new Error('Falta configurar SESSION_SECRET en el archivo .env');
+}
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'cambia_este_secreto',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { sameSite: 'lax', httpOnly: true, secure: false }
 }));
 
+// user disponible en todas las vistas EJS
 app.use((req, res, next) => {
   res.locals.user = req.session?.user || null;
   next();
 });
 
-// View engine: configura el motor de plantillas
+// ========================
+// 2) Middlewares globales
+// ========================
+
+// CORS: políticas de origen cruzado
+app.use(cors({ origin: true }));
+
+// Body parsing
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// ========================
+// 3) Motor de vistas (EJS)
+// ========================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layout');
 
-// Static: configura la entrega de archivos estáticos
+// ========================
+// 4) Archivos estáticos
+// ========================
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
-// Middleware: procesar el cuerpo de la solicitud (Body Parsing)
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// ========================
+// 5) Rutas especiales
+// ========================
 
-// CORS: configura las políticas de origen cruzado
-app.use(cors({ origin: true }));
+// Silenciar ruido DevTools (evita 404 en /.well-known/...)
+app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) =>
+  res.sendStatus(204)
+);
 
-// ✅ NUEVO: silenciar ruido DevTools (evita 404 en /.well-known/...)
-app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => res.sendStatus(204));
-
-// Rutas: configura el enrutador principa
+// ========================
+// 6) Rutas principales
+// ========================
 app.use(routes);
 
-// Errores
+// ========================
+// 7) Manejador de errores
+// ========================
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err);
@@ -57,7 +81,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-//const PORT = 3000;
+// ========================
+// 8) Arrancar servidor
+// ========================
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });

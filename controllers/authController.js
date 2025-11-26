@@ -10,7 +10,7 @@ const RoleRoutes = {
   user: '/user'
 };
 
-// Hash por defecto definido en .env (la password genérica)
+// Hash por defecto definido en .env (password genérica)
 const DEFAULT_PASSWORD_HASH = process.env.DEFAULT_USER_PASSWORD_HASH || null;
 const PEPPER = process.env.PEPPER || '';
 
@@ -112,7 +112,7 @@ async function mostrarFormularioCambioPassword(req, res) {
     return res.redirect('/');
   }
 
-  // Renderiza la vista EJS (aún no creada)
+  // Renderiza la vista cambiar-password
   return res.render('cambiar-password', {
     title: 'Cambiar contraseña',
     user

@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================
-  // Compañias: alta desde el modal
+  // COMPAÑIAS: alta desde el modal
   // ================
   const formNuevaCompany = document.getElementById('formNuevaCompany');
 

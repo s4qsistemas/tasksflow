@@ -34,10 +34,9 @@ async function verifyLogin(login, plainPassword) {
   const user = await getUserByEmailOrName(login);
   if (!user) return null;
 
-  // La columna real en la DB se llama "password"
   const hashedPassword = user.password;
 
-  // Verificamos la contraseña ingresada + PEPPER
+  // Verifica contraseña
   const ok = await argon2.verify(hashedPassword, plainPassword + PEPPER);
   if (!ok) return null;
 
