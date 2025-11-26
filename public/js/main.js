@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.switchCompanyTab('registrar');
       }
 
+      // 🔹 Admin del root
+      if (id === 'modalRootAdminUsers' && typeof window.switchRootAdminTab === 'function') {
+        window.switchRootAdminTab('registrar');
+      }
+
       // 🔹 Grupos de trabajo (admin): por ahora sin tabs, solo reset de formularios
       if (id === 'modalNuevoGrupo' || id === 'modalEditarGrupo') {
         // Aquí ya se ejecutó el reset() de los forms.
@@ -271,6 +276,38 @@ document.addEventListener('DOMContentLoaded', () => {
         notify({
           ok: false,
           message: 'Error inesperado al crear el usuario'
+        });
+      }
+    });
+  }
+
+  // ================
+  // ROOT: alta de USUARIOS ADMIN desde el modal de root
+  // ================
+  const formRootNuevoAdmin = document.getElementById('formRootNuevoAdmin');
+
+  if (formRootNuevoAdmin) {
+    formRootNuevoAdmin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        // Usa el mismo helper postForm
+        const resp = await postForm('/api/users', formRootNuevoAdmin);
+        // resp = { ok, message, data }
+
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalRootAdminUsers', false);
+          formRootNuevoAdmin.reset();
+          // recargar para ver el nuevo admin en la tabla de root
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        notify({
+          ok: false,
+          message: 'Error inesperado al crear el usuario Admin'
         });
       }
     });

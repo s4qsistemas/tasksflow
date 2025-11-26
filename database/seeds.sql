@@ -209,3 +209,98 @@ VALUES
   @sup_ti_demo,
   'active'
 );
+
+
+
+
+-- 2) Admin principal para Empresa Tasksflow
+INSERT INTO users (
+  name, email, password, telephone, role_id,
+  company_id, area_id, manager_id, status
+)
+VALUES (
+  'Admin Tasksflow',
+  'admin',  -- ojo: este es el email que usaremos abajo
+  '$argon2id$v=19$m=65536,t=3,p=1$X101lOIANXl6+MCe/qNezw$L2ru8jWjbGwxLsnBk9FnmjFtMxonxXSFp/gHk7pSKXA',
+  '+56900002222',
+  (SELECT id FROM roles WHERE name = 'admin'),
+  (SELECT id FROM companies WHERE name = 'Empresa Tasksflow'),
+  NULL,
+  NULL,
+  'active'
+);
+
+-- 3) Segundo admin: admin_demo (misma contraseña hasheada que el admin anterior)
+INSERT INTO users (
+  name, email, password, telephone, role_id,
+  company_id, area_id, manager_id, status
+)
+VALUES (
+  'Admin Demo',
+  'admin_demo',
+  '$argon2id$v=19$m=65536,t=3,p=1$X101lOIANXl6+MCe/qNezw$L2ru8jWjbGwxLsnBk9FnmjFtMxonxXSFp/gHk7pSKXA',
+  '+56900002223',
+  (SELECT id FROM roles WHERE name = 'admin'),
+  (SELECT id FROM companies WHERE name = 'Empresa Tasksflow'),
+  NULL,
+  NULL,
+  'active'
+);
+
+-- =======================================
+-- 4) Supervisores: uno por área, todos dependen del Admin Tasksflow
+--    Usamos una variable para evitar el ERROR 1093
+-- =======================================
+
+-- Guardamos el id del admin en una variable
+SET @admin_tasksflow_id := (
+  SELECT id FROM users WHERE email = 'admin'
+);
+
+INSERT INTO users (
+  name, email, password, telephone, role_id,
+  company_id, area_id, manager_id, status
+)
+VALUES
+-- Supervisor Operaciones
+(
+  'Sup Operaciones',
+  'sup_operaciones',
+  '$argon2id$v=19$m=65536,t=3,p=1$5Ska27HBafeek1eXvFPVJw$f68PjwlEerUm68bbxBOFayBKhfVY2RMkYehNa6qxqlY',
+  '+56900003331',
+  (SELECT id FROM roles WHERE name = 'supervisor'),
+  (SELECT id FROM companies WHERE name = 'Empresa Tasksflow'),
+  (SELECT id FROM areas
+     WHERE name = 'Operaciones'
+       AND company_id = (SELECT id FROM companies WHERE name = 'Empresa Tasksflow')),
+  @admin_tasksflow_id,
+  'active'
+),
+-- Supervisor Mantenimiento
+(
+  'Sup Mantenimiento',
+  'sup_mantenimiento',
+  '$argon2id$v=19$m=65536,t=3,p=1$5Ska27HBafeek1eXvFPVJw$f68PjwlEerUm68bbxBOFayBKhfVY2RMkYehNa6qxqlY',
+  '+56900003332',
+  (SELECT id FROM roles WHERE name = 'supervisor'),
+  (SELECT id FROM companies WHERE name = 'Empresa Tasksflow'),
+  (SELECT id FROM areas
+     WHERE name = 'Mantenimiento'
+       AND company_id = (SELECT id FROM companies WHERE name = 'Empresa Tasksflow')),
+  @admin_tasksflow_id,
+  'active'
+),
+-- Supervisor TI
+(
+  'Sup TI',
+  'sup_ti',
+  '$argon2id$v=19$m=65536,t=3,p=1$5Ska27HBafeek1eXvFPVJw$f68PjwlEerUm68bbxBOFayBKhfVY2RMkYehNa6qxqlY',
+  '+56900003333',
+  (SELECT id FROM roles WHERE name = 'supervisor'),
+  (SELECT id FROM companies WHERE name = 'Empresa Tasksflow'),
+  (SELECT id FROM areas
+     WHERE name = 'TI'
+       AND company_id = (SELECT id FROM companies WHERE name = 'Empresa Tasksflow')),
+  @admin_tasksflow_id,
+  'active'
+);

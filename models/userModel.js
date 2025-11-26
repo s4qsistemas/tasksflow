@@ -209,6 +209,29 @@ async function updatePassword(id, company_id, newHash) {
   return result.affectedRows > 0;
 }
 
+// Lista todos los usuarios con rol "admin" (role_id = 2) junto con el nombre de la empresa
+async function getAdminsWithCompany() {
+  const [rows] = await pool.query(
+    `SELECT
+       u.id,
+       u.company_id,
+       u.area_id,
+       u.manager_id,
+       u.role_id,
+       u.name,
+       u.email,
+       u.telephone,
+       u.status,
+       u.created_at,
+       c.name AS company_name
+     FROM users u
+     LEFT JOIN companies c ON c.id = u.company_id
+     WHERE u.role_id = 2
+     ORDER BY c.name, u.name`
+  );
+  return rows;
+}
+
 module.exports = {
   getUsersByCompany,
   getUserById,
@@ -216,5 +239,6 @@ module.exports = {
   createUser,
   updateUser,
   resetPassword,
-  updatePassword
+  updatePassword,
+  getAdminsWithCompany
 };

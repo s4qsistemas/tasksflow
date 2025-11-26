@@ -21,6 +21,15 @@
         <span>Nueva empresa</span>
       </button>
 
+      <!-- Botón: gestión usuarios admin -->
+      <button
+        type="button"
+        onclick="toggleModal('modalRootAdminUsers', true)"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-[#2E7D32] text-[#2E7D32] text-xs hover:bg-[#E8F5E9]">
+        <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+        <span>Usuarios admin</span>
+      </button>
+
       <a href="/logout"
         onclick="return doLogout()"
         class="px-3 py-1 rounded-lg bg-[#F87171] text-white hover:bg-[#EF4444]">
@@ -84,15 +93,57 @@
   </div>
 </section>
 
-<!-- Section: Panel root -->
+<!-- Section: Usuarios Admin -->
 <section class="bg-white rounded-2xl shadow p-6 max-w-6xl mx-auto my-8">
-  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Root</h2>
-  <p class="text-sm text-gray-600 mb-4">Acciones de administración global.</p>
+  <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Usuarios Admin</h2>
+  <p class="text-sm text-gray-600 mb-4">
+    Usuarios con rol Admin asociados a una compañía.
+  </p>
 
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <a href="#" class="block p-4 rounded-xl border hover:shadow">Gestión de usuarios</a>
-    <a href="#" class="block p-4 rounded-xl border hover:shadow">Gestión de áreas</a>
-    <a href="#" class="block p-4 rounded-xl border hover:shadow">Roles y permisos</a>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b text-xs uppercase">
+          <th class="py-2 pr-3">Nombre</th>
+          <th class="py-2 pr-3">Email</th>
+          <th class="py-2 pr-3">Empresa</th>
+          <th class="py-2 pr-3">Estado</th>
+          <th class="py-2 pr-3">Creado</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-xs sm:text-sm">
+        <% if (adminUsers && adminUsers.length) { %>
+          <% adminUsers.forEach(function(u) { %>
+            <tr>
+              <td class="py-2 pr-3 font-medium text-gray-800">
+                <%= u.name %>
+              </td>
+              <td class="py-2 pr-3 text-gray-700">
+                <%= u.email %>
+              </td>
+              <td class="py-2 pr-3 text-gray-700">
+                <%= u.company_name || 'Sin empresa' %>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px]
+                  <%= u.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700' %>">
+                  <%= u.status === 'active' ? 'Activo' : 'Inactivo' %>
+                </span>
+              </td>
+              <td class="py-2 pr-3 text-gray-500">
+                <%= u.created_at ? u.created_at.toISOString().slice(0, 10) : '' %>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" class="py-4 text-center text-gray-400">
+              No hay usuarios admin registrados aún.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
   </div>
 </section>
 
@@ -270,6 +321,254 @@
   </div>
 </div>
 
+<!-- MODAL: Registrar / Editar usuarios ADMIN (solo root) -->
+<div
+  id="modalRootAdminUsers"
+  class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg mx-4">
+
+    <!-- Header -->
+    <div class="px-5 py-3 border-b flex justify-between items-center">
+      <h3 class="text-base font-semibold text-gray-800">
+        Gestión de usuarios Admin
+      </h3>
+      <button
+        type="button"
+        class="text-gray-500 hover:text-gray-700"
+        onclick="toggleModal('modalRootAdminUsers', false)">
+        ✕
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="px-5 pt-3 border-b flex gap-4 text-sm">
+      <button
+        id="tabRootAdminRegistrar"
+        type="button"
+        class="pb-2 border-b-2 border-[#2E7D32] text-[#2E7D32] font-medium"
+        onclick="switchRootAdminTab('registrar')">
+        Registrar Admin
+      </button>
+      <button
+        id="tabRootAdminEditar"
+        type="button"
+        class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        onclick="switchRootAdminTab('editar')">
+        Editar Admin
+      </button>
+    </div>
+
+    <!-- Contenido -->
+    <div class="px-5 py-4 text-sm">
+      <!-- TAB: REGISTRAR -->
+      <div id="tabContentRootAdminRegistrar" class="space-y-3">
+        <form id="formRootNuevoAdmin" class="space-y-3">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre</label>
+            <input
+              type="text"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <input
+              type="tel"
+              name="telephone"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+          </div>
+
+          <!-- Company obligatoria -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
+            <select
+              name="company_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="" disabled selected>Selecciona una empresa…</option>
+              <% if (companies && companies.length) { %>
+                <% companies.forEach(function(c) { %>
+                  <option value="<%= c.id %>"><%= c.name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              * Todo usuario Admin debe pertenecer a una empresa existente.
+            </p>
+          </div>
+
+          <!-- Rol fijo = admin -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+            <select
+              name="role"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="admin" selected>Admin</option>
+            </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              * Como Root, solo puedes registrar usuarios de tipo Admin.
+            </p>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+            <select
+              name="status"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="active" selected>Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </div>
+
+          <!-- Footer -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalRootAdminUsers', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB: EDITAR -->
+      <div id="tabContentRootAdminEditar" class="space-y-3 hidden">
+        <form id="formRootEditarAdmin" class="space-y-3">
+          <!-- Selector usuario admin -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Usuario Admin</label>
+            <select
+              id="selectRootAdminEditar"
+              name="user_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="" disabled selected>Seleccionar usuario…</option>
+              <% if (adminUsers && adminUsers.length) { %>
+                <% adminUsers.forEach(function(u) { %>
+                  <option value="<%= u.id %>">
+                    <%= u.name %> - <%= u.email %> (<%= u.company_name || 'sin company' %>)
+                  </option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre</label>
+            <input
+              type="text"
+              id="rootEditarAdminName"
+              name="name"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              id="rootEditarAdminEmail"
+              name="email"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <input
+              type="tel"
+              id="rootEditarAdminTel"
+              name="telephone"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+          </div>
+
+          <!-- Empresa -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Empresa</label>
+            <select
+              id="rootEditarAdminCompany"
+              name="company_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="" disabled selected>Selecciona una empresa…</option>
+              <% if (companies && companies.length) { %>
+                <% companies.forEach(function(c) { %>
+                  <option value="<%= c.id %>"><%= c.name %></option>
+                <% }) %>
+              <% } %>
+            </select>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+            <select
+              id="rootEditarAdminStatus"
+              name="status"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
+              required>
+              <option value="active">Activo</option>
+              <option value="suspended">Inactivo</option>
+            </select>
+          </div>
+
+          <!-- Rol fijo = admin (solo info) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+            <input
+              type="text"
+              value="Admin"
+              disabled
+              class="w-full border rounded-lg px-3 py-2 bg-gray-50 text-gray-500 text-xs">
+          </div>
+
+          <!-- Footer -->
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onclick="toggleModal('modalRootAdminUsers', false)"
+              class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- Script: Control de pestañas para registrar / editar companies -->
 <script>
   function switchCompanyTab(tab) {
@@ -367,6 +666,148 @@
       } catch (err) {
         console.error(err);
         alert('Error al actualizar la empresa');
+      }
+    });
+  }
+</script>
+
+<script>
+  // Tabs modal Root Admin
+  function switchRootAdminTab(tab) {
+    const tabReg = document.getElementById('tabRootAdminRegistrar');
+    const tabEdit = document.getElementById('tabRootAdminEditar');
+    const contentReg = document.getElementById('tabContentRootAdminRegistrar');
+    const contentEdit = document.getElementById('tabContentRootAdminEditar');
+
+    if (tab === 'registrar') {
+      tabReg.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabReg.classList.remove('border-transparent', 'text-gray-500');
+      tabEdit.classList.add('border-transparent', 'text-gray-500');
+      tabEdit.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+      contentReg.classList.remove('hidden');
+      contentEdit.classList.add('hidden');
+    } else {
+      tabEdit.classList.add('border-[#2E7D32]', 'text-[#2E7D32]');
+      tabEdit.classList.remove('border-transparent', 'text-gray-500');
+      tabReg.classList.add('border-transparent', 'text-gray-500');
+      tabReg.classList.remove('border-[#2E7D32]', 'text-[#2E7D32]');
+      contentEdit.classList.remove('hidden');
+      contentReg.classList.add('hidden');
+    }
+  }
+
+  window.switchRootAdminTab = switchRootAdminTab;
+</script>
+
+<script>
+  // 🎯 Elementos de edición de usuarios Admin (modal root)
+  const formRootEditarAdmin   = document.getElementById('formRootEditarAdmin');
+  const selectRootAdminEditar = document.getElementById('selectRootAdminEditar');
+
+  const inputRootAdminName     = document.getElementById('rootEditarAdminName');
+  const inputRootAdminEmail    = document.getElementById('rootEditarAdminEmail');
+  const inputRootAdminTel      = document.getElementById('rootEditarAdminTel');
+  const selectRootAdminCompany = document.getElementById('rootEditarAdminCompany');
+  const selectRootAdminStatus  = document.getElementById('rootEditarAdminStatus');
+
+  // Helper simple de mensajes (usa alert para no depender de notify)
+  function showAdminMsg(payload) {
+    if (!payload) {
+      alert('Operación realizada');
+      return;
+    }
+    alert(payload.message || (payload.ok ? 'Operación exitosa' : 'Ocurrió un problema'));
+  }
+
+  // ============================
+  // 1) Cargar datos al seleccionar usuario Admin
+  // ============================
+  if (selectRootAdminEditar) {
+    selectRootAdminEditar.addEventListener('change', async () => {
+      const id = selectRootAdminEditar.value;
+      if (!id) return;
+
+      try {
+        const res = await fetch(`/api/users/${id}`, {
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          showAdminMsg({
+            ok: false,
+            message: data.message || 'No se pudo cargar el usuario seleccionado'
+          });
+          return;
+        }
+
+        const u = data.data || {};
+
+        // Rellenar campos del formulario
+        inputRootAdminName.value  = u.name || '';
+        inputRootAdminEmail.value = u.email || '';
+        inputRootAdminTel.value   = u.telephone || '';
+
+        if (u.company_id && selectRootAdminCompany) {
+          selectRootAdminCompany.value = String(u.company_id);
+        }
+
+        if (selectRootAdminStatus) {
+          selectRootAdminStatus.value = u.status || 'active';
+        }
+      } catch (err) {
+        console.error('Error al cargar usuario admin:', err);
+        showAdminMsg({
+          ok: false,
+          message: 'Error inesperado al cargar el usuario Admin'
+        });
+      }
+    });
+  }
+
+  // ============================
+  // 2) Guardar cambios del usuario Admin
+  // ============================
+  if (formRootEditarAdmin) {
+    formRootEditarAdmin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = selectRootAdminEditar ? selectRootAdminEditar.value : null;
+      if (!id) {
+        showAdminMsg({
+          ok: false,
+          message: 'Selecciona un usuario Admin antes de guardar los cambios'
+        });
+        return;
+      }
+
+      try {
+        const body = new URLSearchParams(new FormData(formRootEditarAdmin));
+
+        const res = await fetch(`/api/users/${id}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body,
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        showAdminMsg(data);
+
+        if (data.ok) {
+          // cerrar modal y recargar la tabla
+          toggleModal('modalRootAdminUsers', false);
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error al actualizar usuario admin:', err);
+        showAdminMsg({
+          ok: false,
+          message: 'Error inesperado al actualizar el usuario Admin'
+        });
       }
     });
   }

@@ -4,6 +4,8 @@ const router = express.Router();
 
 const companyController = require('../controllers/companyController');
 
+const rootController = require('../controllers/rootController');
+
 const {
   postLogin,
   mostrarFormularioCambioPassword,
@@ -67,7 +69,7 @@ router.get(
   '/root',
   requireAuth,
   requireRole('root'),
-  companyController.listarCompaniesView
+  rootController.panelRootView
 );
 
 // Panel Admin (admin + root)
