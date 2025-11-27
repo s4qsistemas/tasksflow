@@ -86,55 +86,167 @@
   </div>
 </nav>
 
-<!-- Vista DASHBOARD (por defecto visible) -->
+<!-- VISTA DASHBOARD ADMIN (NIVEL ESTRATÉGICO) -->
 <section id="adminDashboardView" class="max-w-6xl mx-auto my-8">
-  <!-- Título -->
+  <% 
+    const kpis = (typeof adminMetrics !== 'undefined' ? adminMetrics : {});
+    const projectsSafe = (typeof projects !== 'undefined' ? projects : []);
+    const areasSummarySafe = (typeof areasSummary !== 'undefined' ? areasSummary : []);
+    const recurringSummarySafe = (typeof recurringSummary !== 'undefined' ? recurringSummary : {});
+    const nextCriticalTasksSafe = (typeof nextCriticalTasks !== 'undefined' ? nextCriticalTasks : []);
+    const strategicAlertsSafe = (typeof strategicAlerts !== 'undefined' ? strategicAlerts : []);
+  %>
+
+  <!-- Encabezado: nivel de la pirámide -->
   <div class="bg-white rounded-2xl p-6 shadow mb-6">
-    <h2 class="text-2xl font-semibold text-[#2E7D32] mb-1">Panel Admin</h2>
-    <p class="text-sm text-gray-600">
-      Control y monitoreo general de áreas, equipos y tareas.
+    <h2 class="text-2xl font-semibold text-[#2E7D32] mb-1">
+      Panel Admin · Vista Estratégica
+    </h2>
+    <p class="text-sm text-gray-600 mb-3">
+      Jefatura / Gerencia general. Información sintetizada para decisiones de
+      mediano y largo plazo: estado global de la empresa, proyectos y carga
+      de trabajo por áreas.
     </p>
+
+    <div class="grid gap-4 md:grid-cols-3 text-xs text-gray-600">
+      <div>
+        <p class="font-semibold text-gray-800 mb-1">Rol en la pirámide</p>
+        <p>Punta · Jefes, Gerentes, Directores.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 mb-1">Tipo de decisión</p>
+        <p>Estratégico · Políticas, prioridades, visión global.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 mb-1">Naturaleza de la información</p>
+        <p>Resumida, agregada, enfocada a tendencias y riesgos.</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Tarjetas resumen -->
+  <!-- KPIs sintetizados -->
   <div class="grid gap-4 md:grid-cols-4 mb-6">
+    <!-- Proyectos -->
     <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">Áreas activas</p>
-      <p class="text-3xl font-semibold text-[#2E7D32] mt-1">4</p>
-      <p class="text-xs text-gray-500 mt-1">Operaciones, Calidad, TI, RRHH</p>
+      <p class="text-xs uppercase tracking-wide text-gray-500">
+        Proyectos activos
+      </p>
+      <p class="text-3xl font-semibold text-[#2E7D32] mt-1">
+        <%= kpis.projectsActive || 0 %>
+      </p>
+      <p class="text-xs text-gray-500 mt-1">
+        <%= kpis.projectsDelayed || 0 %> con atraso
+      </p>
     </div>
 
+    <!-- Carga por tareas -->
     <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">Equipos</p>
-      <p class="text-3xl font-semibold text-[#0288D1] mt-1">9</p>
-      <p class="text-xs text-gray-500 mt-1">Incluye turnos y células de trabajo</p>
+      <p class="text-xs uppercase tracking-wide text-gray-500">
+        Tareas abiertas (empresa)
+      </p>
+      <p class="text-3xl font-semibold text-[#0288D1] mt-1">
+        <%= kpis.tasksOpen || 0 %>
+      </p>
+      <p class="text-xs text-gray-500 mt-1">
+        <%= kpis.tasksOverdue || 0 %> vencidas
+      </p>
     </div>
 
+    <!-- Cumplimiento -->
     <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">Usuarios activos</p>
-      <p class="text-3xl font-semibold text-[#F9A825] mt-1">27</p>
-      <p class="text-xs text-gray-500 mt-1">Con acceso al sistema</p>
+      <p class="text-xs uppercase tracking-wide text-gray-500">
+        Cumplimiento mensual
+      </p>
+      <p class="text-3xl font-semibold text-[#F9A825] mt-1">
+        <%= kpis.completionRate || 0 %>%
+      </p>
+      <p class="text-xs text-gray-500 mt-1">
+        Objetivo: <%= kpis.targetCompletion || 90 %>% de cierre.
+      </p>
     </div>
 
+    <!-- Tareas recurrentes -->
     <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">Tareas abiertas</p>
-      <p class="text-3xl font-semibold text-[#E64A19] mt-1">18</p>
-      <p class="text-xs text-gray-500 mt-1">Pendientes (To Do + In Progress)</p>
+      <p class="text-xs uppercase tracking-wide text-gray-500">
+        Tareas recurrentes críticas
+      </p>
+      <p class="text-3xl font-semibold text-[#E64A19] mt-1">
+        <%= kpis.recurringCritical || 0 %>
+      </p>
+      <p class="text-xs text-gray-500 mt-1">
+        Con impacto en producción / seguridad.
+      </p>
     </div>
   </div>
 
-  <!-- Grilla principal: Áreas/Equipos - Tareas -->
-  <div class="grid gap-6 md:grid-cols-2">
-    <!-- Panel Áreas y equipos -->
+  <!-- Visión por proyectos y por áreas -->
+  <div class="grid gap-6 md:grid-cols-2 mb-6">
+    <!-- Proyectos (agrupador de tareas) -->
     <div class="bg-white rounded-2xl shadow p-4">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold text-gray-800">Áreas y equipos</h3>
-        <button
-          type="button"
-          onclick="toggleModal('modalNuevaArea', true)"
-          class="text-xs px-2 py-1 rounded-lg border border-[#0288D1] text-[#0288D1] hover:bg-[#E1F5FE]">
-          + Nueva área/equipo
-        </button>
+        <h3 class="text-lg font-semibold text-gray-800">
+          Proyectos en curso
+        </h3>
+        <span class="text-xs text-gray-500">
+          Vista resumida (Top 5 por prioridad)
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 border-b text-xs uppercase">
+              <th class="py-2 pr-3">Proyecto</th>
+              <th class="py-2 pr-3">Área líder</th>
+              <th class="py-2 pr-3">% avance</th>
+              <th class="py-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y text-xs sm:text-sm">
+            <% if (projectsSafe.length) { %>
+              <% projectsSafe.forEach(function(p) { %>
+                <tr>
+                  <td class="py-2 pr-3 font-medium text-gray-800">
+                    <%= p.name %>
+                  </td>
+                  <td class="py-2 pr-3">
+                    <%= p.area_name || '-' %>
+                  </td>
+                  <td class="py-2 pr-3">
+                    <span class="font-semibold">
+                      <%= p.progress || 0 %>%
+                    </span>
+                  </td>
+                  <td class="py-2">
+                    <span
+                      class="px-2 py-0.5 rounded-full text-[11px] font-semibold
+                      <%= p.status === 'active' ? 'bg-[#E3F2FD] text-[#1565C0]'
+                        : p.status === 'paused' ? 'bg-[#FFF3E0] text-[#EF6C00]'
+                        : 'bg-[#FFEBEE] text-[#C62828]' %>">
+                      <%= p.status %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="py-3 text-center text-xs text-gray-500">
+                  Aún no hay proyectos configurados.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Áreas (carga y salud) -->
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-800">Áreas de la empresa</h3>
+        <span class="text-xs text-gray-500">
+          Carga de trabajo y cumplimiento.
+        </span>
       </div>
 
       <div class="overflow-x-auto">
@@ -142,148 +254,128 @@
           <thead>
             <tr class="text-left text-gray-500 border-b text-xs uppercase">
               <th class="py-2 pr-3">Área</th>
-              <th class="py-2 pr-3">Equipo / Grupo</th>
-              <th class="py-2 pr-3">Usuarios</th>
-              <th class="py-2">Tareas abiertas</th>
+              <th class="py-2 pr-3">Tareas abiertas</th>
+              <th class="py-2 pr-3">% cierre mes</th>
+              <th class="py-2">Riesgo</th>
             </tr>
           </thead>
           <tbody class="divide-y text-xs sm:text-sm">
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Operaciones</td>
-              <td class="py-2 pr-3">Turno Noche Planta</td>
-              <td class="py-2 pr-3">8</td>
-              <td class="py-2 text-[#E64A19] font-semibold">5</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Operaciones</td>
-              <td class="py-2 pr-3">Turno Día Despacho</td>
-              <td class="py-2 pr-3">5</td>
-              <td class="py-2 text-[#E64A19] font-semibold">3</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Calidad</td>
-              <td class="py-2 pr-3">Control de proceso</td>
-              <td class="py-2 pr-3">4</td>
-              <td class="py-2 text-[#F9A825] font-semibold">4</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">TI</td>
-              <td class="py-2 pr-3">Soporte interno</td>
-              <td class="py-2 pr-3">3</td>
-              <td class="py-2 text-[#2E7D32] font-semibold">1</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Panel Tareas recientes -->
-    <div class="bg-white rounded-2xl shadow p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold text-gray-800">Tareas recientes</h3>
-        <span class="text-xs text-gray-500">Últimas actualizaciones</span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="text-left text-gray-500 border-b text-xs uppercase">
-              <th class="py-2 pr-3">Tarea</th>
-              <th class="py-2 pr-3">Asignado a</th>
-              <th class="py-2 pr-3">Estado</th>
-              <th class="py-2">Área</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y text-xs sm:text-sm">
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Ajuste turnos torniquetes</td>
-              <td class="py-2 pr-3">Juan Soto</td>
-              <td class="py-2 pr-3">
-                <span class="px-2 py-0.5 rounded-full bg-[#FFF3E0] text-[#E64A19] text-[11px] font-semibold">
-                  In Progress
-                </span>
-              </td>
-              <td class="py-2">Operaciones</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Revisión checklist calidad</td>
-              <td class="py-2 pr-3">María Rojas</td>
-              <td class="py-2 pr-3">
-                <span class="px-2 py-0.5 rounded-full bg-[#FFFDE7] text-[#F9A825] text-[11px] font-semibold">
-                  To Do
-                </span>
-              </td>
-              <td class="py-2">Calidad</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Actualizar DSN satélites VB6</td>
-              <td class="py-2 pr-3">Diego A.</td>
-              <td class="py-2 pr-3">
-                <span class="px-2 py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-[11px] font-semibold">
-                  Done
-                </span>
-              </td>
-              <td class="py-2">TI</td>
-            </tr>
-            <tr>
-              <td class="py-2 pr-3 font-medium text-gray-800">Capacitación nuevo supervisor</td>
-              <td class="py-2 pr-3">Carolina V.</td>
-              <td class="py-2 pr-3">
-                <span class="px-2 py-0.5 rounded-full bg-[#FFFDE7] text-[#F9A825] text-[11px] font-semibold">
-                  To Do
-                </span>
-              </td>
-              <td class="py-2">RRHH</td>
-            </tr>
+            <% if (areasSummarySafe.length) { %>
+              <% areasSummarySafe.forEach(function(a) { %>
+                <tr>
+                  <td class="py-2 pr-3 font-medium text-gray-800">
+                    <%= a.name %>
+                  </td>
+                  <td class="py-2 pr-3">
+                    <%= a.tasksOpen || 0 %>
+                  </td>
+                  <td class="py-2 pr-3">
+                    <%= a.completionRate || 0 %>%
+                  </td>
+                  <td class="py-2">
+                    <span
+                      class="px-2 py-0.5 rounded-full text-[11px] font-semibold
+                      <%= a.risk === 'high' ? 'bg-[#FFEBEE] text-[#C62828]'
+                        : a.risk === 'medium' ? 'bg-[#FFF8E1] text-[#F9A825]'
+                        : 'bg-[#E8F5E9] text-[#2E7D32]' %>">
+                      <%= a.riskLabel || a.risk || 'Bajo' %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="py-3 text-center text-xs text-gray-500">
+                  Sin datos de áreas aún.
+                </td>
+              </tr>
+            <% } %>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- Panel de monitoreo rápido (opcional) -->
-  <div class="mt-6 bg-white rounded-2xl shadow p-4">
+  <!-- Periodicidad y alertas estratégicas -->
+  <div class="bg-white rounded-2xl shadow p-4">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold text-gray-800">Monitoreo rápido</h3>
-      <span class="text-xs text-gray-500">Vista general del día</span>
+      <h3 class="text-lg font-semibold text-gray-800">
+        Periodicidad de tareas y alertas
+      </h3>
+      <span class="text-xs text-gray-500">
+        Resumen de tareas diarias, semanales y mensuales.
+      </span>
     </div>
+
     <div class="grid gap-4 md:grid-cols-3 text-xs sm:text-sm">
+      <!-- Resumen de recurrencia -->
       <div>
-        <p class="text-gray-500 mb-1">Tareas por estado</p>
+        <p class="text-gray-500 mb-1">Resumen de tareas recurrentes</p>
         <ul class="space-y-1">
           <li class="flex justify-between">
-            <span>To Do</span>
-            <span class="font-semibold text-[#F9A825]">9</span>
+            <span>Diarias</span>
+            <span class="font-semibold">
+              <%= recurringSummarySafe.daily || 0 %>
+            </span>
           </li>
           <li class="flex justify-between">
-            <span>In Progress</span>
-            <span class="font-semibold text-[#E64A19]">6</span>
+            <span>Semanales</span>
+            <span class="font-semibold">
+              <%= recurringSummarySafe.weekly || 0 %>
+            </span>
           </li>
           <li class="flex justify-between">
-            <span>Done (hoy)</span>
-            <span class="font-semibold text-[#2E7D32]">3</span>
+            <span>Mensuales</span>
+            <span class="font-semibold">
+              <%= recurringSummarySafe.monthly || 0 %>
+            </span>
           </li>
         </ul>
       </div>
+
+      <!-- Próximas tareas clave -->
       <div>
-        <p class="text-gray-500 mb-1">Áreas con más carga</p>
+        <p class="text-gray-500 mb-1">Próximas tareas críticas</p>
         <ul class="space-y-1">
-          <li>Operaciones · <span class="font-semibold">8 tareas</span></li>
-          <li>Calidad · <span class="font-semibold">4 tareas</span></li>
-          <li>TI · <span class="font-semibold">3 tareas</span></li>
+          <% if (nextCriticalTasksSafe.length) { %>
+            <% nextCriticalTasksSafe.forEach(function(t) { %>
+              <li>
+                <span class="font-medium"><%= t.title %></span>
+                <span class="block text-[11px] text-gray-500">
+                  Próxima ejecución: <%= t.next_run_human %> · Responsable: <%= t.owner_name %>
+                </span>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li class="text-xs text-gray-500">
+              No hay tareas críticas recurrentes configuradas.
+            </li>
+          <% } %>
         </ul>
       </div>
+
+      <!-- Alertas estratégicas -->
       <div>
-        <p class="text-gray-500 mb-1">Observaciones</p>
+        <p class="text-gray-500 mb-1">Alertas estratégicas</p>
         <ul class="space-y-1">
-          <li>✔ Revisión de DSN completada en TI</li>
-          <li>⚠ Alta carga en turno noche planta</li>
-          <li>ℹ Pendiente capacitación supervisor nuevo</li>
+          <% if (strategicAlertsSafe.length) { %>
+            <% strategicAlertsSafe.forEach(function(a) { %>
+              <li>
+                <span class="font-medium"><%= a.title %></span>
+                <span class="block text-[11px] text-gray-500"><%= a.detail %></span>
+              </li>
+            <% }) %>
+          <% } else { %>
+            <li class="text-xs text-gray-500">
+              Sin alertas críticas por ahora. Mantener seguimiento periódico.
+            </li>
+          <% } %>
         </ul>
       </div>
     </div>
   </div>
 </section>
+
 
 <!-- Vista KANBAN (por ahora solo H1, oculta al inicio) -->
 <section id="adminKanbanView" class="max-w-6xl mx-auto my-8 hidden">
