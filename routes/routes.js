@@ -4,7 +4,12 @@ const router = express.Router();
 
 const companyController = require('../controllers/companyController');
 
-const rootController = require('../controllers/rootController');
+const {
+  panelRootView,
+  obtenerAdminRootJSON,
+  crearAdminRoot,
+  actualizarAdminRoot
+} = require('../controllers/rootController');
 
 const {
   postLogin,
@@ -69,7 +74,7 @@ router.get(
   '/root',
   requireAuth,
   requireRole('root'),
-  rootController.panelRootView
+  panelRootView
 );
 
 // Panel Admin (admin + root)
@@ -247,6 +252,30 @@ router.post(
   requireAuth,
   requireRole('root'),
   companyController.activarCompany
+);
+
+// ===============================
+// APIs especiales root (admins)
+// ===============================
+router.get(
+  '/api/root/admins/:id',
+  requireAuth,
+  requireRole('root'),
+  obtenerAdminRootJSON
+);
+
+router.post(
+  '/api/root/admins',
+  requireAuth,
+  requireRole('root'),
+  crearAdminRoot
+);
+
+router.post(
+  '/api/root/admins/:id/edit',
+  requireAuth,
+  requireRole('root'),
+  actualizarAdminRoot
 );
 
 // ===============================

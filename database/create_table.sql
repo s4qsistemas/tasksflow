@@ -208,17 +208,6 @@ CREATE TABLE task_audit (
 -- Roles base
 INSERT INTO roles (name) VALUES ('root'), ('admin'), ('supervisor'), ('user');
 
--- Empresa demo
-INSERT INTO companies (name, description)
-VALUES ('Empresa Tasksflow', 'Empresa Demo');
-
--- Áreas base para la empresa demo
-INSERT INTO areas (company_id, name, description)
-VALUES
-  (1, 'Operaciones',   'Área de operaciones'),
-  (1, 'Mantenimiento', 'Mantenimiento planta'),
-  (1, 'TI',            'Tecnologías de la información');
-
 -- Usuario Root (global, sin empresa ni área)
 INSERT INTO users (
   name, email, password, telephone, role_id,

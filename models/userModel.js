@@ -232,6 +232,28 @@ async function getAdminsWithCompany() {
   return rows;
 }
 
+// Obtiene un usuario por id, sin validar empresa (uso exclusivo para root)
+async function getUserByIdAnyCompany(id) {
+  const [rows] = await pool.query(
+    `SELECT
+       id,
+       company_id,
+       area_id,
+       manager_id,
+       role_id,
+       name,
+       email,
+       telephone,
+       status,
+       created_at
+     FROM users
+     WHERE id = ?
+     LIMIT 1`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
 module.exports = {
   getUsersByCompany,
   getUserById,
@@ -240,5 +262,6 @@ module.exports = {
   updateUser,
   resetPassword,
   updatePassword,
-  getAdminsWithCompany
+  getAdminsWithCompany,
+  getUserByIdAnyCompany
 };

@@ -433,7 +433,7 @@
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
               required>
               <option value="active" selected>Activo</option>
-              <option value="inactive">Inactivo</option>
+              <option value="suspended">Inactivo</option>
             </select>
           </div>
 
@@ -728,7 +728,7 @@
       if (!id) return;
 
       try {
-        const res = await fetch(`/api/users/${id}`, {
+        const res = await fetch(`/api/root/admins/${id}`, {
           credentials: 'same-origin'
         });
 
@@ -783,9 +783,10 @@
       }
 
       try {
+
         const body = new URLSearchParams(new FormData(formRootEditarAdmin));
 
-        const res = await fetch(`/api/users/${id}/edit`, {
+        const res = await fetch(`/api/root/admins/${id}/edit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'

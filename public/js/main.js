@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         // Usa el mismo helper postForm
-        const resp = await postForm('/api/users', formRootNuevoAdmin);
+        const resp = await postForm('/api/root/admins', formRootNuevoAdmin);
         // resp = { ok, message, data }
 
         notify(resp);
