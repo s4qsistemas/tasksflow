@@ -41,6 +41,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // ========================
+// 2.1) Logger sencillo de requests
+// ========================
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(
+      `[REQ] ${new Date().toISOString()} ${req.method} ${req.originalUrl} ` +
+      `status=${res.statusCode} time=${ms}ms`
+    );
+  });
+
+  next();
+});
+
+// ========================
 // 3) Motor de vistas (EJS)
 // ========================
 app.set('view engine', 'ejs');
