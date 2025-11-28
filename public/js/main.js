@@ -340,4 +340,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ===============================
+  // Alta de teams (grupo de trabajo)
+  // ===============================
+  const formNuevoGrupo = document.getElementById('formNuevoGrupo');
+
+  if (formNuevoGrupo) {
+    formNuevoGrupo.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        // Enviamos a /api/teams usando el helper postForm
+        const resp = await postForm('/api/teams', formNuevoGrupo);
+
+        // resp = { ok, message, data }
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalNuevoGrupo', false);
+          formNuevoGrupo.reset();
+          // De momento lo más simple para ver el nuevo grupo disponible:
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error(err);
+        notify({
+          ok: false,
+          message: 'Error inesperado al crear el grupo de trabajo'
+        });
+      }
+    });
+  }
 });

@@ -4,6 +4,8 @@ const router = express.Router();
 
 const companyController = require('../controllers/companyController');
 
+const teamController = require('../controllers/teamController');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -276,6 +278,64 @@ router.post(
   requireAuth,
   requireRole('root'),
   actualizarAdminRoot
+);
+
+// ===============================
+// TEAMS (grupos de trabajo)
+// ===============================
+
+// Listar teams de la empresa actual
+router.get(
+  '/api/teams',
+  requireAuth,
+  requireRole('admin', 'root', 'supervisor'),
+  teamController.listarTeamsJSON
+);
+
+// Obtener un team
+router.get(
+  '/api/teams/:id',
+  requireAuth,
+  requireRole('admin', 'root', 'supervisor'),
+  teamController.obtenerTeamJSON
+);
+
+// Crear team (solo admin/root)
+router.post(
+  '/api/teams',
+  requireAuth,
+  requireRole('admin', 'root'),
+  teamController.crearTeam
+);
+
+// Actualizar team (solo admin/root)
+router.post(
+  '/api/teams/:id/edit',
+  requireAuth,
+  requireRole('admin', 'root'),
+  teamController.actualizarTeam
+);
+
+// Miembros de un team
+router.get(
+  '/api/teams/:id/members',
+  requireAuth,
+  requireRole('admin', 'root'),
+  teamController.listarMiembrosTeamJSON
+);
+
+router.post(
+  '/api/teams/:id/members/add',
+  requireAuth,
+  requireRole('admin', 'root'),
+  teamController.agregarMiembroTeam
+);
+
+router.post(
+  '/api/teams/:id/members/remove',
+  requireAuth,
+  requireRole('admin', 'root'),
+  teamController.quitarMiembroTeam
 );
 
 // ===============================

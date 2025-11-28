@@ -970,6 +970,7 @@
         </div>
         <div class="flex gap-2 justify-end">
           <button
+            id="btnRefrescarGrupo"
             type="button"
             class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
             Refrescar
@@ -987,7 +988,11 @@
             id="filtroArea"
             class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
             <option value="">Todas las áreas…</option>
-            <!-- Rellenar con areas de la empresa -->
+            <% if (typeof areas !== 'undefined' && areas.length) { %>
+              <% areas.forEach(function(area) { %>
+                <option value="<%= area.id %>"><%= area.name %></option>
+              <% }) %>
+            <% } %>
           </select>
         </div>
         <div>
@@ -1424,3 +1429,311 @@
     }
   }
 </script>
+
+<script>
+  // ===============================
+  // EDICIÓN DE GRUPOS (miembros)
+  // ===============================
+
+  const selectGrupo = document.getElementById('grupoSeleccionado');
+  const btnRefrescarGrupo = document.querySelector('#modalEditarGrupo button[type="button"].px-3.py-1\.5'); // si prefieres, ponle un id a ese botón y cámbialo aquí
+  const filtroArea = document.getElementById('filtroArea');
+  const filtroTipoUsuario = document.getElementById('filtroTipoUsuario');
+  const buscadorUsuarioGrupo = document.getElementById('buscadorUsuarioGrupo');
+
+  const listaUsuariosDisponibles = document.getElementById('listaUsuariosDisponibles');
+  const listaMiembrosGrupo = document.getElementById('listaMiembrosGrupo');
+
+  let todosUsuariosGrupo = [];
+  let miembrosActualesGrupo = [];
+
+  // Cargar teams para el select
+  async function cargarGruposTrabajo() {
+    if (!selectGrupo) return;
+
+    try {
+      const res = await fetch('/api/teams', { credentials: 'same-origin' });
+      const data = await res.json();
+
+      if (!data.ok || !Array.isArray(data.data)) {
+        console.warn(data.message || 'No se pudieron cargar los grupos');
+        return;
+      }
+
+      // Limpiar (dejar solo el placeholder)
+      while (selectGrupo.options.length > 1) {
+        selectGrupo.remove(1);
+      }
+
+      data.data.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (${t.status})`;
+        selectGrupo.appendChild(opt);
+      });
+    } catch (err) {
+      console.error('Error cargarGruposTrabajo:', err);
+    }
+  }
+
+  // Cargar usuarios base para lista de disponibles (supervisores + workers)
+  async function cargarUsuariosBaseGrupo() {
+    try {
+      const res = await fetch('/api/users', { credentials: 'same-origin' });
+      const data = await res.json();
+
+      if (!data.ok || !Array.isArray(data.data)) {
+        console.warn(data.message || 'No se pudieron cargar los usuarios');
+        return;
+      }
+
+      // Guardamos todos los usuarios (ya filtrará el admin por área/tipo)
+      todosUsuariosGrupo = data.data;
+      renderListasGrupo();
+    } catch (err) {
+      console.error('Error cargarUsuariosBaseGrupo:', err);
+    }
+  }
+
+  // Cargar miembros actuales del team seleccionado
+  async function cargarMiembrosGrupo() {
+    const teamId = selectGrupo?.value;
+    if (!teamId) return;
+
+    try {
+      const res = await fetch(`/api/teams/${teamId}/members`, {
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+
+      if (!data.ok || !Array.isArray(data.data)) {
+        console.warn(data.message || 'No se pudieron cargar los miembros');
+        return;
+      }
+
+      miembrosActualesGrupo = data.data;
+      renderListasGrupo();
+    } catch (err) {
+      console.error('Error cargarMiembrosGrupo:', err);
+    }
+  }
+
+  // Helpers para filtros
+  function pasaFiltrosUsuario(u) {
+    // Filtro por área
+    if (filtroArea && filtroArea.value) {
+      if (String(u.area_id || '') !== filtroArea.value) return false;
+    }
+
+    // Filtro tipo usuario (role_id)
+    if (filtroTipoUsuario && filtroTipoUsuario.value) {
+      if (filtroTipoUsuario.value === 'supervisor' && u.role_id !== 3) {
+        return false;
+      }
+      if (filtroTipoUsuario.value === 'user' && u.role_id !== 4) {
+        return false;
+      }
+    }
+
+    // Filtro por texto
+    if (buscadorUsuarioGrupo && buscadorUsuarioGrupo.value.trim()) {
+      const term = buscadorUsuarioGrupo.value.trim().toLowerCase();
+      const nombre = (u.name || '').toLowerCase();
+      const correo = (u.email || '').toLowerCase();
+      if (!nombre.includes(term) && !correo.includes(term)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function renderListasGrupo() {
+    if (!listaUsuariosDisponibles || !listaMiembrosGrupo) return;
+
+    const teamId = selectGrupo?.value;
+    const idsMiembros = new Set(miembrosActualesGrupo.map((m) => m.user_id));
+
+    // Disponibles = todos - miembros
+    const disponibles = todosUsuariosGrupo.filter(
+      (u) => !idsMiembros.has(u.id) && pasaFiltrosUsuario(u)
+    );
+
+    // Limpiar ULs
+    listaUsuariosDisponibles.innerHTML = '';
+    listaMiembrosGrupo.innerHTML = '';
+
+    // Render disponibles
+    if (!teamId) {
+      // Si no hay grupo seleccionado, mostramos mensaje base
+      listaUsuariosDisponibles.innerHTML = `
+        <li class="px-3 py-2 text-[11px] text-gray-500">
+          Selecciona un grupo para comenzar.
+        </li>`;
+      listaMiembrosGrupo.innerHTML = `
+        <li class="px-3 py-2 text-[11px] text-gray-500">
+          Selecciona un grupo para ver sus miembros.
+        </li>`;
+      return;
+    }
+
+    if (!disponibles.length) {
+      listaUsuariosDisponibles.innerHTML = `
+        <li class="px-3 py-2 text-[11px] text-gray-500">
+          No hay usuarios disponibles con los filtros actuales.
+        </li>`;
+    } else {
+      disponibles.forEach((u) => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between px-3 py-2 hover:bg-gray-50';
+        li.innerHTML = `
+          <div>
+            <p class="font-medium text-gray-800">${u.name}</p>
+            <p class="text-[11px] text-gray-500">
+              ${u.email} · ${u.area_name || ''} 
+            </p>
+          </div>
+          <button
+            type="button"
+            class="text-[11px] px-2 py-1 rounded border border-[#7B1FA2] text-[#7B1FA2] hover:bg-[#F3E5F5]"
+            data-user-id="${u.id}"
+          >
+            Agregar
+          </button>
+        `;
+        listaUsuariosDisponibles.appendChild(li);
+      });
+    }
+
+    // Render miembros
+    if (!miembrosActualesGrupo.length) {
+      listaMiembrosGrupo.innerHTML = `
+        <li class="px-3 py-2 text-[11px] text-gray-500">
+          Este grupo aún no tiene miembros.
+        </li>`;
+    } else {
+      miembrosActualesGrupo.forEach((m) => {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between px-3 py-2 hover:bg-gray-50';
+        li.innerHTML = `
+          <div>
+            <p class="font-medium text-gray-800">${m.name}</p>
+            <p class="text-[11px] text-gray-500">
+              ${m.email} · ${m.role_in_team === 'leader' ? 'Líder' : 'Miembro'}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="text-[11px] px-2 py-1 rounded border border-red-400 text-red-500 hover:bg-red-50"
+            data-user-id="${m.user_id}"
+          >
+            Quitar
+          </button>
+        `;
+        listaMiembrosGrupo.appendChild(li);
+      });
+    }
+
+    // Delegación de eventos para Agregar / Quitar
+    listaUsuariosDisponibles.onclick = async (ev) => {
+      const btn = ev.target.closest('button[data-user-id]');
+      if (!btn) return;
+      const userId = btn.getAttribute('data-user-id');
+      await agregarMiembroGrupo(teamId, userId);
+    };
+
+    listaMiembrosGrupo.onclick = async (ev) => {
+      const btn = ev.target.closest('button[data-user-id]');
+      if (!btn) return;
+      const userId = btn.getAttribute('data-user-id');
+      await quitarMiembroGrupo(teamId, userId);
+    };
+  }
+
+  async function agregarMiembroGrupo(teamId, userId) {
+    if (!teamId || !userId) return;
+    try {
+      const body = new URLSearchParams({ user_id: userId });
+      const res = await fetch(`/api/teams/${teamId}/members/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body,
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      alert(data.message || 'Operación realizada');
+
+      if (data.ok && Array.isArray(data.data)) {
+        miembrosActualesGrupo = data.data;
+        renderListasGrupo();
+      }
+    } catch (err) {
+      console.error('Error agregarMiembroGrupo:', err);
+      alert('Error al agregar miembro');
+    }
+  }
+
+  async function quitarMiembroGrupo(teamId, userId) {
+    if (!teamId || !userId) return;
+    try {
+      const body = new URLSearchParams({ user_id: userId });
+      const res = await fetch(`/api/teams/${teamId}/members/remove`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body,
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+      alert(data.message || 'Operación realizada');
+
+      if (data.ok && Array.isArray(data.data)) {
+        miembrosActualesGrupo = data.data;
+        renderListasGrupo();
+      }
+    } catch (err) {
+      console.error('Error quitarMiembroGrupo:', err);
+      alert('Error al quitar miembro');
+    }
+  }
+
+  // Inicialización al cargar la vista admin
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('modalEditarGrupo')) return;
+
+    cargarGruposTrabajo();
+    cargarUsuariosBaseGrupo();
+
+    if (selectGrupo) {
+      selectGrupo.addEventListener('change', () => {
+        cargarMiembrosGrupo();
+      });
+    }
+
+    if (filtroArea) {
+      filtroArea.addEventListener('change', renderListasGrupo);
+    }
+    if (filtroTipoUsuario) {
+      filtroTipoUsuario.addEventListener('change', renderListasGrupo);
+    }
+    if (buscadorUsuarioGrupo) {
+      buscadorUsuarioGrupo.addEventListener('input', () => {
+        // un pequeño debounce sería nice, pero por ahora directo:
+        renderListasGrupo();
+      });
+    }
+
+    // Botón refrescar
+    const btnRefrescarGrupo = document.getElementById('btnRefrescarGrupo');
+    if (btnRefrescarGrupo) {
+      btnRefrescarGrupo.addEventListener('click', () => {
+        cargarGruposTrabajo();
+        cargarMiembrosGrupo();
+      });
+    }
+  });
+</script>
+
