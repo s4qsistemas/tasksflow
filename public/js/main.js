@@ -66,8 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.switchRootAdminTab('registrar');
       }
 
-      // 🔹 Grupos de trabajo (admin): por ahora sin tabs, solo reset de formularios
-      if (id === 'modalNuevoGrupo' || id === 'modalEditarGrupo') {
+      // 🔹 Grupos de trabajo (admin)
+      if (id === 'modalNuevoGrupo' && typeof window.switchTeamTab === 'function') {
+        window.switchTeamTab('registrar');
       }
 
       // Ocultar modal
