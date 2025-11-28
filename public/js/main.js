@@ -68,9 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 🔹 Grupos de trabajo (admin): por ahora sin tabs, solo reset de formularios
       if (id === 'modalNuevoGrupo' || id === 'modalEditarGrupo') {
-        // Aquí ya se ejecutó el reset() de los forms.
-        // Si más adelante agregas tabs para teams, puedes crear un switchTeamTab()
-        // y llamarlo desde acá igual que con áreas/usuarios/companies.
       }
 
       // Ocultar modal
@@ -175,22 +172,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ================
-  // LOGOUT
-  // ================
-  async function doLogout() {
-    try {
-      await fetch('/logout', { method: 'GET', credentials: 'same-origin' });
-    } catch (_) {
-      // si falla el fetch, igual seguimos
-    } finally {
-      window.location.href = '/';
-    }
-    return false; // evita navegación del href si se usa onclick="return doLogout()"
-  }
+// ================
+// LOGOUT
+// ================
+function doLogout() {
+  // Navegación simple hacia la ruta /logout
+  window.location.href = '/logout';
+  return false; // evita que el <a> navegue por su cuenta
+}
 
-  // Exponer logout globalmente (navbar usa onclick="return doLogout()")
-  window.doLogout = doLogout;
+// Exponer logout globalmente (navbar usa onclick="return doLogout()")
+window.doLogout = doLogout;
 
   // ================
   // CONTACTO
