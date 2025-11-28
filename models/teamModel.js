@@ -1,5 +1,5 @@
 // models/teamModel.js
-const pool = require('./db'); // o '../db' según tu estructura
+const { pool } = require('../config/db');
 
 // ===============================
 // TEAMS
