@@ -904,7 +904,7 @@
               <select
                 name="type"
                 class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-                <option value="">Seleccionar…</option>
+                <option value="" disabled selected>Seleccionar…</option>
                 <option value="area_team">Equipo de área</option>
                 <option value="project">Proyecto puntual</option>
                 <option value="committee">Comité permanente</option>
@@ -971,7 +971,7 @@
               name="team_id"
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
               required>
-              <option value="">Seleccionar grupo…</option>
+              <option value="" disabled selected>Seleccionar grupo…</option>
               <!-- Se rellena vía JS con /api/teams -->
             </select>
           </div>
@@ -1084,7 +1084,7 @@
           <select
             id="grupoSeleccionado"
             class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-            <option value="">Seleccionar grupo…</option>
+            <option value="" disabled selected>Seleccionar grupo…</option>
             <!-- Opciones desde backend (teams) -->
           </select>
         </div>
@@ -1110,7 +1110,9 @@
             <option value="">Todas las áreas…</option>
             <% if (typeof areas !== 'undefined' && areas.length) { %>
               <% areas.forEach(function(area) { %>
-                <option value="<%= area.id %>"><%= area.name %></option>
+                <% if (area.status === 'active') { %>
+                  <option value="<%= area.id %>"><%= area.name %></option>
+                <% } %>
               <% }) %>
             <% } %>
           </select>
@@ -1206,9 +1208,10 @@
         Cerrar
       </button>
       <button
+        id="btnGuardarMiembrosGrupo"
         type="button"
         class="px-3 py-1.5 rounded-lg text-xs bg-[#7B1FA2] text-white hover:bg-[#6A1B9A]">
-        Guardar cambios (UI)
+        Guardar cambios
       </button>
     </div>
   </div>
@@ -1690,6 +1693,16 @@
   // EDICIÓN DE GRUPOS (miembros)
   // ===============================
 
+  // IDs de áreas activas (inyectadas desde el servidor)
+  window.activeAreaIds = <%- JSON.stringify(
+    (typeof areas !== 'undefined' && Array.isArray(areas)
+      ? areas
+          .filter(function (a) { return a.status === 'active'; })
+          .map(function (a) { return a.id; })
+      : []
+    )
+  ) %>;
+
   const selectGrupo = document.getElementById('grupoSeleccionado');
   const btnRefrescarGrupo = document.querySelector('#modalEditarGrupo btnRefrescarGrupo');
   const filtroArea = document.getElementById('filtroArea');
@@ -1720,10 +1733,14 @@
         selectGrupo.remove(1);
       }
 
-      data.data.forEach((t) => {
+    // 🔹 Solo teams activos
+    data.data
+      .filter((t) => t.status === 'active')
+      .forEach((t) => {
         const opt = document.createElement('option');
         opt.value = t.id;
-        opt.textContent = `${t.name} (${t.status})`;
+        // puedes dejar solo el nombre, porque ya son todos activos
+        opt.textContent = t.name;
         selectGrupo.appendChild(opt);
       });
     } catch (err) {
@@ -1732,6 +1749,7 @@
   }
 
   // Cargar usuarios base para lista de disponibles (supervisores + workers)
+// Cargar usuarios base para lista de disponibles (supervisores + workers)
   async function cargarUsuariosBaseGrupo() {
     try {
       const res = await fetch('/api/users', { credentials: 'same-origin' });
@@ -1742,8 +1760,23 @@
         return;
       }
 
-      // Guardamos todos los usuarios (ya filtrará el admin por área/tipo)
-      todosUsuariosGrupo = data.data;
+      let usuarios = data.data;
+
+      // 🔹 1) Solo usuarios activos
+      usuarios = usuarios.filter((u) => u.status === 'active');
+
+      // 🔹 2) Solo usuarios en áreas activas (o sin área)
+      const activosSet = new Set(
+        (window.activeAreaIds || []).map((id) => String(id))
+      );
+
+      usuarios = usuarios.filter((u) => {
+        if (!u.area_id) return true; // usuarios sin área, los dejamos
+        return activosSet.has(String(u.area_id));
+      });
+
+      // Guardamos todos los usuarios filtrados
+      todosUsuariosGrupo = usuarios;
       renderListasGrupo();
     } catch (err) {
       console.error('Error cargarUsuariosBaseGrupo:', err);
@@ -1984,9 +2017,42 @@
     // Botón refrescar
     const btnRefrescarGrupo = document.getElementById('btnRefrescarGrupo');
     if (btnRefrescarGrupo) {
-      btnRefrescarGrupo.addEventListener('click', () => {
-        cargarGruposTrabajo();
-        cargarMiembrosGrupo();
+      btnRefrescarGrupo.addEventListener('click', async () => {
+        btnRefrescarGrupo.disabled = true;
+
+        // helper local para mostrar mensaje con notify o alert de respaldo
+        const showMsg = (ok, message) => {
+          if (typeof notify === 'function') {
+            notify({ ok, message });
+          } else {
+            alert(message);
+          }
+        };
+
+        try {
+          await Promise.all([
+            cargarGruposTrabajo(),
+            cargarUsuariosBaseGrupo(),
+            cargarMiembrosGrupo()
+          ]);
+
+          showMsg(true, 'Grupos, usuarios y miembros actualizados desde el servidor.');
+        } catch (err) {
+          console.error('Error al refrescar grupo:', err);
+          showMsg(false, 'Ocurrió un error al refrescar los datos del grupo.');
+        } finally {
+          btnRefrescarGrupo.disabled = false;
+        }
+      });
+    }
+
+    // Botón "Guardar cambios"
+    const btnGuardarMiembrosGrupo = document.getElementById('btnGuardarMiembrosGrupo');
+    if (btnGuardarMiembrosGrupo) {
+      btnGuardarMiembrosGrupo.addEventListener('click', () => {
+        // Opcional: algún mensaje suave
+        alert('Los cambios de miembros ya se guardan cada vez que agregas o quitas.\nCerraré el modal.');
+        toggleModal('modalEditarGrupo', false);
       });
     }
   });

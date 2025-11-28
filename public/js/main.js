@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       alert('OK');
     }
+
+    // Exponer notify de forma global para usarlo en los EJS
+    window.notify = notify;
   }
 
   // helper: toggle modal (versión con reset + tabs para admin/root)
