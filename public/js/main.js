@@ -74,6 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.switchTeamTab('registrar');
       }
 
+      // 🔹 Proyectos (nuevo)
+      if (id === 'modalNuevoProyecto' && typeof window.switchProjectTab === 'function') {
+        window.switchProjectTab('registrar');
+      }
+
+      // 🔹 Nueva tarea: volver siempre a asignación por TEAM
+      if (id === 'modalNuevaTarea' && typeof window.switchTaskAssignment === 'function') {
+        window.switchTaskAssignment('team');
+      }
+
       // Ocultar modal
       el.classList.add('hidden');
       el.classList.remove('flex');
@@ -83,25 +93,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // Exponer toggleModal globalmente (para usar en onclick en el HTML)
   window.toggleModal = toggleModal;
 
-  // ============================
+  // ============================ 
   // TOGGLE DASHBOARD / KANBAN (Admin, Supervisor, User)
   // ============================
   function toggleKanbanView(checkbox) {
     const candidates = [
-      { dashId: 'adminDashboardView',       kanbanId: 'adminKanbanView' },
-      { dashId: 'supervisorDashboardView',  kanbanId: 'supervisorKanbanView' },
-      { dashId: 'userDashboardView',        kanbanId: 'userKanbanView' }
+      { dashId: 'adminDashboardView',      kanbanId: 'adminKanbanView',      role: 'admin' },
+      { dashId: 'supervisorDashboardView', kanbanId: 'supervisorKanbanView', role: 'supervisor' },
+      { dashId: 'userDashboardView',       kanbanId: 'userKanbanView',       role: 'user' }
     ];
 
     let dash = null;
     let kanban = null;
+    let currentRole = null;
 
+    // Detectar qué par (dashboard/kanban) existe en esta vista
     for (const cfg of candidates) {
       const d = document.getElementById(cfg.dashId);
       const k = document.getElementById(cfg.kanbanId);
       if (d && k) {
         dash = d;
         kanban = k;
+        currentRole = cfg.role;
         break;
       }
     }
@@ -112,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isOn = checkbox && checkbox.checked;
 
     if (isOn) {
+      // --- MODO KANBAN ---
       dash.classList.add('hidden');
       kanban.classList.remove('hidden');
 
@@ -120,7 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
         label.style.color = '#111827';
         label.style.borderColor = '#AEEA00';
       }
+
+      // 🔹 Lógica especial SOLO para SUPERVISOR
+      if (currentRole === 'supervisor') {
+        const btnNuevoUsuario  = document.getElementById('btnSupervisorNuevoUsuario');
+        const btnNuevaTarea    = document.getElementById('btnSupervisorNuevaTarea');
+        const btnProyectos     = document.getElementById('btnSupervisorProyectos');
+
+        if (btnNuevoUsuario) btnNuevoUsuario.classList.add('hidden');
+        if (btnNuevaTarea)   btnNuevaTarea.classList.remove('hidden');
+        if (btnProyectos)    btnProyectos.classList.remove('hidden'); // 👈 mostrar en Kanban
+      }
+
     } else {
+      // --- MODO DASHBOARD ---
       kanban.classList.add('hidden');
       dash.classList.remove('hidden');
 
@@ -128,6 +155,17 @@ document.addEventListener('DOMContentLoaded', () => {
         label.style.backgroundColor = '';
         label.style.color = '';
         label.style.borderColor = '';
+      }
+
+      // 🔹 Lógica especial SOLO para SUPERVISOR
+      if (currentRole === 'supervisor') {
+        const btnNuevoUsuario  = document.getElementById('btnSupervisorNuevoUsuario');
+        const btnNuevaTarea    = document.getElementById('btnSupervisorNuevaTarea');
+        const btnProyectos     = document.getElementById('btnSupervisorProyectos');
+
+        if (btnNuevoUsuario) btnNuevoUsuario.classList.remove('hidden');
+        if (btnNuevaTarea)   btnNuevaTarea.classList.add('hidden');
+        if (btnProyectos)    btnProyectos.classList.add('hidden'); // 👈 ocultar en Dashboard
       }
     }
   }
@@ -176,17 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-// ================
-// LOGOUT
-// ================
-function doLogout() {
-  // Navegación simple hacia la ruta /logout
-  window.location.href = '/logout';
-  return false; // evita que el <a> navegue por su cuenta
-}
+  // ================
+  // LOGOUT
+  // ================
+  function doLogout() {
+    // Navegación simple hacia la ruta /logout
+    window.location.href = '/logout';
+    return false; // evita que el <a> navegue por su cuenta
+  }
 
-// Exponer logout globalmente (navbar usa onclick="return doLogout()")
-window.doLogout = doLogout;
+  // Exponer logout globalmente (navbar usa onclick="return doLogout()")
+  window.doLogout = doLogout;
 
   // ================
   // CONTACTO
@@ -365,6 +403,116 @@ window.doLogout = doLogout;
           ok: false,
           message: 'Error inesperado al crear el grupo de trabajo'
         });
+      }
+    });
+  }
+
+  // ===============================
+  // Alta de tareas (modalNuevaTarea)
+  // ===============================
+  const formNuevaTarea = document.getElementById('formNuevaTarea');
+
+  if (formNuevaTarea) {
+    formNuevaTarea.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        // Enviamos el form al backend
+        const resp = await postForm('/api/tasks', formNuevaTarea);
+        // resp = { ok: true/false, message, data? }
+        notify(resp);
+
+        if (resp.ok) {
+          // Cerrar modal y refrescar Kanban / Dashboard (por ahora recargamos página)
+          toggleModal('modalNuevaTarea', false);
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error al crear tarea:', err);
+        notify({ ok: false, message: 'Error inesperado al crear la tarea' });
+      }
+    });
+  }
+
+  // ===============================
+  // Alta de proyectos (modalNuevoProyecto)
+  // ===============================
+  const formNuevoProyecto = document.getElementById('formNuevoProyecto');
+
+  if (formNuevoProyecto) {
+    formNuevoProyecto.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const resp = await postForm('/api/projects', formNuevoProyecto);
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalNuevoProyecto', false);
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error al crear proyecto:', err);
+        notify({ ok: false, message: 'Error inesperado al crear el proyecto' });
+      }
+    });
+  }
+
+  // ===============================
+  // Edición de proyectos
+  // ===============================
+  const formEditarProyecto = document.getElementById('formEditarProyecto');
+
+  if (formEditarProyecto) {
+    formEditarProyecto.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        // Aquí suponemos que el backend espera PUT/PATCH a /api/projects/:id
+        // pero como postForm probablemente haga POST, podemos usar una ruta tipo /api/projects/update
+        // o enviar _method=PUT. Por ahora usamos una ruta genérica de ejemplo:
+        const resp = await postForm('/api/projects/update', formEditarProyecto);
+        notify(resp);
+
+        if (resp.ok) {
+          toggleModal('modalNuevoProyecto', false);
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error al actualizar proyecto:', err);
+        notify({ ok: false, message: 'Error inesperado al actualizar el proyecto' });
+      }
+    });
+  }
+
+  // Cargar datos de proyecto en el formulario de edición
+  // Más adelante, cuando tengas /api/projects/:id, podemos agregar algo tipo:
+  const selectProyectoEditar = document.getElementById('selectProyectoEditar');
+
+  if (selectProyectoEditar && formEditarProyecto) {
+    selectProyectoEditar.addEventListener('change', async (e) => {
+      const projectId = e.target.value;
+      if (!projectId) return;
+
+      try {
+        const res = await fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' });
+        const data = await res.json();
+
+        if (!data.ok) {
+          notify({ ok: false, message: data.message || 'No se pudo cargar el proyecto' });
+          return;
+        }
+
+        const p = data.data; // ajustamos esto cuando definamos el JSON
+
+        document.getElementById('editarProyectoName').value = p.name || '';
+        document.getElementById('editarProyectoStatus').value = p.status || 'active';
+        document.getElementById('editarProyectoStartDate').value = p.start_date || '';
+        document.getElementById('editarProyectoEndDate').value = p.end_date || '';
+        document.getElementById('editarProyectoDescription').value = p.description || '';
+      } catch (err) {
+        console.error('Error al cargar proyecto:', err);
+        notify({ ok: false, message: 'Error inesperado al cargar el proyecto' });
       }
     });
   }

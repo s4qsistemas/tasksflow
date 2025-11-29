@@ -6,6 +6,10 @@ const companyController = require('../controllers/companyController');
 
 const teamController = require('../controllers/teamController');
 
+const projectController = require('../controllers/projectController');
+
+const projectModel = require('../models/projectModel');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -92,7 +96,31 @@ router.get(
   '/supervisor',
   requireAuth,
   requireRole('supervisor', 'root'),
-  (req, res) => res.render('supervisor', { title: 'Panel Supervisor' })
+  async (req, res) => {
+    try {
+      const companyId = req.user.company_id;
+      const areaId = req.user.area_id;
+
+      let projects = [];
+
+      if (areaId) {
+
+        projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
+      } else {
+
+        projects = [];
+      }
+
+      res.render('supervisor', {
+        title: 'Panel Supervisor',
+        user: req.user,
+        projects
+      });
+    } catch (err) {
+      console.error('Error al renderizar /supervisor:', err);
+      res.status(500).send('Error al cargar panel supervisor');
+    }
+  }
 );
 
 // Panel Usuario (user + root)
@@ -336,6 +364,37 @@ router.post(
   requireAuth,
   requireRole('admin', 'root'),
   teamController.quitarMiembroTeam
+);
+
+// ===============================
+// API Projects
+// ===============================
+router.get(
+  '/api/projects',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  projectController.listarProjectsJSON
+);
+
+router.get(
+  '/api/projects/:id',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  projectController.obtenerProjectJSON
+);
+
+router.post(
+  '/api/projects',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  projectController.crearProject
+);
+
+router.post(
+  '/api/projects/update',
+  requireAuth,
+  requireRole('admin', 'supervisor', 'root'),
+  projectController.actualizarProject
 );
 
 // ===============================
