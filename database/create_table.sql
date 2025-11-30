@@ -128,13 +128,11 @@ CREATE TABLE projects (
 CREATE TABLE tasks (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_id INT NOT NULL,
-  project_id INT NULL, -- FK opcional a projects
+  project_id INT NULL,
   title VARCHAR(180) NOT NULL,
   description TEXT,
   status ENUM('pending','in_progress','done','review') NOT NULL DEFAULT 'pending',
-  -- NUEVO: prioridad para dashboards y análisis
   priority ENUM('low','normal','high','critical') NOT NULL DEFAULT 'normal',
-  -- NUEVO: fecha límite para cálculo de vencidas / atrasos
   deadline DATETIME NULL,
   is_personal BOOLEAN NOT NULL DEFAULT FALSE,
   visibility_scope ENUM('private','team','area','company') NOT NULL DEFAULT 'team',

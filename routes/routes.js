@@ -10,6 +10,10 @@ const projectController = require('../controllers/projectController');
 
 const projectModel = require('../models/projectModel');
 
+const taskController = require('../controllers/taskController');
+
+const User = require('../models/userModel');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -101,20 +105,25 @@ router.get(
       const companyId = req.user.company_id;
       const areaId = req.user.area_id;
 
+      // 1) Proyectos del área (como ya tenías)
       let projects = [];
-
       if (areaId) {
-
         projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
-      } else {
-
-        projects = [];
       }
+
+      // 2) Usuarios de la misma empresa (usamos el modelo existente)
+      const allUsers = await User.getUsersByCompany(companyId);
+
+      // 3) Filtramos solo los de la MISMA área del supervisor
+      const users = allUsers.filter(
+        (u) => u.area_id === areaId && u.status === 'active'
+      );
 
       res.render('supervisor', {
         title: 'Panel Supervisor',
         user: req.user,
-        projects
+        projects,
+        users   // 👈 ahora la vista ya tiene los usuarios disponibles
       });
     } catch (err) {
       console.error('Error al renderizar /supervisor:', err);
@@ -122,6 +131,7 @@ router.get(
     }
   }
 );
+
 
 // Panel Usuario (user + root)
 router.get('/user', requireAuth, requireRole('user', 'root'), (req, res) =>
@@ -395,6 +405,16 @@ router.post(
   requireAuth,
   requireRole('admin', 'supervisor', 'root'),
   projectController.actualizarProject
+);
+
+// ===============================
+// API TAREAS
+// ===============================
+router.post(
+  '/api/tasks',
+  requireAuth,
+  requireRole('admin', 'supervisor'),
+  taskController.crearTarea
 );
 
 // ===============================
