@@ -16,6 +16,8 @@ const User = require('../models/userModel');
 
 const { panelUserView } = require('../controllers/userController');
 
+const taskCommitController = require('../controllers/taskCommitController');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -427,6 +429,21 @@ router.patch(
   requireAuth,
   requireRole('user', 'supervisor', 'admin', 'root'),
   taskController.updateStatus
+);
+
+// ===============================
+// API: Commits de tareas
+// ===============================
+router.get(
+  '/api/tasks/:id/commits',
+  requireAuth,
+  taskCommitController.listarCommitsPorTarea
+);
+
+router.post(
+  '/api/tasks/:id/commits',
+  requireAuth,
+  taskCommitController.crearCommitParaTarea
 );
 
 // ===============================

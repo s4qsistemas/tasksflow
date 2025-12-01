@@ -638,5 +638,240 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTaskStatus(taskId, newStatus);
       });
     });
+
+        // ===============================
+    // Doble click en tarjeta = abrir modal de commits
+    // ===============================
+    kanbanView.addEventListener('dblclick', (e) => {
+      const card = e.target.closest('[data-task-id]');
+      if (!card) return;
+
+      const taskId = card.getAttribute('data-task-id');
+      const currentStatus = card.getAttribute('data-task-status') || 'pending';
+      const titleEl = card.querySelector('h4');
+      const title = titleEl ? titleEl.textContent.trim() : `Tarea #${taskId}`;
+
+      // Función que definimos más abajo
+      if (typeof window.openTaskCommitModal === 'function') {
+        window.openTaskCommitModal({
+          id: taskId,
+          title,
+          status: currentStatus
+        });
+      }
+    });
   }
+
+  // ===============================
+  // Modal de commits de tarea (vista usuario)
+  // ===============================
+  const modalTaskCommit       = document.getElementById('modalTaskCommit');
+  const formNuevoCommit       = document.getElementById('formNuevoCommit');
+  const commitTaskTitle       = document.getElementById('commitTaskTitle');
+  const commitTaskIdLabel     = document.getElementById('commitTaskIdLabel');
+  const commitTaskStatusBadge = document.getElementById('commitTaskStatusBadge');
+  const commitTaskIdInput     = document.getElementById('commitTaskId');
+  const commitFromStatus      = document.getElementById('commitFromStatus');
+  const commitToStatus        = document.getElementById('commitToStatus');
+  const commitMessage         = document.getElementById('commitMessage');
+  const commitList            = document.getElementById('commitList');
+
+  // OJO: STATUS_LABELS_ES ya existe en el bloque del Kanban, reutilizamos esa constante.
+
+  function applyStatusBadgeStyle(badgeEl, status) {
+    if (!badgeEl) return;
+
+    badgeEl.className =
+      'inline-flex items-center px-2 py-0.5 rounded-full text-xs';
+
+    switch (status) {
+      case 'pending':
+        badgeEl.classList.add('bg-[#F1F8E9]', 'text-[#33691E]');
+        break;
+      case 'in_progress':
+        badgeEl.classList.add('bg-[#E3F2FD]', 'text-[#1565C0]');
+        break;
+      case 'review':
+        badgeEl.classList.add('bg-[#F3E5F5]', 'text-[#6A1B9A]');
+        break;
+      case 'done':
+        badgeEl.classList.add('bg-[#FFF3E0]', 'text-[#EF6C00]');
+        break;
+      default:
+        badgeEl.classList.add('bg-gray-100', 'text-gray-700');
+        break;
+    }
+  }
+
+  function renderCommitList(commits) {
+    if (!commitList) return;
+
+    commitList.innerHTML = '';
+
+    if (!commits || !commits.length) {
+      commitList.innerHTML = `
+        <p class="text-xs text-gray-400">
+          Aún no hay commits registrados para esta tarea.
+        </p>
+      `;
+      return;
+    }
+
+    commits.forEach((c) => {
+      const item = document.createElement('article');
+      item.className =
+        'rounded-lg bg-white border border-gray-200 px-3 py-2 text-sm';
+
+      const autor = c.author_name || 'Usuario';
+      const fecha = c.created_at
+        ? new Date(c.created_at).toLocaleString()
+        : '';
+
+      const fromSt = c.from_status;
+      const toSt   = c.to_status;
+
+      let statusLine = '';
+      if (fromSt || toSt) {
+        const fromLabel = STATUS_LABELS_ES[fromSt] || fromSt || '—';
+        const toLabel   = STATUS_LABELS_ES[toSt]   || toSt   || '—';
+        statusLine = `
+          <p class="text-[11px] text-gray-500 mt-0.5">
+            Estado: <strong>${fromLabel}</strong> → <strong>${toLabel}</strong>
+          </p>
+        `;
+      }
+
+      item.innerHTML = `
+        <header class="flex justify-between items-center mb-1">
+          <span class="text-xs font-medium text-gray-700">${autor}</span>
+          <span class="text-[11px] text-gray-400">${fecha}</span>
+        </header>
+        <p class="text-sm text-gray-800 whitespace-pre-wrap">
+          ${c.message || ''}
+        </p>
+        ${statusLine}
+      `;
+
+      commitList.appendChild(item);
+    });
+  }
+
+  async function loadTaskCommits(taskId) {
+    if (!taskId || !commitList) return;
+
+    commitList.innerHTML = `
+      <p class="text-xs text-gray-400">
+        Cargando commits...
+      </p>
+    `;
+
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/commits`, {
+        credentials: 'same-origin'
+      });
+      const data = await res.json();
+
+      if (!data.ok) {
+        renderCommitList([]);
+        if (typeof notify === 'function') {
+          notify({
+            ok: false,
+            message: data.message || 'No se pudo cargar el historial de commits'
+          });
+        }
+        return;
+      }
+
+      // Backend: { ok: true, data: commits[] }
+      const commits = Array.isArray(data.data) ? data.data : [];
+
+      renderCommitList(commits);
+    } catch (err) {
+      console.error('Error cargando commits de tarea:', err);
+      renderCommitList([]);
+      if (typeof notify === 'function') {
+        notify({ ok: false, message: 'Error al cargar el historial de commits' });
+      }
+    }
+  }
+
+  function openTaskCommitModal(task) {
+    if (!modalTaskCommit || !task) return;
+
+    const { id, title, status } = task;
+
+    if (commitTaskTitle) {
+      commitTaskTitle.textContent = title || `Tarea #${id}`;
+    }
+    if (commitTaskIdLabel) {
+      commitTaskIdLabel.textContent = `Tarea #${id}`;
+    }
+    if (commitTaskStatusBadge) {
+      const label = STATUS_LABELS_ES[status] || status || '—';
+      commitTaskStatusBadge.textContent = label;
+      applyStatusBadgeStyle(commitTaskStatusBadge, status);
+    }
+
+    if (commitTaskIdInput) {
+      commitTaskIdInput.value = id;
+    }
+    if (commitFromStatus) {
+      commitFromStatus.value = status || '';
+    }
+    if (commitToStatus) {
+      commitToStatus.value = '';
+    }
+    if (commitMessage) {
+      commitMessage.value = '';
+    }
+
+    // Cargar historial
+    loadTaskCommits(id);
+
+    // Abrir modal
+    toggleModal('modalTaskCommit', true);
+  }
+
+  // Exponer global
+  window.openTaskCommitModal = openTaskCommitModal;
+
+  // Envío del formulario de nuevo commit
+  if (formNuevoCommit) {
+    formNuevoCommit.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const taskId = commitTaskIdInput ? commitTaskIdInput.value : null;
+      if (!taskId) {
+        if (typeof notify === 'function') {
+          notify({ ok: false, message: 'No se pudo identificar la tarea' });
+        }
+        return;
+      }
+
+      try {
+        const resp = await postForm(
+          `/api/tasks/${taskId}/commits`,
+          formNuevoCommit
+        );
+        // resp = { ok, message, data }
+        if (typeof notify === 'function') {
+          notify(resp);
+        }
+
+        if (resp && resp.ok) {
+          if (commitMessage) {
+            commitMessage.value = '';
+          }
+          // Recargamos el historial
+          loadTaskCommits(taskId);
+        }
+      } catch (err) {
+        console.error('Error al guardar commit:', err);
+        if (typeof notify === 'function') {
+          notify({ ok: false, message: 'Error inesperado al guardar el commit' });
+        }
+      }
+    });
+  }
+
 });
