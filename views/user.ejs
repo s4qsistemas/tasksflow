@@ -45,6 +45,24 @@
         default: return st;
       }
     }
+
+    // --- Cálculos para el dashboard usuario ---
+    const hasTasks = (typeof tasks !== 'undefined') && tasks && tasks.length;
+    const totalTasks = hasTasks ? tasks.length : 0;
+
+    let totalInProgress = 0;
+    let totalDone = 0;
+
+    if (hasTasks) {
+      tasks.forEach(function (t) {
+        if (t.status === 'in_progress') {
+          totalInProgress++;
+        }
+        if (t.status === 'done') {
+          totalDone++;
+        }
+      });
+    }
   %>
   <!-- VISTA DASHBOARD USUARIO -->
   <section
@@ -56,319 +74,330 @@
     </p>
 
     <div class="grid gap-4 sm:grid-cols-3">
+      <!-- Total tareas asignadas -->
       <div class="bg-[#F1F8E9] rounded-xl p-4">
         <p class="text-xs text-gray-500 mb-1">Tareas asignadas</p>
-        <p class="text-2xl font-semibold text-[#33691E]">0</p>
+        <p class="text-2xl font-semibold text-[#33691E]">
+          <%= totalTasks %>
+        </p>
       </div>
+
+      <!-- En progreso -->
       <div class="bg-[#E3F2FD] rounded-xl p-4">
         <p class="text-xs text-gray-500 mb-1">En progreso</p>
-        <p class="text-2xl font-semibold text-[#1565C0]">0</p>
+        <p class="text-2xl font-semibold text-[#1565C0]">
+          <%= totalInProgress %>
+        </p>
       </div>
+
+      <!-- Completadas -->
       <div class="bg-[#FFF3E0] rounded-xl p-4">
         <p class="text-xs text-gray-500 mb-1">Completadas</p>
-        <p class="text-2xl font-semibold text-[#EF6C00]">0</p>
+        <p class="text-2xl font-semibold text-[#EF6C00]">
+          <%= totalDone %>
+        </p>
       </div>
     </div>
   </section>
 
-<!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
-<section
-  id="userKanbanView"
-  class="bg-white rounded-2xl p-6 shadow hidden">
-  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
-    <!-- Izquierda: título + descripción -->
-    <div>
-      <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
-      <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
-    </div>
-
-    <!-- Derecha: select alineado (tareas) -->
-    <div class="bg-[#F1F8E9] rounded-xl p-3">
-      <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
-        Filtrar por tarea
-      </label>
-      <select
-        id="filtroTarea"
-        class="block w-full rounded-lg border border-gray-300 rounded-lg text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
-      >
-        <option value="">Todas las tareas</option>
-        <% if (typeof tasks !== 'undefined' && tasks && tasks.length) { %>
-          <% tasks.forEach(function(t) { %>
-            <option value="<%= t.id %>">
-              <%= t.title %> (<%= statusLabel(t.status) %>)
-            </option>
-          <% }); %>
-        <% } else { %>
-          <option value="" disabled>(Sin tareas asignadas)</option>
-        <% } %>
-      </select>
-    </div>
-  </div>
-
-<!-- Columnas Kanban -->
-<div class="grid gap-4 md:grid-cols-4">
-  <!-- Pendientes -->
-  <div class="bg-[#F1F8E9] rounded-xl p-3" data-column-status="pending">
-    <h3 class="text-sm font-semibold text-gray-700 mb-1">Pendientes</h3>
-    <p class="text-xs text-gray-500">Tareas que aún no comienzas.</p>
-    <div class="mt-3 space-y-2 kanban-column-body">
-      <% if (tasks && tasks.length) { %>
-        <% tasks.forEach(function(t) { if (t.status === 'pending') { %>
-          <article
-            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-            draggable="true"
-            data-task-id="<%= t.id %>"
-            data-task-status="<%= t.status %>">
-            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-            <p
-              class="text-xs text-gray-500"
-              data-role="task-status-label">
-              Estado: <%= statusLabel(t.status) %>
-            </p>
-          </article>
-        <% } }); %>
-      <% } else { %>
-        <p class="text-xs text-gray-400 mt-2">No tienes tareas pendientes.</p>
-      <% } %>
-    </div>
-  </div>
-
-  <!-- En progreso -->
-  <div class="bg-[#E3F2FD] rounded-xl p-3" data-column-status="in_progress">
-    <h3 class="text-sm font-semibold text-gray-700 mb-1">En progreso</h3>
-    <p class="text-xs text-gray-500">Lo que estás trabajando ahora.</p>
-    <div class="mt-3 space-y-2 kanban-column-body">
-      <% if (tasks && tasks.length) { %>
-        <% tasks.forEach(function(t) { if (t.status === 'in_progress') { %>
-          <article
-            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-            draggable="true"
-            data-task-id="<%= t.id %>"
-            data-task-status="<%= t.status %>">
-            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-            <p
-              class="text-xs text-gray-500"
-              data-role="task-status-label">
-              Estado: <%= statusLabel(t.status) %>
-            </p>
-          </article>
-        <% } }); %>
-      <% } else { %>
-        <p class="text-xs text-gray-400 mt-2">No tienes tareas en progreso.</p>
-      <% } %>
-    </div>
-  </div>
-
-  <!-- En revisión -->
-  <div class="bg-[#F3E5F5] rounded-xl p-3" data-column-status="review">
-    <h3 class="text-sm font-semibold text-gray-700 mb-1">En revisión</h3>
-    <p class="text-xs text-gray-500">Esperando revisión del supervisor.</p>
-    <div class="mt-3 space-y-2 kanban-column-body">
-      <% if (tasks && tasks.length) { %>
-        <% tasks.forEach(function(t) { if (t.status === 'review') { %>
-          <article
-            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-            draggable="true"
-            data-task-id="<%= t.id %>"
-            data-task-status="<%= t.status %>">
-            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-            <p
-              class="text-xs text-gray-500"
-              data-role="task-status-label">
-              Estado: <%= statusLabel(t.status) %>
-            </p>
-          </article>
-        <% } }); %>
-      <% } else { %>
-        <p class="text-xs text-gray-400 mt-2">No tienes tareas en revisión.</p>
-      <% } %>
-    </div>
-  </div>
-
-  <!-- Completadas -->
-  <div class="bg-[#FFF3E0] rounded-xl p-3" data-column-status="done">
-    <h3 class="text-sm font-semibold text-gray-700 mb-1">Completadas</h3>
-    <p class="text-xs text-gray-500">Tareas que ya terminaste ✅</p>
-    <div class="mt-3 space-y-2 kanban-column-body">
-      <% if (tasks && tasks.length) { %>
-        <% tasks.forEach(function(t) { if (t.status === 'done') { %>
-          <article
-            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-            draggable="true"
-            data-task-id="<%= t.id %>"
-            data-task-status="<%= t.status %>">
-            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-            <p
-              class="text-xs text-gray-500"
-              data-role="task-status-label">
-              Estado: <%= statusLabel(t.status) %>
-            </p>
-          </article>
-        <% } }); %>
-      <% } else { %>
-        <p class="text-xs text-gray-400 mt-2">No tienes tareas completadas.</p>
-      <% } %>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- MODAL: Commits de tarea (vista usuario) -->
-<div
-  id="modalTaskCommit"
-  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
->
-  <div
-    class="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col"
-  >
-    <!-- Header -->
-    <header class="px-6 py-4 border-b flex items-center justify-between">
+  <!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
+  <section
+    id="userKanbanView"
+    class="bg-white rounded-2xl p-6 shadow hidden">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+      <!-- Izquierda: título + descripción -->
       <div>
-        <p class="text-xs uppercase tracking-wide text-gray-400">
-          Commits de tarea
-        </p>
-        <h3
-          id="commitTaskTitle"
-          class="text-lg font-semibold text-gray-900 truncate"
-        >
-          <!-- Título de la tarea -->
-        </h3>
-        <div class="mt-1 flex items-center gap-2 text-xs text-gray-500">
-          <span class="inline-flex items-center gap-1">
-            <span class="material-icons text-base">assignment</span>
-            <span id="commitTaskIdLabel">Tarea #</span>
-          </span>
-          <span class="inline-flex items-center gap-1">
-            <span class="material-icons text-base">label</span>
-            <span
-              id="commitTaskStatusBadge"
-              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700"
-            >
-              <!-- Estado en texto -->
-            </span>
-          </span>
-        </div>
+        <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
+        <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
       </div>
 
-      <button
-        type="button"
-        class="p-2 rounded-full hover:bg-gray-100 text-gray-500"
-        onclick="toggleModal('modalTaskCommit', false)"
-      >
-        <span class="material-icons">close</span>
-      </button>
-    </header>
+      <!-- Derecha: select alineado (tareas) -->
+      <div class="bg-[#F1F8E9] rounded-xl p-3">
+        <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
+          Filtrar por tarea
+        </label>
+        <select
+          id="filtroTarea"
+          class="block w-full rounded-lg border border-gray-300 rounded-lg text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+        >
+          <option value="">Todas las tareas</option>
+          <% if (typeof tasks !== 'undefined' && tasks && tasks.length) { %>
+            <% tasks.forEach(function(t) { %>
+              <option value="<%= t.id %>">
+                <%= t.title %> (<%= statusLabel(t.status) %>)
+              </option>
+            <% }); %>
+          <% } else { %>
+            <option value="" disabled>(Sin tareas asignadas)</option>
+          <% } %>
+        </select>
+      </div>
+    </div>
 
-    <!-- Body -->
-    <div class="flex-1 overflow-hidden px-6 py-4">
-      <div class="grid gap-6 md:grid-cols-2 h-full">
-        <!-- Historial de commits -->
-        <section class="flex flex-col h-full">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-semibold text-gray-800">
-              Historial de commits
-            </h4>
-          </div>
+  <!-- Columnas Kanban -->
+  <div class="grid gap-4 md:grid-cols-4">
+    <!-- Pendientes -->
+    <div class="bg-[#F1F8E9] rounded-xl p-3" data-column-status="pending">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">Pendientes</h3>
+      <p class="text-xs text-gray-500">Tareas que aún no comienzas.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (tasks && tasks.length) { %>
+          <% tasks.forEach(function(t) { if (t.status === 'pending') { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="<%= t.status %>">
+              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+              <p
+                class="text-xs text-gray-500"
+                data-role="task-status-label">
+                Estado: <%= statusLabel(t.status) %>
+              </p>
+            </article>
+          <% } }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">No tienes tareas pendientes.</p>
+        <% } %>
+      </div>
+    </div>
 
-          <div
-            id="commitList"
-            class="flex-1 overflow-y-auto pr-2 space-y-3 text-sm border rounded-xl p-3 bg-gray-50"
+    <!-- En progreso -->
+    <div class="bg-[#E3F2FD] rounded-xl p-3" data-column-status="in_progress">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">En progreso</h3>
+      <p class="text-xs text-gray-500">Lo que estás trabajando ahora.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (tasks && tasks.length) { %>
+          <% tasks.forEach(function(t) { if (t.status === 'in_progress') { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="<%= t.status %>">
+              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+              <p
+                class="text-xs text-gray-500"
+                data-role="task-status-label">
+                Estado: <%= statusLabel(t.status) %>
+              </p>
+            </article>
+          <% } }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">No tienes tareas en progreso.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- En revisión -->
+    <div class="bg-[#F3E5F5] rounded-xl p-3" data-column-status="review">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">En revisión</h3>
+      <p class="text-xs text-gray-500">Esperando revisión del supervisor.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (tasks && tasks.length) { %>
+          <% tasks.forEach(function(t) { if (t.status === 'review') { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="<%= t.status %>">
+              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+              <p
+                class="text-xs text-gray-500"
+                data-role="task-status-label">
+                Estado: <%= statusLabel(t.status) %>
+              </p>
+            </article>
+          <% } }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">No tienes tareas en revisión.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Completadas -->
+    <div class="bg-[#FFF3E0] rounded-xl p-3" data-column-status="done">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">Completadas</h3>
+      <p class="text-xs text-gray-500">Tareas que ya terminaste ✅</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (tasks && tasks.length) { %>
+          <% tasks.forEach(function(t) { if (t.status === 'done') { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="<%= t.status %>">
+              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+              <p
+                class="text-xs text-gray-500"
+                data-role="task-status-label">
+                Estado: <%= statusLabel(t.status) %>
+              </p>
+            </article>
+          <% } }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">No tienes tareas completadas.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- MODAL: Commits de tarea (vista usuario) -->
+  <div
+    id="modalTaskCommit"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col"
+    >
+      <!-- Header -->
+      <header class="px-6 py-4 border-b flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-gray-400">
+            Commits de tarea
+          </p>
+          <h3
+            id="commitTaskTitle"
+            class="text-lg font-semibold text-gray-900 truncate"
           >
-            <p class="text-xs text-gray-400">
-              Aún no hay commits registrados para esta tarea.
-            </p>
-          </div>
-        </section>
-
-        <!-- Nuevo commit -->
-        <section class="flex flex-col h-full">
-          <h4 class="text-sm font-semibold text-gray-800 mb-2">
-            Nuevo commit
-          </h4>
-
-          <form
-            id="formNuevoCommit"
-            class="flex flex-col h-full gap-3"
-          >
-            <!-- IDs ocultos -->
-            <input type="hidden" id="commitTaskId" name="task_id">
-            <input type="hidden" id="commitFromStatus" name="from_status">
-
-            <!-- Mensaje -->
-            <div class="flex-1 flex flex-col">
-              <label
-                for="commitMessage"
-                class="text-xs font-medium text-gray-600 mb-1"
+            <!-- Título de la tarea -->
+          </h3>
+          <div class="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <span class="inline-flex items-center gap-1">
+              <span class="material-icons text-base">assignment</span>
+              <span id="commitTaskIdLabel">Tarea #</span>
+            </span>
+            <span class="inline-flex items-center gap-1">
+              <span class="material-icons text-base">label</span>
+              <span
+                id="commitTaskStatusBadge"
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700"
               >
-                Descripción del avance / bloqueo / instrucción
-              </label>
-              <textarea
-                id="commitMessage"
-                name="message"
-                rows="6"
-                class="flex-1 w-full rounded-lg border border-gray-300 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
-                placeholder="Ej: Avancé con la carga de datos de facturas, queda pendiente validar los totales con contabilidad..."
-                required
-              ></textarea>
-              <p class="mt-1 text-[11px] text-gray-400">
-                Piensa este commit como un mini &quot;git commit&quot;: qué hiciste,
-                qué falta, qué bloqueos tienes, qué instrucciones seguiste, etc.
+                <!-- Estado en texto -->
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+          onclick="toggleModal('modalTaskCommit', false)"
+        >
+          <span class="material-icons">close</span>
+        </button>
+      </header>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-hidden px-6 py-4">
+        <div class="grid gap-6 md:grid-cols-2 h-full">
+          <!-- Historial de commits -->
+          <section class="flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-gray-800">
+                Historial de commits
+              </h4>
+            </div>
+
+            <div
+              id="commitList"
+              class="flex-1 overflow-y-auto pr-2 space-y-3 text-sm border rounded-xl p-3 bg-gray-50"
+            >
+              <p class="text-xs text-gray-400">
+                Aún no hay commits registrados para esta tarea.
               </p>
             </div>
+          </section>
 
-            <!-- Cambio de estado (opcional) -->
-            <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <div>
+          <!-- Nuevo commit -->
+          <section class="flex flex-col h-full">
+            <h4 class="text-sm font-semibold text-gray-800 mb-2">
+              Nuevo commit
+            </h4>
+
+            <form
+              id="formNuevoCommit"
+              class="flex flex-col h-full gap-3"
+            >
+              <!-- IDs ocultos -->
+              <input type="hidden" id="commitTaskId" name="task_id">
+              <input type="hidden" id="commitFromStatus" name="from_status">
+
+              <!-- Mensaje -->
+              <div class="flex-1 flex flex-col">
                 <label
-                  for="commitToStatus"
+                  for="commitMessage"
                   class="text-xs font-medium text-gray-600 mb-1"
                 >
-                  Cambiar estado de la tarea (opcional)
+                  Descripción del avance / bloqueo / instrucción
                 </label>
-                <select
-                  id="commitToStatus"
-                  name="to_status"
-                  class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+                <textarea
+                  id="commitMessage"
+                  name="message"
+                  rows="6"
+                  class="flex-1 w-full rounded-lg border border-gray-300 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+                  placeholder="Ej: Avancé con la carga de datos de facturas, queda pendiente validar los totales con contabilidad..."
+                  required
+                ></textarea>
+                <p class="mt-1 text-[11px] text-gray-400">
+                  Piensa este commit como un mini &quot;git commit&quot;: qué hiciste,
+                  qué falta, qué bloqueos tienes, qué instrucciones seguiste, etc.
+                </p>
+              </div>
+
+              <!-- Cambio de estado (opcional) -->
+              <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div>
+                  <label
+                    for="commitToStatus"
+                    class="text-xs font-medium text-gray-600 mb-1"
+                  >
+                    Cambiar estado de la tarea (opcional)
+                  </label>
+                  <select
+                    id="commitToStatus"
+                    name="to_status"
+                    class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+                  >
+                    <option value="">Mantener estado actual</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="in_progress">En progreso</option>
+                    <option value="review">En revisión</option>
+                    <option value="done">Completada</option>
+                  </select>
+                </div>
+
+                <div class="text-xs text-gray-500 md:text-[11px]">
+                  <p class="mb-1 font-medium">Recomendación:</p>
+                  <ul class="list-disc list-inside space-y-0.5">
+                    <li><strong>Pendiente → En progreso</strong> cuando comiences.</li>
+                    <li><strong>En progreso → En revisión</strong> cuando la des por lista.</li>
+                    <li><strong>En revisión → Completada</strong> normalmente lo hará tu supervisor.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Footer botones -->
+              <div class="flex justify-end gap-2 pt-2 border-t mt-1">
+                <button
+                  type="button"
+                  class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-100"
+                  onclick="toggleModal('modalTaskCommit', false)"
                 >
-                  <option value="">Mantener estado actual</option>
-                  <option value="pending">Pendiente</option>
-                  <option value="in_progress">En progreso</option>
-                  <option value="review">En revisión</option>
-                  <option value="done">Completada</option>
-                </select>
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 rounded-lg text-sm bg-[#2E7D32] text-white hover:bg-[#1B5E20]"
+                >
+                  Guardar commit
+                </button>
               </div>
-
-              <div class="text-xs text-gray-500 md:text-[11px]">
-                <p class="mb-1 font-medium">Recomendación:</p>
-                <ul class="list-disc list-inside space-y-0.5">
-                  <li><strong>Pendiente → En progreso</strong> cuando comiences.</li>
-                  <li><strong>En progreso → En revisión</strong> cuando la des por lista.</li>
-                  <li><strong>En revisión → Completada</strong> normalmente lo hará tu supervisor.</li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Footer botones -->
-            <div class="flex justify-end gap-2 pt-2 border-t mt-1">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-100"
-                onclick="toggleModal('modalTaskCommit', false)"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 rounded-lg text-sm bg-[#2E7D32] text-white hover:bg-[#1B5E20]"
-              >
-                Guardar commit
-              </button>
-            </div>
-          </form>
-        </section>
+            </form>
+          </section>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 </main>

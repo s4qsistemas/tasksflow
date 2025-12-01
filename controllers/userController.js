@@ -399,19 +399,25 @@ async function resetearPassword(req, res, next) {
 }
 
 async function panelUserView(req, res) {
-  try {
-    const userId = req.user.id;
+  const usuario = req.user; // viene de requireAuth
 
+  try {
+    const userId = usuario.id;
+
+    // Usa el método que ya vienes ocupando para el Kanban
+    // (ajusta el nombre si en tu modelo es distinto)
     const tasks = await taskModel.getByAssignee(userId);
 
     res.render('user', {
       title: 'Panel Usuario',
-      user: req.user,
-      tasks    // 👈 aquí va el arreglo de tareas
+      user: usuario,
+      tasks
     });
   } catch (err) {
     console.error('Error cargando panel de usuario:', err);
-    res.status(500).render('user', {
+
+    // En caso de error, igual renderizamos pero con lista vacía
+    res.render('user', {
       title: 'Panel Usuario',
       user: req.user,
       tasks: []
