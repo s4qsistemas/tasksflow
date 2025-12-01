@@ -1,6 +1,8 @@
 // controllers/userController.js
 const User = require('../models/userModel');
 
+const taskModel = require('../models/taskModel');
+
 // Mapea 'admin', 'supervisor', 'user' -> ids de la tabla roles
 function mapRoleToId(role) {
   switch ((role || '').toLowerCase()) {
@@ -396,10 +398,32 @@ async function resetearPassword(req, res, next) {
   }
 }
 
+async function panelUserView(req, res) {
+  try {
+    const userId = req.user.id;
+
+    const tasks = await taskModel.getByAssignee(userId);
+
+    res.render('user', {
+      title: 'Panel Usuario',
+      user: req.user,
+      tasks    // 👈 aquí va el arreglo de tareas
+    });
+  } catch (err) {
+    console.error('Error cargando panel de usuario:', err);
+    res.status(500).render('user', {
+      title: 'Panel Usuario',
+      user: req.user,
+      tasks: []
+    });
+  }
+}
+
 module.exports = {
   listarUsuariosJSON,
   obtenerUsuarioJSON,
   crearUsuario,
   actualizarUsuario,
-  resetearPassword
+  resetearPassword,
+  panelUserView
 };

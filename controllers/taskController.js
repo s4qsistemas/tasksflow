@@ -168,6 +168,44 @@ async function crearTarea(req, res) {
   }
 }
 
+const ALLOWED_STATUSES = ['pending', 'in_progress', 'review', 'done'];
+
+async function updateStatus(req, res) {
+  try {
+    const taskId = parseInt(req.params.id, 10);
+    const { status } = req.body;
+
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Estado de tarea inválido'
+      });
+    }
+
+    // Seguridad básica: sólo tareas de su company
+    const companyId = req.user.company_id;
+    const userId = req.user.id;
+
+    const updated = await taskModel.updateStatus(taskId, status, companyId, userId);
+
+    if (!updated) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tarea no encontrada o no tienes permisos'
+      });
+    }
+
+    res.json({ ok: true, message: 'Estado actualizado correctamente' });
+  } catch (err) {
+    console.error('Error en updateStatus:', err);
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno al actualizar el estado'
+    });
+  }
+}
+
 module.exports = {
-  crearTarea
+  crearTarea,
+  updateStatus
 };

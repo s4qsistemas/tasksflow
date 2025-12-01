@@ -516,4 +516,127 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+    // ===============================
+  // Filtro de tareas en el Kanban (vista usuario)
+  // ===============================
+  const filtroTarea = document.getElementById('filtroTarea');
+
+  if (filtroTarea) {
+    filtroTarea.addEventListener('change', (e) => {
+      const selectedId = e.target.value;
+      const cards = document.querySelectorAll('#userKanbanView [data-task-id]');
+
+      cards.forEach((card) => {
+        const cardId = card.getAttribute('data-task-id');
+
+        if (!selectedId || cardId === selectedId) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  }
+
+    // ===============================
+  // Kanban drag & drop (vista usuario)
+  // ===============================
+  const kanbanView = document.getElementById('userKanbanView');
+  const STATUS_LABELS_ES = {
+    pending: 'pendiente',
+    in_progress: 'en progreso',
+    review: 'en revisión',
+    done: 'completada'
+  };
+
+  let draggedCard = null;
+  let originColumn = null;
+
+  async function updateTaskStatus(taskId, newStatus) {
+    try {
+      const resp = await fetch(`/api/tasks/${taskId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      const data = await resp.json();
+      if (!data.ok) {
+        throw new Error(data.message || 'No se pudo actualizar el estado');
+      }
+
+      if (typeof notify === 'function') {
+        notify({ ok: true, message: 'Estado de tarea actualizado' });
+      } else {
+        console.log('Estado de tarea actualizado');
+      }
+    } catch (err) {
+      console.error('Error actualizando estado de tarea:', err);
+      if (typeof notify === 'function') {
+        notify({ ok: false, message: 'Error al actualizar el estado de la tarea' });
+      } else {
+        alert('Error al actualizar el estado de la tarea');
+      }
+      // Revertir visualmente
+      if (originColumn && draggedCard) {
+        originColumn.querySelector('.kanban-column-body').appendChild(draggedCard);
+      }
+    }
+  }
+
+  if (kanbanView) {
+    // Delegación de eventos para dragstart / dragend
+    kanbanView.addEventListener('dragstart', (e) => {
+      const card = e.target.closest('[data-task-id]');
+      if (!card) return;
+
+      draggedCard = card;
+      originColumn = card.closest('[data-column-status]');
+      card.classList.add('opacity-50');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    kanbanView.addEventListener('dragend', (e) => {
+      if (draggedCard) {
+        draggedCard.classList.remove('opacity-50');
+      }
+      draggedCard = null;
+      originColumn = null;
+    });
+
+    // Permitir soltar en columnas
+    const columns = kanbanView.querySelectorAll('[data-column-status]');
+    columns.forEach((col) => {
+      col.addEventListener('dragover', (e) => {
+        e.preventDefault(); // necesario para permitir drop
+        e.dataTransfer.dropEffect = 'move';
+      });
+
+      col.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!draggedCard) return;
+
+        const newStatus = col.getAttribute('data-column-status');
+        const taskId = draggedCard.getAttribute('data-task-id');
+
+        // Mover visualmente la tarjeta
+        const body = col.querySelector('.kanban-column-body') || col;
+        body.appendChild(draggedCard);
+        draggedCard.setAttribute('data-task-status', newStatus);
+
+        // Actualizar etiqueta de estado en español
+        const label = draggedCard.querySelector('[data-role="task-status-label"]');
+        if (label && STATUS_LABELS_ES[newStatus]) {
+          label.textContent = 'Estado: ' + STATUS_LABELS_ES[newStatus];
+        }
+
+        // Llamar al backend para actualizar en BD
+        updateTaskStatus(taskId, newStatus);
+      });
+    });
+  }
 });

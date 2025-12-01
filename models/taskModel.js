@@ -119,10 +119,61 @@ async function filterUserIdsByCompanyAndArea(userIds, companyId, areaId = null) 
   return rows.map((r) => r.id);
 }
 
+/**
+ * Obtiene las tareas asignadas a un usuario (por su userId).
+ * Opcionalmente filtra por companyId para mayor seguridad.
+ */
+async function getByAssignee(userId, companyId = null) {
+  const params = [userId];
+
+  let sql = `
+    SELECT
+      t.id,
+      t.company_id,
+      t.project_id,
+      t.title,
+      t.description,
+      t.status,
+      t.priority,
+      t.deadline,
+      t.creator_id,
+      ta.assigned_at
+    FROM task_assignments ta
+    INNER JOIN tasks t ON ta.task_id = t.id
+    WHERE ta.user_id = ?
+  `;
+
+  if (companyId) {
+    sql += ' AND t.company_id = ?';
+    params.push(companyId);
+  }
+
+  sql += ' ORDER BY ta.assigned_at DESC';
+
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+async function updateStatus(taskId, status, companyId, userId) {
+  // Opcional: verificar que la tarea le pertenece al usuario o está asignada a él.
+  const [result] = await pool.query(
+    `
+      UPDATE tasks
+      SET status = ?
+      WHERE id = ? AND company_id = ?
+    `,
+    [status, taskId, companyId]
+  );
+
+  return result.affectedRows; // 0 = no actualizó, 1 = ok
+}
+
 module.exports = {
   createTask,
   addAssignments,
   getActiveUserIdsByTeam,
   getActiveUserIdsByArea,
-  filterUserIdsByCompanyAndArea
+  filterUserIdsByCompanyAndArea,
+  getByAssignee,
+  updateStatus
 };

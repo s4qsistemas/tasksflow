@@ -35,7 +35,17 @@
 </nav>
 
 <main class="max-w-6xl mx-auto my-8">
-
+  <% 
+    function statusLabel(st) {
+      switch (st) {
+        case 'pending': return 'pendiente';
+        case 'in_progress': return 'en progreso';
+        case 'review': return 'en revisión';
+        case 'done': return 'completada';
+        default: return st;
+      }
+    }
+  %>
   <!-- VISTA DASHBOARD USUARIO -->
   <section
     id="userDashboardView"
@@ -61,31 +71,146 @@
     </div>
   </section>
 
-  <!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
-  <section
-    id="userKanbanView"
-    class="bg-white rounded-2xl p-6 shadow hidden">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
-        <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
-      </div>
+<!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
+<section
+  id="userKanbanView"
+  class="bg-white rounded-2xl p-6 shadow hidden">
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+    <!-- Izquierda: título + descripción -->
+    <div>
+      <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
+      <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="bg-[#F1F8E9] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">To Do</h3>
-        <p class="text-xs text-gray-500">Tareas pendientes por comenzar.</p>
-      </div>
-      <div class="bg-[#E3F2FD] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">In Progress</h3>
-        <p class="text-xs text-gray-500">Lo que estás trabajando ahora.</p>
-      </div>
-      <div class="bg-[#FFF3E0] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Done</h3>
-        <p class="text-xs text-gray-500">Tareas que ya completaste ✅</p>
-      </div>
+    <!-- Derecha: select alineado (tareas) -->
+    <div class="bg-[#F1F8E9] rounded-xl p-3">
+      <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
+        Filtrar por tarea
+      </label>
+      <select
+        id="filtroTarea"
+        class="block w-full rounded-lg border border-gray-300 rounded-lg text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+      >
+        <option value="">Todas las tareas</option>
+        <% if (typeof tasks !== 'undefined' && tasks && tasks.length) { %>
+          <% tasks.forEach(function(t) { %>
+            <option value="<%= t.id %>">
+              <%= t.title %> (<%= statusLabel(t.status) %>)
+            </option>
+          <% }); %>
+        <% } else { %>
+          <option value="" disabled>(Sin tareas asignadas)</option>
+        <% } %>
+      </select>
     </div>
-  </section>
+  </div>
+
+<!-- Columnas Kanban -->
+<div class="grid gap-4 md:grid-cols-4">
+  <!-- Pendientes -->
+  <div class="bg-[#F1F8E9] rounded-xl p-3" data-column-status="pending">
+    <h3 class="text-sm font-semibold text-gray-700 mb-1">Pendientes</h3>
+    <p class="text-xs text-gray-500">Tareas que aún no comienzas.</p>
+    <div class="mt-3 space-y-2 kanban-column-body">
+      <% if (tasks && tasks.length) { %>
+        <% tasks.forEach(function(t) { if (t.status === 'pending') { %>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+            <p
+              class="text-xs text-gray-500"
+              data-role="task-status-label">
+              Estado: <%= statusLabel(t.status) %>
+            </p>
+          </article>
+        <% } }); %>
+      <% } else { %>
+        <p class="text-xs text-gray-400 mt-2">No tienes tareas pendientes.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- En progreso -->
+  <div class="bg-[#E3F2FD] rounded-xl p-3" data-column-status="in_progress">
+    <h3 class="text-sm font-semibold text-gray-700 mb-1">En progreso</h3>
+    <p class="text-xs text-gray-500">Lo que estás trabajando ahora.</p>
+    <div class="mt-3 space-y-2 kanban-column-body">
+      <% if (tasks && tasks.length) { %>
+        <% tasks.forEach(function(t) { if (t.status === 'in_progress') { %>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+            <p
+              class="text-xs text-gray-500"
+              data-role="task-status-label">
+              Estado: <%= statusLabel(t.status) %>
+            </p>
+          </article>
+        <% } }); %>
+      <% } else { %>
+        <p class="text-xs text-gray-400 mt-2">No tienes tareas en progreso.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- En revisión -->
+  <div class="bg-[#F3E5F5] rounded-xl p-3" data-column-status="review">
+    <h3 class="text-sm font-semibold text-gray-700 mb-1">En revisión</h3>
+    <p class="text-xs text-gray-500">Esperando revisión del supervisor.</p>
+    <div class="mt-3 space-y-2 kanban-column-body">
+      <% if (tasks && tasks.length) { %>
+        <% tasks.forEach(function(t) { if (t.status === 'review') { %>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+            <p
+              class="text-xs text-gray-500"
+              data-role="task-status-label">
+              Estado: <%= statusLabel(t.status) %>
+            </p>
+          </article>
+        <% } }); %>
+      <% } else { %>
+        <p class="text-xs text-gray-400 mt-2">No tienes tareas en revisión.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Completadas -->
+  <div class="bg-[#FFF3E0] rounded-xl p-3" data-column-status="done">
+    <h3 class="text-sm font-semibold text-gray-700 mb-1">Completadas</h3>
+    <p class="text-xs text-gray-500">Tareas que ya terminaste ✅</p>
+    <div class="mt-3 space-y-2 kanban-column-body">
+      <% if (tasks && tasks.length) { %>
+        <% tasks.forEach(function(t) { if (t.status === 'done') { %>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+            <p
+              class="text-xs text-gray-500"
+              data-role="task-status-label">
+              Estado: <%= statusLabel(t.status) %>
+            </p>
+          </article>
+        <% } }); %>
+      <% } else { %>
+        <p class="text-xs text-gray-400 mt-2">No tienes tareas completadas.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+</section>
 
 </main>

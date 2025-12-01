@@ -14,6 +14,8 @@ const taskController = require('../controllers/taskController');
 
 const User = require('../models/userModel');
 
+const { panelUserView } = require('../controllers/userController');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -134,8 +136,11 @@ router.get(
 
 
 // Panel Usuario (user + root)
-router.get('/user', requireAuth, requireRole('user', 'root'), (req, res) =>
-  res.render('user', { title: 'Panel Usuario' })
+router.get(
+  '/user',
+  requireAuth,
+  requireRole('user', 'root'),
+  panelUserView
 );
 
 // ===============================
@@ -415,6 +420,13 @@ router.post(
   requireAuth,
   requireRole('admin', 'supervisor'),
   taskController.crearTarea
+);
+
+router.patch(
+  '/api/tasks/:id/status',
+  requireAuth,
+  requireRole('user', 'supervisor', 'admin', 'root'),
+  taskController.updateStatus
 );
 
 // ===============================
