@@ -52,6 +52,7 @@
 
     let totalInProgress = 0;
     let totalDone = 0;
+    let totalReview = 0;
 
     if (hasTasks) {
       tasks.forEach(function (t) {
@@ -60,6 +61,9 @@
         }
         if (t.status === 'done') {
           totalDone++;
+        }
+        if (t.status === 'review') {
+          totalReview++;
         }
       });
     }
@@ -73,7 +77,7 @@
       Tus tareas y actividad reciente.
     </p>
 
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-4">
       <!-- Total tareas asignadas -->
       <div class="bg-[#F1F8E9] rounded-xl p-4">
         <p class="text-xs text-gray-500 mb-1">Tareas asignadas</p>
@@ -87,6 +91,14 @@
         <p class="text-xs text-gray-500 mb-1">En progreso</p>
         <p class="text-2xl font-semibold text-[#1565C0]">
           <%= totalInProgress %>
+        </p>
+      </div>
+
+      <!-- En revisión -->
+      <div class="bg-[#F3E5F5] rounded-xl p-4">
+        <p class="text-xs text-gray-500 mb-1">En revisión</p>
+        <p class="text-2xl font-semibold text-[#6A1B9A]">
+          <%= totalReview %>
         </p>
       </div>
 

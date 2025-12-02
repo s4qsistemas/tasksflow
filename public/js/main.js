@@ -859,25 +859,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (resp && resp.ok) {
-          /*
-          if (commitMessage) {
-            commitMessage.value = '';
-          }
-          // Recargamos el historial
-          loadTaskCommits(taskId);
-        }
-          */
-         
           // limpiar textarea
           if (commitMessage) commitMessage.value = '';
 
-          // mover tarjeta si se actualizó estado
-          if (resp.task && resp.task.status) {
-            moverTarjetaKanban(resp.task.id, resp.task.status);
-          }
-
-          // recargar historial
-          loadTaskCommits(taskId);
+          // ✅ Recargar toda la página para ver los cambios reflejados
+          window.location.reload();
         }
       } catch (err) {
         console.error('Error al guardar commit:', err);
