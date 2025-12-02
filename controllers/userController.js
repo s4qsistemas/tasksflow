@@ -3,6 +3,8 @@ const User = require('../models/userModel');
 
 const taskModel = require('../models/taskModel');
 
+const projectModel = require('../models/projectModel');
+
 // Mapea 'admin', 'supervisor', 'user' -> ids de la tabla roles
 function mapRoleToId(role) {
   switch ((role || '').toLowerCase()) {
@@ -399,31 +401,36 @@ async function resetearPassword(req, res, next) {
 }
 
 async function panelUserView(req, res) {
-  const usuario = req.user; // viene de requireAuth
-
   try {
-    const userId = usuario.id;
+    const user = req.user;
+    const companyId = user.company_id;
+    const areaId = user.area_id;
 
-    // Usa el método que ya vienes ocupando para el Kanban
-    // (ajusta el nombre si en tu modelo es distinto)
-    const tasks = await taskModel.getByAssignee(userId);
+    // Tareas asignadas al user actual (por seguridad, filtramos company)
+    const tasks = await taskModel.getByAssignee(user.id, companyId); // :contentReference[oaicite:11]{index=11}
+
+    // Proyectos del área del user (misma lógica que supervisor)
+    let projects = [];
+    if (areaId) {
+      projects = await projectModel.getAllByCompanyAndArea(companyId, areaId); // :contentReference[oaicite:12]{index=12}
+    }
 
     res.render('user', {
       title: 'Panel Usuario',
-      user: usuario,
-      tasks
+      user,
+      tasks,
+      projects
     });
   } catch (err) {
-    console.error('Error cargando panel de usuario:', err);
-
-    // En caso de error, igual renderizamos pero con lista vacía
-    res.render('user', {
-      title: 'Panel Usuario',
-      user: req.user,
-      tasks: []
-    });
+    console.error('Error en panelUserView:', err);
+    res.status(500).send('Error al cargar panel usuario');
   }
 }
+
+module.exports = {
+  panelUserView,
+  // ... tus otros métodos (listarUsuariosJSON, etc.)
+};
 
 module.exports = {
   listarUsuariosJSON,

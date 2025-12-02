@@ -12,6 +12,22 @@
 
     <!-- Derecha: toggle Kanban + Logout -->
     <div class="flex items-center gap-4">
+      <button
+        id="btnSupervisorProyectos"
+        type="button"
+        onclick="toggleModal('modalNuevoProyecto', true)"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-[#7B1FA2] text-[#7B1FA2] text-sm bg-white hover:bg-[#F3E5F5]">
+        <span class="material-symbols-outlined text-sm">folder_special</span>
+        <span>Proyectos</span>
+      </button>
+      <button
+        id="btnSupervisorNuevaTarea"
+        type="button"
+        onclick="toggleModal('modalNuevaTarea', true)"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#2E7D32] text-white text-sm hover:bg-[#1B5E20]">
+        <span class="material-symbols-outlined text-sm">task_alt</span>
+        <span>Nueva tarea</span>
+      </button>
       <!-- Toggle vista Kanban -->
       <label
         id="kanbanToggleLabel"
@@ -411,5 +427,416 @@
       </div>
     </div>
   </div>
+
+    <!-- MODAL: Nueva tarea personal (vista usuario) -->
+  <div
+    id="modalNuevaTarea"
+    class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-xl mx-4">
+      <!-- Header -->
+      <div class="px-5 py-3 border-b flex justify-between items-center">
+        <h3 class="text-base font-semibold text-gray-800">
+          Nueva tarea personal
+        </h3>
+        <button
+          type="button"
+          class="text-gray-500 hover:text-gray-700"
+          onclick="toggleModal('modalNuevaTarea', false)">
+          ✕
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-5 py-4 space-y-3 text-sm">
+        <form id="formNuevaTarea" class="space-y-3">
+          <!-- PROYECTO (opcional) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Proyecto (opcional)
+            </label>
+            <select
+              id="taskProject"
+              name="project_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+              <option value="">Sin proyecto asociado…</option>
+              <% if (typeof projects !== 'undefined' && projects.length) { %>
+                <% projects.forEach(function(project) { %>
+                  <% if (project.status === 'active') { %>
+                    <option value="<%= project.id %>">
+                      <%= project.name %>
+                    </option>
+                  <% } %>
+                <% }) %>
+              <% } %>
+            </select>
+            <p class="mt-1 text-[11px] text-gray-400">
+              Puedes dejarla sin proyecto si es una tarea “suelta”.
+            </p>
+          </div>
+
+          <!-- TÍTULO + PRIORIDAD -->
+          <div class="grid gap-3 sm:grid-cols-3 items-start">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Título de la tarea
+              </label>
+              <input
+                type="text"
+                name="title"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                placeholder="Ej: Preparar informe semanal"
+                required>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Prioridad
+              </label>
+              <select
+                name="priority"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+                <option value="low">Baja</option>
+                <option value="normal" selected>Normal</option>
+                <option value="high">Alta</option>
+                <option value="critical">Crítica</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- DESCRIPCIÓN -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Descripción (opcional)
+            </label>
+            <textarea
+              name="description"
+              rows="2"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+              placeholder="Detalle breve de la tarea…"></textarea>
+          </div>
+
+          <!-- FECHA TOPE -->
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Plazo (fecha)
+              </label>
+              <input
+                type="date"
+                id="taskDeadlineDate"
+                name="deadline_date"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Hora (opcional)
+              </label>
+              <input
+                type="time"
+                id="taskDeadlineTime"
+                name="deadline_time"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+            </div>
+          </div>
+
+          <!-- ASIGNACIÓN: SIEMPRE AL USUARIO ACTUAL -->
+          <div class="border-t pt-3 mt-2">
+            <p class="text-xs text-gray-600 mb-1">
+              Asignada a
+              <span class="font-semibold"><%= user ? user.name : '' %> (yo)</span>
+            </p>
+            <!-- Campo oculto para reutilizar el mismo endpoint que supervisor -->
+            <input
+              type="hidden"
+              name="assignees[]"
+              value="<%= user ? user.id : '' %>">
+          </div>
+
+          <!-- Hidden: status inicial (pending) -->
+          <input type="hidden" name="status" value="pending">
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-5 py-3 border-t flex justify-end gap-2">
+        <button
+          type="button"
+          onclick="toggleModal('modalNuevaTarea', false)"
+          class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+          Cancelar
+        </button>
+        <button
+          id="btnGuardarNuevaTarea"
+          type="submit"
+          form="formNuevaTarea"
+          class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+          Guardar tarea
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- MODAL: Registrar / Editar proyecto personal (vista usuario) -->
+  <div
+    id="modalNuevoProyecto"
+    class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-md mx-4">
+      <!-- Header -->
+      <div class="px-5 py-3 border-b flex justify-between items-center">
+        <h3 class="text-base font-semibold text-gray-800">
+          Mis proyectos
+        </h3>
+        <button
+          type="button"
+          class="text-gray-500 hover:text-gray-700"
+          onclick="toggleModal('modalNuevoProyecto', false)">
+          ✕
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="px-5 pt-3 border-b flex gap-4 text-sm">
+        <button
+          id="tabProjectRegistrar"
+          type="button"
+          class="pb-2 border-b-2 border-[#7B1FA2] text-[#7B1FA2] font-medium"
+          onclick="switchProjectTab('registrar')">
+          Registrar proyecto
+        </button>
+        <button
+          id="tabProjectEditar"
+          type="button"
+          class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+          onclick="switchProjectTab('editar')">
+          Editar proyecto
+        </button>
+      </div>
+
+      <!-- Contenido -->
+      <div class="px-5 py-4 text-sm">
+        <!-- TAB: REGISTRAR -->
+        <div id="tabContentProjectRegistrar" class="space-y-3">
+          <form id="formNuevoProyecto" class="space-y-3">
+            <!-- Nombre del proyecto -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Nombre del proyecto
+              </label>
+              <input
+                type="text"
+                name="name"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                placeholder="Ej: Organización de informes mensuales"
+                required>
+            </div>
+
+            <!-- Estado + Fechas -->
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Estado
+                </label>
+                <select
+                  name="status"
+                  class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+                  <option value="active" selected>Activo</option>
+                  <option value="paused">Pausado</option>
+                  <option value="closed">Cerrado</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Inicio (opcional)
+                </label>
+                <input
+                  type="date"
+                  name="start_date"
+                  class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Fin (opcional)
+                </label>
+                <input
+                  type="date"
+                  name="end_date"
+                  class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Descripción / alcance
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                placeholder="Ej: Proyecto para ordenar y planificar mis tareas personales por tema."></textarea>
+            </div>
+
+            <!-- (Opcional) dueño del proyecto: usuario actual -->
+            <input
+              type="hidden"
+              name="owner_id"
+              value="<%= user ? user.id : '' %>">
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onclick="toggleModal('modalNuevoProyecto', false)"
+                class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-3 py-1.5 rounded-lg text-xs bg-[#7B1FA2] text-white hover:bg-[#6A1B9A]">
+                Guardar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB: EDITAR -->
+        <div id="tabContentProjectEditar" class="space-y-3 hidden">
+          <form id="formEditarProyecto" class="space-y-3">
+            <!-- Selector de proyecto -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Proyecto a editar
+              </label>
+              <select
+                id="selectProyectoEditar"
+                name="project_id"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                required>
+                <option value="" disabled selected>Seleccionar proyecto…</option>
+                <% if (typeof projects !== 'undefined' && projects.length) { %>
+                  <% projects.forEach(function(project) { %>
+                    <option value="<%= project.id %>">
+                      <%= project.name %> (<%= project.status %>)
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+
+            <!-- Nombre -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Nombre del proyecto
+              </label>
+              <input
+                type="text"
+                id="editarProyectoName"
+                name="name"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                required>
+            </div>
+
+            <!-- Estado + Fechas -->
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Estado
+                </label>
+                <select
+                  id="editarProyectoStatus"
+                  name="status"
+                  class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+                  <option value="active">Activo</option>
+                  <option value="paused">Pausado</option>
+                  <option value="closed">Cerrado</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Inicio
+                </label>
+                <input
+                  type="date"
+                  id="editarProyectoStartDate"
+                  name="start_date"
+                  class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  Fin
+                </label>
+                <input
+                  type="date"
+                  id="editarProyectoEndDate"
+                  name="end_date"
+                  class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Descripción / alcance
+              </label>
+              <textarea
+                id="editarProyectoDescription"
+                name="description"
+                rows="3"
+                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                placeholder="Descripción del proyecto…"></textarea>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onclick="toggleModal('modalNuevoProyecto', false)"
+                class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-3 py-1.5 rounded-lg text-xs bg-[#7B1FA2] text-white hover:bg-[#6A1B9A]">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script tabs proyecto (igual que supervisor) -->
+  <script>
+    function switchProjectTab(mode) {
+      const tabReg = document.getElementById('tabProjectRegistrar');
+      const tabEd = document.getElementById('tabProjectEditar');
+      const contentReg = document.getElementById('tabContentProjectRegistrar');
+      const contentEd = document.getElementById('tabContentProjectEditar');
+
+      if (!tabReg || !tabEd || !contentReg || !contentEd) return;
+
+      if (mode === 'editar') {
+        tabReg.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+        tabReg.classList.add('border-transparent', 'text-gray-500');
+
+        tabEd.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+        tabEd.classList.remove('border-transparent', 'text-gray-500');
+
+        contentReg.classList.add('hidden');
+        contentEd.classList.remove('hidden');
+      } else {
+        tabEd.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+        tabEd.classList.add('border-transparent', 'text-gray-500');
+
+        tabReg.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+        tabReg.classList.remove('border-transparent', 'text-gray-500');
+
+        contentEd.classList.add('hidden');
+        contentReg.classList.remove('hidden');
+      }
+    }
+
+    window.switchProjectTab = switchProjectTab;
+  </script>
 
 </main>

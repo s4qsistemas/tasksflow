@@ -389,28 +389,28 @@ router.post(
 router.get(
   '/api/projects',
   requireAuth,
-  requireRole('admin', 'supervisor', 'root'),
+  requireRole('admin', 'supervisor', 'root', 'user'),
   projectController.listarProjectsJSON
 );
 
 router.get(
   '/api/projects/:id',
   requireAuth,
-  requireRole('admin', 'supervisor', 'root'),
+  requireRole('admin', 'supervisor', 'root', 'user'),
   projectController.obtenerProjectJSON
 );
 
 router.post(
   '/api/projects',
   requireAuth,
-  requireRole('admin', 'supervisor', 'root'),
+  requireRole('admin', 'supervisor', 'root', 'user'),
   projectController.crearProject
 );
 
 router.post(
   '/api/projects/update',
   requireAuth,
-  requireRole('admin', 'supervisor', 'root'),
+  requireRole('admin', 'supervisor', 'root', 'user'),
   projectController.actualizarProject
 );
 
@@ -420,7 +420,7 @@ router.post(
 router.post(
   '/api/tasks',
   requireAuth,
-  requireRole('admin', 'supervisor'),
+  requireRole('admin', 'supervisor', 'user'),
   taskController.crearTarea
 );
 

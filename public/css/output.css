@@ -1520,6 +1520,14 @@ video {
   transition-duration: 150ms;
 }
 
+.\[oaicite\:11\] {
+  oaicite: 11;
+}
+
+.\[oaicite\:12\] {
+  oaicite: 12;
+}
+
 .hover\:bg-\[\#0277BD\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(2 119 189 / var(--tw-bg-opacity, 1));

@@ -39,7 +39,7 @@ async function listarProjectsJSON(req, res) {
 
     let projects = [];
 
-    if (role === 'supervisor') {
+    if (role === 'supervisor' || role === 'user') {
       if (!areaId) {
         return res.status(400).json({
           ok: false,
@@ -83,7 +83,7 @@ async function obtenerProjectJSON(req, res) {
 
     let project = null;
 
-    if (role === 'supervisor') {
+    if (role === 'supervisor' || role === 'user') {
       if (!areaId) {
         return res.status(400).json({
           ok: false,
@@ -133,7 +133,7 @@ async function crearProject(req, res) {
 
     let areaIdToUse = null;
 
-    if (role === 'supervisor') {
+    if (role === 'supervisor' || role === 'user') {
       // Supervisor: siempre su propia área
       if (!userAreaId) {
         return res.status(400).json({
@@ -173,6 +173,9 @@ async function crearProject(req, res) {
 async function actualizarProject(req, res) {
   try {
     const companyId = req.user.company_id;
+    const role = getUserRole(req);
+    const userAreaId = getUserAreaId(req);
+
     const {
       project_id,
       name,
@@ -191,14 +194,12 @@ async function actualizarProject(req, res) {
       });
     }
 
-    // 👇 armamos un objeto de actualización “inteligente”
     const updateData = {
       name: typeof name !== 'undefined' ? name.trim() : undefined,
       description,
       status
     };
 
-    // Solo actualizamos fechas si vienen con valor (no vacío)
     if (typeof start_date !== 'undefined' && start_date !== '') {
       updateData.start_date = start_date;
     }
@@ -207,12 +208,23 @@ async function actualizarProject(req, res) {
       updateData.end_date = end_date;
     }
 
-    const project = await projectModel.updateProject(id, companyId, updateData);
+    // 👇 scope adicional por área para supervisor / user
+    let areaScope = null;
+    if (role === 'supervisor' || role === 'user') {
+      areaScope = userAreaId || null;
+    }
+
+    const project = await projectModel.updateProject(
+      id,
+      companyId,
+      updateData,
+      areaScope            // <- nuevo parámetro
+    );
 
     if (!project) {
       return res.status(404).json({
         ok: false,
-        message: 'Proyecto no encontrado o no pertenece a tu empresa'
+        message: 'Proyecto no encontrado o no pertenece a tu empresa/área'
       });
     }
 
