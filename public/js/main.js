@@ -859,10 +859,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (resp && resp.ok) {
+          /*
           if (commitMessage) {
             commitMessage.value = '';
           }
           // Recargamos el historial
+          loadTaskCommits(taskId);
+        }
+          */
+         
+          // limpiar textarea
+          if (commitMessage) commitMessage.value = '';
+
+          // mover tarjeta si se actualizó estado
+          if (resp.task && resp.task.status) {
+            moverTarjetaKanban(resp.task.id, resp.task.status);
+          }
+
+          // recargar historial
           loadTaskCommits(taskId);
         }
       } catch (err) {
@@ -873,5 +887,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Mueve la tarjeta desde el modal de commits
+function moverTarjetaKanban(taskId, newStatus) {
+  const card = document.querySelector(`[data-task-id="${taskId}"]`);
+
+  if (!card) return;
+
+  const column = document.querySelector(
+    `[data-column-status="${newStatus}"] .kanban-column-body`
+  );
+
+  if (!column) return;
+
+  // mover tarjeta
+  column.appendChild(card);
+
+  // actualizar dataset
+  card.dataset.taskStatus = newStatus;
+
+  // actualizar etiqueta de estado
+  const label = card.querySelector('[data-role="task-status-label"]');
+  if (label) {
+    label.textContent = 'Estado: ' + (STATUS_LABELS_ES[newStatus] || newStatus);
+  }
+}
 
 });
