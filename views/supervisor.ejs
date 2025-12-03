@@ -319,17 +319,17 @@
       </p>
     </div>
 
-    <!-- Derecha: select alineado (tareas) -->
+    <!-- Derecha: select alineado (proyectos) -->
     <div class="bg-[#F1F8E9] rounded-xl p-3 md:min-w-[260px]">
       <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
-        Filtrar por tarea
+        Filtrar por proyecto
       </label>
       <select
         id="filtroTarea"
         class="block w-full rounded-lg border border-gray-300 text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]">
         <option value="">Todos los proyectos</option>
         <option value="__no_project__">Tareas sin proyecto</option>
-        <% 
+        <%
           const fp = (typeof userProjects !== 'undefined' && userProjects && userProjects.length)
             ? userProjects
             : [];
@@ -361,7 +361,8 @@
               class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
               draggable="true"
               data-task-id="<%= t.id %>"
-              data-task-status="pending">
+              data-task-status="pending"
+              data-project-id="<%= t.project_id || '' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -375,12 +376,6 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
-                <p
-                  class="text-xs text-gray-500"
-                  data-role="task-status-label">
-                  Proyecto:
-                  <%= t.project_name ? t.project_name : 'No tiene' %>
-                </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -402,7 +397,8 @@
               class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
               draggable="true"
               data-task-id="<%= t.id %>"
-              data-task-status="in_progress">
+              data-task-status="in_progress"
+              data-project-id="<%= t.project_id || '' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -416,12 +412,6 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
-                <p
-                  class="text-xs text-gray-500"
-                  data-role="task-status-label">
-                  Proyecto:
-                  <%= t.project_name ? t.project_name : 'No tiene' %>
-                </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -443,7 +433,8 @@
               class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
               draggable="true"
               data-task-id="<%= t.id %>"
-              data-task-status="review">
+              data-task-status="review"
+              data-project-id="<%= t.project_id || '' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -457,12 +448,6 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
-                <p
-                  class="text-xs text-gray-500"
-                  data-role="task-status-label">
-                  Proyecto:
-                  <%= t.project_name ? t.project_name : 'No tiene' %>
-                </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -484,7 +469,8 @@
               class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
               draggable="true"
               data-task-id="<%= t.id %>"
-              data-task-status="done">
+              data-task-status="done"
+              data-project-id="<%= t.project_id || '' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -498,12 +484,6 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
-                <p
-                  class="text-xs text-gray-500"
-                  data-role="task-status-label">
-                  Proyecto:
-                  <%= t.project_name ? t.project_name : 'No tiene' %>
-                </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -1393,27 +1373,51 @@
     window.switchProjectTab = switchProjectTab;
   </script>
 
-  <!-- Filtro de tareas en Kanban (supervisor), igual comportamiento que user -->
+  <!-- Filtro de tareas en el Kanban (user / supervisor) POR PROYECTO -->
   <script>
-    (function () {
-      const filtroTarea = document.getElementById('filtroTarea');
-      if (!filtroTarea) return;
+    
+    const filtroTarea = document.getElementById('filtroTarea');
 
-      filtroTarea.addEventListener('change', function () {
-        const selectedId = this.value;
-        // Todas las tarjetas del Kanban del supervisor
-        const cards = document.querySelectorAll('#supervisorKanbanView .task-card');
+    if (filtroTarea) {
+      filtroTarea.addEventListener('change', (e) => {
+        const selected = e.target.value;
+
+        // Detectar qué Kanban está presente en la vista actual
+        let rootSelector = '#userKanbanView';
+        if (document.getElementById('supervisorKanbanView')) {
+          rootSelector = '#supervisorKanbanView';
+        }
+
+        const cards = document.querySelectorAll(`${rootSelector} [data-task-id]`);
 
         cards.forEach((card) => {
-          const cardId = card.getAttribute('data-task-id');
-          if (!selectedId || selectedId === cardId) {
+          const cardProjectId = card.getAttribute('data-project-id') || '';
+
+          // 1) Sin filtro: mostrar todo
+          if (!selected) {
+            card.classList.remove('hidden');
+            return;
+          }
+
+          // 2) Solo tareas sin proyecto
+          if (selected === '__no_project__') {
+            if (!cardProjectId) {
+              card.classList.remove('hidden');
+            } else {
+              card.classList.add('hidden');
+            }
+            return;
+          }
+
+          // 3) Filtro por proyecto específico
+          if (cardProjectId === selected) {
             card.classList.remove('hidden');
           } else {
             card.classList.add('hidden');
           }
         });
       });
-    })();
+    }
   </script>
 
   <script>
@@ -1497,7 +1501,7 @@
 
             <div
               id="commitList"
-              class="flex-1 overflow-y-auto pr-2 space-y-3 text-sm border rounded-xl p-3 bg-gray-50"
+              class="flex-1 max-h-64 md:max-h-80 overflow-y-auto pr-2 space-y-3 text-sm border rounded-xl p-3 bg-gray-50"
             >
               <p class="text-xs text-gray-400">
                 Aún no hay commits registrados para esta tarea.

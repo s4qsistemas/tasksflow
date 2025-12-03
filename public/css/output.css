@@ -705,6 +705,10 @@ video {
   max-height: 90vh;
 }
 
+.max-h-64 {
+  max-height: 16rem;
+}
+
 .min-h-screen {
   min-height: 100vh;
 }
@@ -1722,6 +1726,10 @@ video {
 }
 
 @media (min-width: 768px) {
+  .md\:max-h-80 {
+    max-height: 20rem;
+  }
+
   .md\:min-w-\[260px\] {
     min-width: 260px;
   }

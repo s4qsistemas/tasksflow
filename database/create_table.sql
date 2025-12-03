@@ -159,20 +159,6 @@ CREATE TABLE task_assignments (
 );
 
 -- --------------------------------------------------------------------------
--- Reglas de recurrencia de tareas (nuevo)
--- --------------------------------------------------------------------------
-CREATE TABLE task_recurring_rules (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  task_id INT NOT NULL,  -- tarea plantilla
-  frequency ENUM('hourly','daily','weekly','monthly') NOT NULL,
-  interval_value INT NOT NULL DEFAULT 1,   -- cada 1 día / 3 horas / 2 semanas…
-  next_run DATETIME NOT NULL,              -- cuándo se debe generar la próxima tarea
-  end_date DATETIME NULL,                  -- opcional: hasta cuándo repetir
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
-);
-
--- --------------------------------------------------------------------------
 -- Trazabilidad tipo "commits" de tarea
 -- --------------------------------------------------------------------------
 CREATE TABLE task_commits (
@@ -185,22 +171,6 @@ CREATE TABLE task_commits (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
   FOREIGN KEY (author_id) REFERENCES users(id)
-);
-
--- --------------------------------------------------------------------------
--- Auditoría fina de cambios en tareas
--- --------------------------------------------------------------------------
-CREATE TABLE task_audit (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  task_id INT NOT NULL,
-  actor_id INT NOT NULL,
-  action_type VARCHAR(50) NOT NULL,
-  field_name VARCHAR(100) NULL,
-  old_value TEXT NULL,
-  new_value TEXT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-  FOREIGN KEY (actor_id) REFERENCES users(id)
 );
 
 -- ============================================================================

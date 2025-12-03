@@ -1,43 +1,61 @@
 // controllers/supervisorController.js
-const taskModel = require('../models/taskModel');
+const dashboardSupModel = require('../models/supervisorDashboardModel');
+const projectModel = require('../models/projectModel');
+const userModel = require('../models/userModel');
 
 async function panelSupervisorView(req, res) {
   try {
-    const supervisorId = req.user.id;
-    const areaId = req.user.area_id; // si lo tienes en el JWT / sesión
+    const user = req.user;
+    const companyId = user.company_id;
+    const supervisorId = user.id;
 
-    // 👇 Ejemplo: obtener tareas del área del supervisor
-    const tasks = await taskModel.getByAreaForSupervisor(areaId);
+    const [
+      supervisorMetrics,
+      teamLoad,
+      todayTasks,
+      teamDeadlineHorizon,
+      upcomingTasks,
+      kanbanTasks,
+      userProjects,
+      projects,
+      users
+    ] = await Promise.all([
+      dashboardSupModel.getSupervisorMetrics(companyId, supervisorId),
+      dashboardSupModel.getTeamLoad(companyId, supervisorId),
+      dashboardSupModel.getTodayTasks(companyId, supervisorId),
+      dashboardSupModel.getTeamDeadlineHorizon(companyId, supervisorId),
+      dashboardSupModel.getUpcomingTasks7d(companyId, supervisorId),
+      dashboardSupModel.getKanbanTasks(companyId, supervisorId),
+      dashboardSupModel.getUserProjects(companyId, supervisorId),
+      projectModel.getAllByCompanyAndArea(companyId, user.area_id),
+      userModel.getAllByCompany(companyId)
+    ]);
 
-    const statuses = ['pending', 'in_progress', 'review', 'done'];
-    const kanbanTasks = {
-      pending: [],
-      in_progress: [],
-      review: [],
-      done: [],
-    };
-
-    tasks.forEach((t) => {
-      const st = statuses.includes(t.status) ? t.status : 'pending';
-      kanbanTasks[st].push(t);
-    });
-
-    const statsByStatus = {};
-    statuses.forEach((st) => {
-      statsByStatus[st] = kanbanTasks[st].length;
-    });
+    const tacticalAlerts = dashboardSupModel.buildTacticalAlerts(
+      supervisorMetrics,
+      teamLoad
+    );
 
     res.render('supervisor', {
       title: 'Panel Supervisor',
+      user,
+      supervisorMetrics,
+      teamLoad,
+      todayTasks,
+      teamRecurring: teamDeadlineHorizon,
+      upcomingRecurring: upcomingTasks,
+      tacticalAlerts,
       kanbanTasks,
-      statsByStatus,
+      projects,
+      users,
+      userProjects
     });
   } catch (err) {
     console.error('Error en panelSupervisorView:', err);
-    res.status(500).send('Error en panel supervisor');
+    res.status(500).send('Error al cargar panel del supervisor');
   }
 }
 
 module.exports = {
-  panelSupervisorView,
+  panelSupervisorView
 };
