@@ -406,31 +406,47 @@ async function panelUserView(req, res) {
     const companyId = user.company_id;
     const areaId = user.area_id;
 
-    // Tareas asignadas al user actual (por seguridad, filtramos company)
-    const tasks = await taskModel.getByAssignee(user.id, companyId); // :contentReference[oaicite:11]{index=11}
+    // Tareas asignadas al user actual (ya traen project_name, etc.)
+    const tasks = await taskModel.getByAssignee(user.id, companyId);
 
-    // Proyectos del área del user (misma lógica que supervisor)
+    // Proyectos del área (se siguen usando para los modales "Nueva tarea", etc.)
     let projects = [];
     if (areaId) {
-      projects = await projectModel.getAllByCompanyAndArea(companyId, areaId); // :contentReference[oaicite:12]{index=12}
+      projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
+    }
+
+    // 🔹 Proyectos donde el user REALMENTE participa (al menos una tarea)
+    const userProjects = [];
+    const seen = new Set();
+
+    if (tasks && tasks.length) {
+      tasks.forEach((t) => {
+        if (t.project_id && t.project_name && !seen.has(t.project_id)) {
+          seen.add(t.project_id);
+
+          const p = projects.find((prj) => prj.id === t.project_id);
+
+          userProjects.push({
+            id: t.project_id,
+            name: t.project_name,
+            status: p ? p.status : 'active'
+          });
+        }
+      });
     }
 
     res.render('user', {
       title: 'Panel Usuario',
       user,
       tasks,
-      projects
+      projects,      // para modales
+      userProjects   // 👈 SOLO estos se usan en el filtro del Kanban
     });
   } catch (err) {
     console.error('Error en panelUserView:', err);
     res.status(500).send('Error al cargar panel usuario');
   }
 }
-
-module.exports = {
-  panelUserView,
-  // ... tus otros métodos (listarUsuariosJSON, etc.)
-};
 
 module.exports = {
   listarUsuariosJSON,

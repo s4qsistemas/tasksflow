@@ -118,9 +118,10 @@ async function obtenerProjectJSON(req, res) {
 // POST /api/projects  → crear proyecto
 async function crearProject(req, res) {
   try {
-    const companyId = req.user.company_id;
-    const role = getUserRole(req);
-    const userAreaId = getUserAreaId(req);
+    const companyId   = req.user.company_id;
+    const creatorId   = req.user.id;           // 👈 NUEVO
+    const role        = getUserRole(req);
+    const userAreaId  = getUserAreaId(req);
 
     const { name, description, status, start_date, end_date, area_id } = req.body;
 
@@ -134,26 +135,31 @@ async function crearProject(req, res) {
     let areaIdToUse = null;
 
     if (role === 'supervisor' || role === 'user') {
-      // Supervisor: siempre su propia área
+      // Supervisor / user: siempre su propia área
       if (!userAreaId) {
         return res.status(400).json({
           ok: false,
-          message: 'No se encontró área asociada al supervisor'
+          message: 'No se encontró área asociada al usuario actual'
         });
       }
       areaIdToUse = userAreaId;
     } else {
-      // Admin / Root: pueden elegir área (o dejar null si quieres permitir proyectos transversales)
+      // Admin / Root: pueden elegir área (o dejar null)
       areaIdToUse = area_id || null;
     }
 
-    const project = await projectModel.createProject(companyId, areaIdToUse, {
-      name: name.trim(),
-      description: description || null,
-      status: status || 'active',
-      start_date: start_date || null,
-      end_date: end_date || null
-    });
+    const project = await projectModel.createProject(
+      companyId,
+      areaIdToUse,
+      creatorId,                 // 👈 PASAMOS EL CREADOR
+      {
+        name: name.trim(),
+        description: description || null,
+        status: status || 'active',
+        start_date: start_date || null,
+        end_date: end_date || null
+      }
+    );
 
     return res.json({
       ok: true,

@@ -18,6 +18,8 @@ const { panelUserView } = require('../controllers/userController');
 
 const taskCommitController = require('../controllers/taskCommitController');
 
+const taskModel = require('../models/taskModel');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -109,13 +111,13 @@ router.get(
       const companyId = req.user.company_id;
       const areaId = req.user.area_id;
 
-      // 1) Proyectos del área (como ya tenías)
+      // 1) Proyectos del área
       let projects = [];
       if (areaId) {
         projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
       }
 
-      // 2) Usuarios de la misma empresa (usamos el modelo existente)
+      // 2) Usuarios de la misma empresa
       const allUsers = await User.getUsersByCompany(companyId);
 
       // 3) Filtramos solo los de la MISMA área del supervisor
@@ -123,11 +125,37 @@ router.get(
         (u) => u.area_id === areaId && u.status === 'active'
       );
 
+      // 4) TAREAS DEL ÁREA PARA EL KANBAN
+      //    (ajusta el nombre de la función según tu taskModel)
+      const tasks = await taskModel.getByCompanyAndArea(companyId, areaId);
+      const statuses = ['pending', 'in_progress', 'review', 'done'];
+
+      const kanbanTasks = {
+        pending: [],
+        in_progress: [],
+        review: [],
+        done: [],
+      };
+
+      tasks.forEach((t) => {
+        const st = statuses.includes(t.status) ? t.status : 'pending';
+        kanbanTasks[st].push(t);
+      });
+
+      const statsByStatus = {};
+      statuses.forEach((st) => {
+        statsByStatus[st] = kanbanTasks[st].length;
+      });
+
+      // 5) Render con TODO: proyectos, usuarios y datos del Kanban
       res.render('supervisor', {
         title: 'Panel Supervisor',
         user: req.user,
         projects,
-        users   // 👈 ahora la vista ya tiene los usuarios disponibles
+        users,
+        kanbanTasks,
+        statsByStatus,
+        tasks
       });
     } catch (err) {
       console.error('Error al renderizar /supervisor:', err);

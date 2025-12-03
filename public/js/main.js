@@ -96,7 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================ 
   // TOGGLE DASHBOARD / KANBAN (Admin, Supervisor, User)
   // ============================
-  function toggleKanbanView(checkbox) {
+  function toggleKanbanView(checkbox, opts) {
+    opts = opts || {};
+    const isInit = !!opts.init;   // 👈 para saber si es llamada de inicialización
+
     const candidates = [
       { dashId: 'adminDashboardView',      kanbanId: 'adminKanbanView',      role: 'admin' },
       { dashId: 'supervisorDashboardView', kanbanId: 'supervisorKanbanView', role: 'supervisor' },
@@ -147,7 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
     } else {
-      // --- MODO DASHBOARD ---
+      // --- VOLVER DESDE KANBAN A DASHBOARD ---
+      // Si NO es la llamada de inicialización => recargar la página
+      if (!isInit) {
+        window.location.reload();
+        return; // importante para que no siga ejecutando
+      }
+
+      // Solo en la inicialización (al cargar la vista) queremos ajustar clases sin recargar
       kanban.classList.add('hidden');
       dash.classList.remove('hidden');
 
@@ -174,7 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const kanbanToggle = document.getElementById('kanbanToggle');
   if (kanbanToggle) {
-    toggleKanbanView(kanbanToggle);
+    // 👇 Inicializa el estado visual SIN recargar
+    toggleKanbanView(kanbanToggle, { init: true });
   }
 
   // ================
@@ -517,28 +528,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-    // ===============================
-  // Filtro de tareas en el Kanban (vista usuario)
-  // ===============================
-  const filtroTarea = document.getElementById('filtroTarea');
+// ===============================
+// Filtro de tareas en el Kanban (user / supervisor) POR PROYECTO
+// ===============================
+const filtroTarea = document.getElementById('filtroTarea');
 
-  if (filtroTarea) {
-    filtroTarea.addEventListener('change', (e) => {
-      const selectedId = e.target.value;
-      const cards = document.querySelectorAll('#userKanbanView [data-task-id]');
+if (filtroTarea) {
+  filtroTarea.addEventListener('change', (e) => {
+    const selected = e.target.value;
 
-      cards.forEach((card) => {
-        const cardId = card.getAttribute('data-task-id');
+    // Detectar qué Kanban está presente en la vista actual
+    let rootSelector = '#userKanbanView';
+    if (document.getElementById('supervisorKanbanView')) {
+      rootSelector = '#supervisorKanbanView';
+    }
 
-        if (!selectedId || cardId === selectedId) {
+    const cards = document.querySelectorAll(`${rootSelector} [data-task-id]`);
+
+    cards.forEach((card) => {
+      const cardProjectId = card.getAttribute('data-project-id') || '';
+
+      // 1) Sin filtro: mostrar todo
+      if (!selected) {
+        card.classList.remove('hidden');
+        return;
+      }
+
+      // 2) Solo tareas sin proyecto
+      if (selected === '__no_project__') {
+        if (!cardProjectId) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
         }
-      });
-    });
-  }
+        return;
+      }
 
+      // 3) Filtro por proyecto específico
+      if (cardProjectId === selected) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  });
+}
+/*
     // ===============================
   // Kanban drag & drop (vista usuario)
   // ===============================
@@ -661,6 +696,143 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+*/
+
+  // ===============================
+  // Kanban drag & drop (user / supervisor)
+  // ===============================
+  const STATUS_LABELS_ES = {
+    pending: 'pendiente',
+    in_progress: 'en progreso',
+    review: 'en revisión',
+    done: 'completada'
+  };
+
+  let draggedCard = null;
+  let originColumn = null;
+
+  async function updateTaskStatus(taskId, newStatus) {
+    try {
+      const resp = await fetch(`/api/tasks/${taskId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      const data = await resp.json();
+      if (!data.ok) {
+        throw new Error(data.message || 'No se pudo actualizar el estado');
+      }
+
+      if (typeof notify === 'function') {
+        notify({ ok: true, message: 'Estado de tarea actualizado' });
+      } else {
+        console.log('Estado de tarea actualizado');
+      }
+    } catch (err) {
+      console.error('Error actualizando estado de tarea:', err);
+      if (typeof notify === 'function') {
+        notify({ ok: false, message: 'Error al actualizar el estado de la tarea' });
+      } else {
+        alert('Error al actualizar el estado de la tarea');
+      }
+      // Revertir visualmente
+      if (originColumn && draggedCard) {
+        const bodyOrigin =
+          originColumn.querySelector('.kanban-column-body') || originColumn;
+        bodyOrigin.appendChild(draggedCard);
+      }
+    }
+  }
+
+  function initKanbanDragAndDrop(kanbanRoot) {
+    if (!kanbanRoot) return;
+
+    // Delegación de eventos para dragstart / dragend
+    kanbanRoot.addEventListener('dragstart', (e) => {
+      const card = e.target.closest('[data-task-id]');
+      if (!card) return;
+
+      draggedCard = card;
+      originColumn = card.closest('[data-column-status]');
+      card.classList.add('opacity-50');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+      }
+    });
+
+    kanbanRoot.addEventListener('dragend', () => {
+      if (draggedCard) {
+        draggedCard.classList.remove('opacity-50');
+      }
+      draggedCard = null;
+      originColumn = null;
+    });
+
+    // Permitir soltar en columnas
+    const columns = kanbanRoot.querySelectorAll('[data-column-status]');
+    columns.forEach((col) => {
+      col.addEventListener('dragover', (e) => {
+        e.preventDefault(); // necesario para permitir drop
+        if (e.dataTransfer) {
+          e.dataTransfer.dropEffect = 'move';
+        }
+      });
+
+      col.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!draggedCard) return;
+
+        const newStatus = col.getAttribute('data-column-status');
+        const taskId = draggedCard.getAttribute('data-task-id');
+
+        // Mover visualmente la tarjeta
+        const body = col.querySelector('.kanban-column-body') || col;
+        body.appendChild(draggedCard);
+        draggedCard.setAttribute('data-task-status', newStatus);
+
+        // Actualizar etiqueta de estado en español
+        const label = draggedCard.querySelector('[data-role="task-status-label"]');
+        if (label && STATUS_LABELS_ES[newStatus]) {
+          label.textContent = 'Estado: ' + STATUS_LABELS_ES[newStatus];
+        }
+
+        // Llamar al backend para actualizar en BD
+        updateTaskStatus(taskId, newStatus);
+      });
+    });
+
+    // ===============================
+    // Doble click en tarjeta = abrir modal de commits
+    // ===============================
+    kanbanRoot.addEventListener('dblclick', (e) => {
+      const card = e.target.closest('[data-task-id]');
+      if (!card) return;
+
+      const taskId = card.getAttribute('data-task-id');
+      const currentStatus = card.getAttribute('data-task-status') || 'pending';
+      const titleEl = card.querySelector('h4');
+      const title = titleEl ? titleEl.textContent.trim() : `Tarea #${taskId}`;
+
+      if (typeof window.openTaskCommitModal === 'function') {
+        window.openTaskCommitModal({
+          id: taskId,
+          title,
+          status: currentStatus
+        });
+      }
+    });
+  }
+
+  const userKanbanView = document.getElementById('userKanbanView');
+  const supervisorKanbanView = document.getElementById('supervisorKanbanView');
+
+  // Inicializar Kanban en la vista que corresponda
+  initKanbanDragAndDrop(userKanbanView);
+  initKanbanDragAndDrop(supervisorKanbanView);
 
   // ===============================
   // Modal de commits de tarea (vista usuario)

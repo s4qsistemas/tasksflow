@@ -305,33 +305,217 @@
     </div>
   </section>
 
-  <!-- VISTA KANBAN SUPERVISOR (inicialmente oculta) -->
-  <section
-    id="supervisorKanbanView"
-    class="bg-white rounded-2xl p-6 shadow hidden">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-semibold text-[#2E7D32]">Tablero Kanban</h2>
-        <p class="text-sm text-gray-600">Visualización de tareas por estado.</p>
+<!-- VISTA KANBAN SUPERVISOR (inicialmente oculta) -->
+<section
+  id="supervisorKanbanView"
+  class="bg-white rounded-2xl p-6 shadow hidden">
+
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
+    <!-- Izquierda: título + descripción -->
+    <div>
+      <h2 class="text-xl font-semibold text-[#2E7D32]">Tablero Kanban (Equipo)</h2>
+      <p class="text-sm text-gray-600">
+        Tareas de tu equipo ordenadas por estado.
+      </p>
+    </div>
+
+    <!-- Derecha: select alineado (tareas) -->
+    <div class="bg-[#F1F8E9] rounded-xl p-3 md:min-w-[260px]">
+      <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
+        Filtrar por tarea
+      </label>
+      <select
+        id="filtroTarea"
+        class="block w-full rounded-lg border border-gray-300 text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]">
+        <option value="">Todos los proyectos</option>
+        <option value="__no_project__">Tareas sin proyecto</option>
+        <% 
+          const fp = (typeof userProjects !== 'undefined' && userProjects && userProjects.length)
+            ? userProjects
+            : [];
+        %>
+        <% if (fp.length) { %>
+          <% fp.forEach(function(p) { %>
+            <option value="<%= p.id %>">
+              <%= p.name %>
+            </option>
+          <% }); %>
+        <% } else { %>
+          <option value="" disabled>(Sin proyectos donde participas)</option>
+        <% } %>
+      </select>
+    </div>
+  </div>
+
+  <!-- Columnas Kanban (igual estilo que user) -->
+  <div class="grid gap-4 md:grid-cols-4">
+
+    <!-- Pendientes -->
+    <div class="bg-[#F1F8E9] rounded-xl p-3" data-column-status="pending">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">Pendientes</h3>
+      <p class="text-xs text-gray-500">Tareas que el equipo aún no comienza.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (kanbanTasks && kanbanTasks.pending && kanbanTasks.pending.length) { %>
+          <% kanbanTasks.pending.forEach(function (t) { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="pending">
+              <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
+
+              <% if (t.project_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Proyecto: <%= t.project_name %>
+                </p>
+              <% } %>
+
+              <% if (t.assignee_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Asignado a: <%= t.assignee_name %>
+                </p>
+              <% } %>
+                <p
+                  class="text-xs text-gray-500"
+                  data-role="task-status-label">
+                  Proyecto:
+                  <%= t.project_name ? t.project_name : 'No tiene' %>
+                </p>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">
+            No hay tareas pendientes del equipo.
+          </p>
+        <% } %>
       </div>
     </div>
 
-    <!-- Kanban simple placeholder -->
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="bg-[#F1F8E9] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">To Do</h3>
-        <p class="text-xs text-gray-500">Sin tareas asignadas todavía.</p>
-      </div>
-      <div class="bg-[#E3F2FD] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">In Progress</h3>
-        <p class="text-xs text-gray-500">Aquí verás tareas en ejecución.</p>
-      </div>
-      <div class="bg-[#FFF3E0] rounded-xl p-3">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Done</h3>
-        <p class="text-xs text-gray-500">Tareas completadas por tu equipo.</p>
+    <!-- En progreso -->
+    <div class="bg-[#E3F2FD] rounded-xl p-3" data-column-status="in_progress">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">En progreso</h3>
+      <p class="text-xs text-gray-500">Tareas que el equipo está ejecutando.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (kanbanTasks && kanbanTasks.in_progress && kanbanTasks.in_progress.length) { %>
+          <% kanbanTasks.in_progress.forEach(function (t) { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="in_progress">
+              <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
+
+              <% if (t.project_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Proyecto: <%= t.project_name %>
+                </p>
+              <% } %>
+
+              <% if (t.assignee_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Asignado a: <%= t.assignee_name %>
+                </p>
+              <% } %>
+                <p
+                  class="text-xs text-gray-500"
+                  data-role="task-status-label">
+                  Proyecto:
+                  <%= t.project_name ? t.project_name : 'No tiene' %>
+                </p>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">
+            No hay tareas en progreso del equipo.
+          </p>
+        <% } %>
       </div>
     </div>
-  </section>
+
+    <!-- En revisión -->
+    <div class="bg-[#FFFDE7] rounded-xl p-3" data-column-status="review">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">En revisión</h3>
+      <p class="text-xs text-gray-500">Tareas que están esperando revisión.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (kanbanTasks && kanbanTasks.review && kanbanTasks.review.length) { %>
+          <% kanbanTasks.review.forEach(function (t) { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="review">
+              <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
+
+              <% if (t.project_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Proyecto: <%= t.project_name %>
+                </p>
+              <% } %>
+
+              <% if (t.assignee_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Asignado a: <%= t.assignee_name %>
+                </p>
+              <% } %>
+                <p
+                  class="text-xs text-gray-500"
+                  data-role="task-status-label">
+                  Proyecto:
+                  <%= t.project_name ? t.project_name : 'No tiene' %>
+                </p>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">
+            No hay tareas en revisión del equipo.
+          </p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Completadas -->
+    <div class="bg-[#FFF3E0] rounded-xl p-3" data-column-status="done">
+      <h3 class="text-sm font-semibold text-gray-700 mb-1">Completadas</h3>
+      <p class="text-xs text-gray-500">Tareas completadas por tu equipo.</p>
+      <div class="mt-3 space-y-2 kanban-column-body">
+        <% if (kanbanTasks && kanbanTasks.done && kanbanTasks.done.length) { %>
+          <% kanbanTasks.done.forEach(function (t) { %>
+            <article
+              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move task-card"
+              draggable="true"
+              data-task-id="<%= t.id %>"
+              data-task-status="done">
+              <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
+
+              <% if (t.project_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Proyecto: <%= t.project_name %>
+                </p>
+              <% } %>
+
+              <% if (t.assignee_name) { %>
+                <p class="text-[11px] text-gray-500">
+                  Asignado a: <%= t.assignee_name %>
+                </p>
+              <% } %>
+                <p
+                  class="text-xs text-gray-500"
+                  data-role="task-status-label">
+                  Proyecto:
+                  <%= t.project_name ? t.project_name : 'No tiene' %>
+                </p>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <p class="text-xs text-gray-400 mt-2">
+            No hay tareas completadas del equipo.
+          </p>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</section>
 
   <!-- MODAL: Registrar / Editar usuario (Supervisor -> Trabajadores) -->
   <div
@@ -1186,14 +1370,14 @@
       if (!tabReg || !tabEd || !contentReg || !contentEd) return;
 
       if (mode === 'editar') {
-        tabReg.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
-        tabReg.classList.add('border-transparent', 'text-gray-500');
-
         tabEd.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
         tabEd.classList.remove('border-transparent', 'text-gray-500');
 
-        contentReg.classList.add('hidden');
+        tabReg.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+        tabReg.classList.add('border-transparent', 'text-gray-500');
+
         contentEd.classList.remove('hidden');
+        contentReg.classList.add('hidden');
       } else {
         tabEd.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
         tabEd.classList.add('border-transparent', 'text-gray-500');
@@ -1208,5 +1392,208 @@
 
     window.switchProjectTab = switchProjectTab;
   </script>
+
+  <!-- Filtro de tareas en Kanban (supervisor), igual comportamiento que user -->
+  <script>
+    (function () {
+      const filtroTarea = document.getElementById('filtroTarea');
+      if (!filtroTarea) return;
+
+      filtroTarea.addEventListener('change', function () {
+        const selectedId = this.value;
+        // Todas las tarjetas del Kanban del supervisor
+        const cards = document.querySelectorAll('#supervisorKanbanView .task-card');
+
+        cards.forEach((card) => {
+          const cardId = card.getAttribute('data-task-id');
+          if (!selectedId || selectedId === cardId) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    })();
+  </script>
+
+  <script>
+  (function () {
+    const filtroTarea = document.getElementById('filtroTarea');
+    if (!filtroTarea) return;
+
+    filtroTarea.addEventListener('change', function () {
+      const selectedId = this.value;
+      // Todas las tarjetas del Kanban del supervisor
+      const cards = document.querySelectorAll('#supervisorKanbanView .task-card');
+
+      cards.forEach((card) => {
+        const cardId = card.getAttribute('data-task-id');
+        if (!selectedId || selectedId === cardId) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  })();
+</script>
+
+  <!-- MODAL: Commits de tarea (vista supervisor) -->
+  <div
+    id="modalTaskCommit"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col"
+    >
+      <!-- Header -->
+      <header class="px-6 py-4 border-b flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-gray-400">
+            Commits de tarea
+          </p>
+          <h3
+            id="commitTaskTitle"
+            class="text-lg font-semibold text-gray-900 truncate"
+          >
+            <!-- Título de la tarea -->
+          </h3>
+          <div class="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <span class="inline-flex items-center gap-1">
+              <span class="material-icons text-base">assignment</span>
+              <span id="commitTaskIdLabel">Tarea #</span>
+            </span>
+            <span class="inline-flex items-center gap-1">
+              <span class="material-icons text-base">label</span>
+              <span
+                id="commitTaskStatusBadge"
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700"
+              >
+                <!-- Estado en texto -->
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+          onclick="toggleModal('modalTaskCommit', false)"
+        >
+          <span class="material-icons">close</span>
+        </button>
+      </header>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-hidden px-6 py-4">
+        <div class="grid gap-6 md:grid-cols-2 h-full">
+          <!-- Historial de commits -->
+          <section class="flex flex-col h-full">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-gray-800">
+                Historial de commits
+              </h4>
+            </div>
+
+            <div
+              id="commitList"
+              class="flex-1 overflow-y-auto pr-2 space-y-3 text-sm border rounded-xl p-3 bg-gray-50"
+            >
+              <p class="text-xs text-gray-400">
+                Aún no hay commits registrados para esta tarea.
+              </p>
+            </div>
+          </section>
+
+          <!-- Nuevo commit -->
+          <section class="flex flex-col h-full">
+            <h4 class="text-sm font-semibold text-gray-800 mb-2">
+              Nuevo commit
+            </h4>
+
+            <form
+              id="formNuevoCommit"
+              class="flex flex-col h-full gap-3"
+            >
+              <!-- IDs ocultos -->
+              <input type="hidden" id="commitTaskId" name="task_id">
+              <input type="hidden" id="commitFromStatus" name="from_status">
+
+              <!-- Mensaje -->
+              <div class="flex-1 flex flex-col">
+                <label
+                  for="commitMessage"
+                  class="text-xs font-medium text-gray-600 mb-1"
+                >
+                  Descripción del avance / bloqueo / instrucción
+                </label>
+                <textarea
+                  id="commitMessage"
+                  name="message"
+                  rows="6"
+                  class="flex-1 w-full rounded-lg border border-gray-300 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+                  placeholder="Ej: Avancé con la carga de datos de facturas, queda pendiente validar los totales con contabilidad..."
+                  required
+                ></textarea>
+                <p class="mt-1 text-[11px] text-gray-400">
+                  Piensa este commit como un mini &quot;git commit&quot;: qué hiciste,
+                  qué falta, qué bloqueos tienes, qué instrucciones seguiste, etc.
+                </p>
+              </div>
+
+              <!-- Cambio de estado (opcional) -->
+              <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div>
+                  <label
+                    for="commitToStatus"
+                    class="text-xs font-medium text-gray-600 mb-1"
+                  >
+                    Cambiar estado de la tarea (opcional)
+                  </label>
+                  <select
+                    id="commitToStatus"
+                    name="to_status"
+                    class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
+                  >
+                    <option value="">Mantener estado actual</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="in_progress">En progreso</option>
+                    <option value="review">En revisión</option>
+                    <option value="done">Completada</option>
+                  </select>
+                </div>
+
+                <div class="text-xs text-gray-500 md:text-[11px]">
+                  <p class="mb-1 font-medium">Recomendación:</p>
+                  <ul class="list-disc list-inside space-y-0.5">
+                    <li><strong>Pendiente → En progreso</strong> cuando comiences.</li>
+                    <li><strong>En progreso → En revisión</strong> cuando la des por lista.</li>
+                    <li><strong>En revisión → Completada</strong> normalmente lo hará tu supervisor.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Footer botones -->
+              <div class="flex justify-end gap-2 pt-2 border-t mt-1">
+                <button
+                  type="button"
+                  class="px-4 py-2 rounded-lg border text-sm text-gray-600 hover:bg-gray-100"
+                  onclick="toggleModal('modalTaskCommit', false)"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 rounded-lg text-sm bg-[#2E7D32] text-white hover:bg-[#1B5E20]"
+                >
+                  Guardar commit
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </main>

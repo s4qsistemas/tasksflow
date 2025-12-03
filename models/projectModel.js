@@ -22,13 +22,14 @@ async function getAllByCompany(companyId) {
   return rows;
 }
 
-// Obtener todos los proyectos de una área específica (para supervisor)
+// Obtener todos los proyectos de una área específica (para supervisor / user)
 async function getAllByCompanyAndArea(companyId, areaId) {
   const [rows] = await pool.query(
     `SELECT
        id,
        company_id,
        area_id,
+       creator_id,      -- 👈 IMPORTANTE
        name,
        description,
        status,
@@ -88,26 +89,42 @@ async function getByIdForArea(id, companyId, areaId) {
 }
 
 // Crear proyecto nuevo
-async function createProject(companyId, areaId, data) {
+async function createProject(companyId, areaId, creatorId, payload) {
   const {
     name,
-    description = null,
-    status = 'active',
-    start_date = null,
-    end_date = null
-  } = data;
+    description,
+    status,
+    start_date,
+    end_date
+  } = payload;
 
   const [result] = await pool.query(
-    `INSERT INTO projects (company_id, area_id, name, description, status, start_date, end_date)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [companyId, areaId || null, name, description, status, start_date || null, end_date || null]
+    `INSERT INTO projects
+       (company_id, area_id, creator_id, name, description, status, start_date, end_date)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      companyId,
+      areaId,
+      creatorId,
+      name,
+      description,
+      status,
+      start_date,
+      end_date
+    ]
   );
 
-  // Si hay areaId, devolvemos con filtro de área; si no, sin filtro.
-  if (areaId) {
-    return getByIdForArea(result.insertId, companyId, areaId);
-  }
-  return getById(result.insertId, companyId);
+  return {
+    id: result.insertId,
+    company_id: companyId,
+    area_id: areaId,
+    creator_id: creatorId,
+    name,
+    description,
+    status,
+    start_date,
+    end_date
+  };
 }
 
 // Actualizar proyecto existente

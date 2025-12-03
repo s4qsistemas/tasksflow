@@ -69,9 +69,13 @@
     let totalInProgress = 0;
     let totalDone = 0;
     let totalReview = 0;
+    let totalPending = 0;
 
     if (hasTasks) {
       tasks.forEach(function (t) {
+        if (t.status === 'pending') {
+          totalPending++;
+        }
         if (t.status === 'in_progress') {
           totalInProgress++;
         }
@@ -90,7 +94,17 @@
     class="bg-white rounded-2xl p-6 shadow">
     <h2 class="text-xl font-semibold text-[#2E7D32] mb-2">Panel Usuario</h2>
     <p class="text-sm text-gray-600 mb-4">
-      Tus tareas y actividad reciente.
+      <% if (!hasTasks || !totalTasks) { %>
+        Sin nuevas tareas asignadas. 👍
+      <% } else if (totalPending > 0) { %>
+        Tienes
+        <span class="font-semibold text-[#2E7D32]">
+          <%= totalPending %>
+        </span>
+        tarea<%= totalPending === 1 ? '' : 's' %> pendiente<%= totalPending === 1 ? '' : 's' %>.
+      <% } else { %>
+        No tienes tareas pendientes. Revisa tus tareas en progreso o en revisión. ✅
+      <% } %>
     </p>
 
     <div class="grid gap-4 sm:grid-cols-4">
@@ -128,38 +142,49 @@
     </div>
   </section>
 
-  <!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
-  <section
-    id="userKanbanView"
-    class="bg-white rounded-2xl p-6 shadow hidden">
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-3">
-      <!-- Izquierda: título + descripción -->
-      <div>
-        <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
-        <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
-      </div>
+<!-- VISTA KANBAN USUARIO (inicialmente oculta) -->
+<section
+  id="userKanbanView"
+  class="bg-white rounded-2xl p-6 shadow hidden">
 
-      <!-- Derecha: select alineado (tareas) -->
-      <div class="bg-[#F1F8E9] rounded-xl p-3">
-        <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
-          Filtrar por tarea
-        </label>
-        <select
-          id="filtroTarea"
-          class="block w-full rounded-lg border border-gray-300 rounded-lg text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]"
-        >
-          <option value="">Todas las tareas</option>
-          <% if (typeof tasks !== 'undefined' && tasks && tasks.length) { %>
-            <% tasks.forEach(function(t) { %>
-              <option value="<%= t.id %>">
-                <%= t.title %> (<%= statusLabel(t.status) %>)
-              </option>
-            <% }); %>
-          <% } else { %>
-            <option value="" disabled>(Sin tareas asignadas)</option>
-          <% } %>
-        </select>
-      </div>
+  <!-- ENCABEZADO: título + filtro, SIEMPRE en fila -->
+  <div class="flex flex-row flex-wrap items-center justify-between gap-3 mb-4">
+    <!-- Izquierda: título + descripción -->
+    <div>
+      <h2 class="text-xl font-semibold text-[#2E7D32]">Mi tablero Kanban</h2>
+      <p class="text-sm text-gray-600">Tus tareas ordenadas por estado.</p>
+    </div>
+
+    <!-- Derecha: select alineado (proyectos) -->
+    <div class="bg-[#F1F8E9] rounded-xl p-3">
+      <label for="filtroTarea" class="block text-xs font-medium text-gray-700 mb-1">
+        Filtrar por proyecto
+      </label>
+      <select
+        id="filtroTarea"
+        class="block w-full rounded-lg border border-gray-300 text-sm px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#2E7D32]/60 focus:border-[#2E7D32]">
+        
+        <!-- todas -->
+        <option value="">Todos los proyectos</option>
+
+        <!-- solo tareas sin proyecto -->
+        <option value="__no_project__">Tareas sin proyecto</option>
+
+        <% 
+          const fp = (typeof userProjects !== 'undefined' && userProjects && userProjects.length)
+            ? userProjects
+            : [];
+        %>
+        <% if (fp.length) { %>
+          <% fp.forEach(function(p) { %>
+            <option value="<%= p.id %>">
+              <%= p.name %>
+            </option>
+          <% }); %>
+        <% } else { %>
+          <option value="" disabled>(Sin proyectos donde participas)</option>
+        <% } %>
+      </select>
     </div>
 
   <!-- Columnas Kanban -->
@@ -171,18 +196,67 @@
       <div class="mt-3 space-y-2 kanban-column-body">
         <% if (tasks && tasks.length) { %>
           <% tasks.forEach(function(t) { if (t.status === 'pending') { %>
-            <article
-              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-              draggable="true"
-              data-task-id="<%= t.id %>"
-              data-task-status="<%= t.status %>">
-              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-              <p
-                class="text-xs text-gray-500"
-                data-role="task-status-label">
-                Estado: <%= statusLabel(t.status) %>
-              </p>
-            </article>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>"
+            data-project-id="<%= t.project_id || '' %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+
+            <!-- Proyecto -->
+            <p class="text-xs text-gray-500">
+              Proyecto:
+              <%= t.project_name ? t.project_name : 'No tiene' %>
+            </p>
+
+            <!-- Tipo / lead de la tarea -->
+            <p class="text-[11px] text-gray-400 mt-1">
+              <%
+                const scopeParts = [];
+                const currentUserId = user.id;
+
+                // Normalizamos is_personal (viene como 0/1 numérico)
+                const isPersonalFlag =
+                  t.is_personal === 1 ||
+                  t.is_personal === true ||
+                  t.is_personal === '1';
+
+                const isCreatorUser =
+                  t.creator_id === currentUserId ||
+                  String(t.creator_id) === String(currentUserId);
+
+                const isPersonal = isPersonalFlag || isCreatorUser;
+
+                if (isPersonal) {
+                  scopeParts.push('Tarea personal');
+                } else {
+                  if (t.visibility_scope === 'team') {
+                    scopeParts.push('Tarea de equipo');
+                  } else if (t.visibility_scope === 'area') {
+                    scopeParts.push('Tarea de área');
+                  } else if (t.visibility_scope === 'company') {
+                    scopeParts.push('Tarea a nivel compañía');
+                  } else {
+                    scopeParts.push('Tarea privada');
+                  }
+                }
+
+                if (t.creator_name) {
+                  let creadorLabel;
+                  if (isCreatorUser) {
+                    creadorLabel = 'creada por ti';
+                  } else if (t.creator_role_name) {
+                    creadorLabel = 'asignada por ' + t.creator_name + ' (' + t.creator_role_name + ')';
+                  } else {
+                    creadorLabel = 'asignada por ' + t.creator_name;
+                  }
+                  scopeParts.push(creadorLabel);
+                }
+              %>
+              <%= scopeParts.join(' • ') %>
+            </p>
+          </article>
           <% } }); %>
         <% } else { %>
           <p class="text-xs text-gray-400 mt-2">No tienes tareas pendientes.</p>
@@ -197,18 +271,67 @@
       <div class="mt-3 space-y-2 kanban-column-body">
         <% if (tasks && tasks.length) { %>
           <% tasks.forEach(function(t) { if (t.status === 'in_progress') { %>
-            <article
-              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-              draggable="true"
-              data-task-id="<%= t.id %>"
-              data-task-status="<%= t.status %>">
-              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-              <p
-                class="text-xs text-gray-500"
-                data-role="task-status-label">
-                Estado: <%= statusLabel(t.status) %>
-              </p>
-            </article>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>"
+            data-project-id="<%= t.project_id || '' %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+
+            <!-- Proyecto -->
+            <p class="text-xs text-gray-500">
+              Proyecto:
+              <%= t.project_name ? t.project_name : 'No tiene' %>
+            </p>
+
+            <!-- Tipo / lead de la tarea -->
+            <p class="text-[11px] text-gray-400 mt-1">
+              <%
+                const scopeParts = [];
+                const currentUserId = user.id;
+
+                // Normalizamos is_personal (viene como 0/1 numérico)
+                const isPersonalFlag =
+                  t.is_personal === 1 ||
+                  t.is_personal === true ||
+                  t.is_personal === '1';
+
+                const isCreatorUser =
+                  t.creator_id === currentUserId ||
+                  String(t.creator_id) === String(currentUserId);
+
+                const isPersonal = isPersonalFlag || isCreatorUser;
+
+                if (isPersonal) {
+                  scopeParts.push('Tarea personal');
+                } else {
+                  if (t.visibility_scope === 'team') {
+                    scopeParts.push('Tarea de equipo');
+                  } else if (t.visibility_scope === 'area') {
+                    scopeParts.push('Tarea de área');
+                  } else if (t.visibility_scope === 'company') {
+                    scopeParts.push('Tarea a nivel compañía');
+                  } else {
+                    scopeParts.push('Tarea privada');
+                  }
+                }
+
+                if (t.creator_name) {
+                  let creadorLabel;
+                  if (isCreatorUser) {
+                    creadorLabel = 'creada por ti';
+                  } else if (t.creator_role_name) {
+                    creadorLabel = 'asignada por ' + t.creator_name + ' (' + t.creator_role_name + ')';
+                  } else {
+                    creadorLabel = 'asignada por ' + t.creator_name;
+                  }
+                  scopeParts.push(creadorLabel);
+                }
+              %>
+              <%= scopeParts.join(' • ') %>
+            </p>
+          </article>
           <% } }); %>
         <% } else { %>
           <p class="text-xs text-gray-400 mt-2">No tienes tareas en progreso.</p>
@@ -223,18 +346,67 @@
       <div class="mt-3 space-y-2 kanban-column-body">
         <% if (tasks && tasks.length) { %>
           <% tasks.forEach(function(t) { if (t.status === 'review') { %>
-            <article
-              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-              draggable="true"
-              data-task-id="<%= t.id %>"
-              data-task-status="<%= t.status %>">
-              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-              <p
-                class="text-xs text-gray-500"
-                data-role="task-status-label">
-                Estado: <%= statusLabel(t.status) %>
-              </p>
-            </article>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>"
+            data-project-id="<%= t.project_id || '' %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+
+            <!-- Proyecto -->
+            <p class="text-xs text-gray-500">
+              Proyecto:
+              <%= t.project_name ? t.project_name : 'No tiene' %>
+            </p>
+
+            <!-- Tipo / lead de la tarea -->
+            <p class="text-[11px] text-gray-400 mt-1">
+              <%
+                const scopeParts = [];
+                const currentUserId = user.id;
+
+                // Normalizamos is_personal (viene como 0/1 numérico)
+                const isPersonalFlag =
+                  t.is_personal === 1 ||
+                  t.is_personal === true ||
+                  t.is_personal === '1';
+
+                const isCreatorUser =
+                  t.creator_id === currentUserId ||
+                  String(t.creator_id) === String(currentUserId);
+
+                const isPersonal = isPersonalFlag || isCreatorUser;
+
+                if (isPersonal) {
+                  scopeParts.push('Tarea personal');
+                } else {
+                  if (t.visibility_scope === 'team') {
+                    scopeParts.push('Tarea de equipo');
+                  } else if (t.visibility_scope === 'area') {
+                    scopeParts.push('Tarea de área');
+                  } else if (t.visibility_scope === 'company') {
+                    scopeParts.push('Tarea a nivel compañía');
+                  } else {
+                    scopeParts.push('Tarea privada');
+                  }
+                }
+
+                if (t.creator_name) {
+                  let creadorLabel;
+                  if (isCreatorUser) {
+                    creadorLabel = 'creada por ti';
+                  } else if (t.creator_role_name) {
+                    creadorLabel = 'asignada por ' + t.creator_name + ' (' + t.creator_role_name + ')';
+                  } else {
+                    creadorLabel = 'asignada por ' + t.creator_name;
+                  }
+                  scopeParts.push(creadorLabel);
+                }
+              %>
+              <%= scopeParts.join(' • ') %>
+            </p>
+          </article>
           <% } }); %>
         <% } else { %>
           <p class="text-xs text-gray-400 mt-2">No tienes tareas en revisión.</p>
@@ -249,18 +421,67 @@
       <div class="mt-3 space-y-2 kanban-column-body">
         <% if (tasks && tasks.length) { %>
           <% tasks.forEach(function(t) { if (t.status === 'done') { %>
-            <article
-              class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
-              draggable="true"
-              data-task-id="<%= t.id %>"
-              data-task-status="<%= t.status %>">
-              <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
-              <p
-                class="text-xs text-gray-500"
-                data-role="task-status-label">
-                Estado: <%= statusLabel(t.status) %>
-              </p>
-            </article>
+          <article
+            class="p-3 bg-white rounded-lg shadow-sm border border-gray-200 text-sm cursor-move"
+            draggable="true"
+            data-task-id="<%= t.id %>"
+            data-task-status="<%= t.status %>"
+            data-project-id="<%= t.project_id || '' %>">
+            <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
+
+            <!-- Proyecto -->
+            <p class="text-xs text-gray-500">
+              Proyecto:
+              <%= t.project_name ? t.project_name : 'No tiene' %>
+            </p>
+
+            <!-- Tipo / lead de la tarea -->
+            <p class="text-[11px] text-gray-400 mt-1">
+              <%
+                const scopeParts = [];
+                const currentUserId = user.id;
+
+                // Normalizamos is_personal (viene como 0/1 numérico)
+                const isPersonalFlag =
+                  t.is_personal === 1 ||
+                  t.is_personal === true ||
+                  t.is_personal === '1';
+
+                const isCreatorUser =
+                  t.creator_id === currentUserId ||
+                  String(t.creator_id) === String(currentUserId);
+
+                const isPersonal = isPersonalFlag || isCreatorUser;
+
+                if (isPersonal) {
+                  scopeParts.push('Tarea personal');
+                } else {
+                  if (t.visibility_scope === 'team') {
+                    scopeParts.push('Tarea de equipo');
+                  } else if (t.visibility_scope === 'area') {
+                    scopeParts.push('Tarea de área');
+                  } else if (t.visibility_scope === 'company') {
+                    scopeParts.push('Tarea a nivel compañía');
+                  } else {
+                    scopeParts.push('Tarea privada');
+                  }
+                }
+
+                if (t.creator_name) {
+                  let creadorLabel;
+                  if (isCreatorUser) {
+                    creadorLabel = 'creada por ti';
+                  } else if (t.creator_role_name) {
+                    creadorLabel = 'asignada por ' + t.creator_name + ' (' + t.creator_role_name + ')';
+                  } else {
+                    creadorLabel = 'asignada por ' + t.creator_name;
+                  }
+                  scopeParts.push(creadorLabel);
+                }
+              %>
+              <%= scopeParts.join(' • ') %>
+            </p>
+          </article>
           <% } }); %>
         <% } else { %>
           <p class="text-xs text-gray-400 mt-2">No tienes tareas completadas.</p>
@@ -713,11 +934,15 @@
                 required>
                 <option value="" disabled selected>Seleccionar proyecto…</option>
                 <% if (typeof projects !== 'undefined' && projects.length) { %>
-                  <% projects.forEach(function(project) { %>
-                    <option value="<%= project.id %>">
-                      <%= project.name %> (<%= project.status %>)
-                    </option>
-                  <% }) %>
+                  <% projects.forEach(function(project) { 
+                      if (project.creator_id === user.id) { %>
+                        <option value="<%= project.id %>">
+                          <%= project.name %> (<%= project.status %>)
+                        </option>
+                  <%   }
+                    }) %>
+                <% } else { %>
+                  <option value="" disabled>(Sin proyectos creados por ti)</option>
                 <% } %>
               </select>
             </div>

@@ -123,34 +123,31 @@ async function filterUserIdsByCompanyAndArea(userIds, companyId, areaId = null) 
  * Obtiene las tareas asignadas a un usuario (por su userId).
  * Opcionalmente filtra por companyId para mayor seguridad.
  */
-async function getByAssignee(userId, companyId = null) {
-  const params = [userId];
+// Tareas asignadas a un usuario (por company), con info de proyecto / team / área / supervisor
+async function getByAssignee(userId, companyId) {
+  const [rows] = await pool.query(
+    `SELECT
+       t.*,
+       ta.user_id AS assignee_id,
+       p.name         AS project_name,
+       u_creator.name AS creator_name,
+       r.name         AS creator_role_name
+     FROM task_assignments ta
+     INNER JOIN tasks t
+       ON t.id = ta.task_id
+     LEFT JOIN projects p
+       ON p.id = t.project_id
+     LEFT JOIN users u_creator
+       ON u_creator.id = t.creator_id
+     LEFT JOIN roles r
+       ON r.id = u_creator.role_id
+     WHERE
+       ta.user_id   = ?
+       AND t.company_id = ?
+     ORDER BY t.created_at DESC`,
+    [userId, companyId]
+  );
 
-  let sql = `
-    SELECT
-      t.id,
-      t.company_id,
-      t.project_id,
-      t.title,
-      t.description,
-      t.status,
-      t.priority,
-      t.deadline,
-      t.creator_id,
-      ta.assigned_at
-    FROM task_assignments ta
-    INNER JOIN tasks t ON ta.task_id = t.id
-    WHERE ta.user_id = ?
-  `;
-
-  if (companyId) {
-    sql += ' AND t.company_id = ?';
-    params.push(companyId);
-  }
-
-  sql += ' ORDER BY ta.assigned_at DESC';
-
-  const [rows] = await pool.query(sql, params);
   return rows;
 }
 
@@ -168,6 +165,33 @@ async function updateStatus(taskId, status, companyId, userId) {
   return result.affectedRows; // 0 = no actualizó, 1 = ok
 }
 
+async function getByCompanyAndArea(companyId, areaId) {
+  const [rows] = await pool.query(
+    `
+    SELECT 
+      t.id,
+      t.title,
+      t.status,
+      t.project_id,
+      p.name AS project_name,
+      u.name AS assignee_name
+    FROM tasks t
+    LEFT JOIN projects p       ON p.id = t.project_id
+    INNER JOIN task_assignments ta ON ta.task_id = t.id
+    INNER JOIN users u             ON u.id = ta.user_id
+    WHERE 
+      t.company_id = ?
+      AND u.area_id = ?
+      AND u.status = 'active'
+      AND t.status IN ('pending', 'in_progress', 'review', 'done')
+    ORDER BY t.created_at DESC
+    `,
+    [companyId, areaId]
+  );
+
+  return rows;
+}
+
 module.exports = {
   createTask,
   addAssignments,
@@ -175,5 +199,6 @@ module.exports = {
   getActiveUserIdsByArea,
   filterUserIdsByCompanyAndArea,
   getByAssignee,
-  updateStatus
+  updateStatus,
+  getByCompanyAndArea
 };

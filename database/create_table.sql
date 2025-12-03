@@ -112,6 +112,7 @@ CREATE TABLE projects (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_id INT NOT NULL,
   area_id INT NULL,
+  creator_id INT NOT NULL,
   name VARCHAR(150) NOT NULL,
   description TEXT,
   status ENUM('active','paused','closed') NOT NULL DEFAULT 'active',
@@ -119,7 +120,8 @@ CREATE TABLE projects (
   end_date DATE NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id),
-  FOREIGN KEY (area_id) REFERENCES areas(id)
+  FOREIGN KEY (area_id) REFERENCES areas(id),
+  FOREIGN KEY (creator_id) REFERENCES users(id)
 );
 
 -- --------------------------------------------------------------------------
