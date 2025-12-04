@@ -149,6 +149,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnProyectos)    btnProyectos.classList.remove('hidden'); // 👈 mostrar en Kanban
       }
 
+      // 🔹 Lógica especial SOLO para ADMIN
+      if (currentRole === 'admin') {
+        const btnArea         = document.getElementById('btnAdminNuevaArea');
+        const btnUsuario      = document.getElementById('btnAdminNuevoUsuario');
+        const btnNuevoGrupo   = document.getElementById('btnAdminNuevoGrupo');
+        const btnEditarGrupo  = document.getElementById('btnAdminEditarGrupo');
+        const btnProyectos    = document.getElementById('btnAdminProyectos');
+        const btnNuevaTarea   = document.getElementById('btnAdminNuevaTarea');
+
+        // Ocultar áreas/usuarios/teams (romper también el sm:inline-flex)
+        if (btnArea) {
+          btnArea.classList.add('hidden');
+          btnArea.classList.remove('sm:inline-flex');
+        }
+        if (btnUsuario) {
+          btnUsuario.classList.add('hidden');
+          btnUsuario.classList.remove('sm:inline-flex');
+        }
+        if (btnNuevoGrupo) {
+          btnNuevoGrupo.classList.add('hidden');
+          btnNuevoGrupo.classList.remove('sm:inline-flex');
+        }
+        if (btnEditarGrupo) {
+          btnEditarGrupo.classList.add('hidden');
+          btnEditarGrupo.classList.remove('sm:inline-flex');
+        }
+
+        // Mostrar proyectos y tareas
+        if (btnProyectos)   btnProyectos.classList.remove('hidden');
+        if (btnNuevaTarea)  btnNuevaTarea.classList.remove('hidden');
+      }
+
     } else {
       // --- VOLVER DESDE KANBAN A DASHBOARD ---
       // Si NO es la llamada de inicialización => recargar la página
@@ -176,6 +208,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnNuevoUsuario) btnNuevoUsuario.classList.remove('hidden');
         if (btnNuevaTarea)   btnNuevaTarea.classList.add('hidden');
         if (btnProyectos)    btnProyectos.classList.add('hidden'); // 👈 ocultar en Dashboard
+      }
+
+      // 🔹 Lógica especial SOLO para ADMIN (solo en inicialización)
+      if (currentRole === 'admin') {
+        const btnArea         = document.getElementById('btnAdminNuevaArea');
+        const btnUsuario      = document.getElementById('btnAdminNuevoUsuario');
+        const btnNuevoGrupo   = document.getElementById('btnAdminNuevoGrupo');
+        const btnEditarGrupo  = document.getElementById('btnAdminEditarGrupo');
+        const btnProyectos    = document.getElementById('btnAdminProyectos');
+        const btnNuevaTarea   = document.getElementById('btnAdminNuevaTarea');
+
+        // En dashboard: mostrar áreas/usuarios/teams (de nuevo con sm:inline-flex)
+        if (btnArea) {
+          btnArea.classList.remove('hidden');
+          btnArea.classList.add('sm:inline-flex');
+        }
+        if (btnUsuario) {
+          btnUsuario.classList.remove('hidden');
+          btnUsuario.classList.add('sm:inline-flex');
+        }
+        if (btnNuevoGrupo) {
+          btnNuevoGrupo.classList.remove('hidden');
+          btnNuevoGrupo.classList.add('sm:inline-flex');
+        }
+        if (btnEditarGrupo) {
+          btnEditarGrupo.classList.remove('hidden');
+          btnEditarGrupo.classList.add('sm:inline-flex');
+        }
+
+        // Ocultar proyectos y tareas en dashboard
+        if (btnProyectos)   btnProyectos.classList.add('hidden');
+        if (btnNuevaTarea)  btnNuevaTarea.classList.add('hidden');
       }
     }
   }

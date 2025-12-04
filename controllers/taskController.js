@@ -1,69 +1,61 @@
 // controllers/taskController.js
+// Lógica de control para tareas (creación y cambio de estado)
 
 const taskModel = require('../models/taskModel');
 
-/**
- * Normaliza un campo que puede venir como string o como array
- * (por ej. name="user_ids[]" o name="assignees[]").
- */
-function normalizeIdArray(raw) {
-  if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return raw
-      .map((v) => Number(v))
-      .filter((n) => Number.isInteger(n) && n > 0);
+// Normaliza los IDs de asignatarios desde el body
+function extractAssigneeIds(body) {
+  // Puede venir como assignees, assignees[] o similar
+  let ids =
+    body['assignees[]'] ||
+    body.assignees ||
+    body.assignee_ids ||
+    body.assignee;
+
+  if (!ids) return [];
+
+  if (!Array.isArray(ids)) {
+    ids = [ids];
   }
-  // string simple
-  const n = Number(raw);
-  return Number.isInteger(n) && n > 0 ? [n] : [];
+
+  return ids
+    .map((v) => Number(v))
+    .filter((n) => !Number.isNaN(n));
 }
 
-/**
- * Construye un DATETIME MySQL a partir de fecha + hora del formulario.
- * Si solo hay fecha, se usa 00:00:00.
- */
-function buildDeadline(deadlineDate, deadlineTime) {
-  if (!deadlineDate) return null;
+// Combina fecha + hora en un solo campo tipo DATETIME (para tasks.deadline)
+function buildDeadline(deadline_date, deadline_time) {
+  if (!deadline_date) return null;
 
-  const date = deadlineDate.trim();
-  const time = (deadlineTime || '').trim() || '00:00';
+  if (!deadline_time) {
+    // Si no hay hora, la dejamos al final del día
+    return `${deadline_date} 23:59:00`;
+  }
 
-  // Formato esperado: YYYY-MM-DD y HH:MM
-  return `${date} ${time}:00`;
+  // Asumimos formato HH:MM
+  return `${deadline_date} ${deadline_time}:00`;
 }
 
-/**
- * POST /api/tasks
- * Crea una tarea y la asigna según el rol (admin o supervisor).
- */
+// ===============================
+// POST /api/tasks  → crear tarea
+// ===============================
 async function crearTarea(req, res) {
   try {
-    const user = req.user;
-
-    if (!user) {
-      return res.status(401).json({
-        ok: false,
-        message: 'No autorizado'
-      });
-    }
-
-    // Heurística sencilla para rol (ajusta según tu req.user)
-    const roleName =
-      user.role_name || user.role || user.roleName || '';
-    const isAdmin = roleName === 'admin';
-    const isSupervisor = roleName === 'supervisor';
+    const companyId = req.user.company_id;
+    const role = req.user.role;
+    const areaId = req.user.area_id || null;
+    const creatorId = req.user.id;
 
     const {
       project_id,
       title,
       description,
-      status,
       priority,
+      status,
       deadline_date,
-      deadline_time,
-      assignment_type, // para admin
-      team_id,
-      area_id
+      deadline_time
+      // NOTA: los asignatarios vienen por extractAssigneeIds(body)
+      //       y NO hace falta declararlos aquí
     } = req.body;
 
     if (!title || !title.trim()) {
@@ -73,134 +65,109 @@ async function crearTarea(req, res) {
       });
     }
 
+    // Obtener IDs de usuarios seleccionados en el modal
+    let assigneeIds = extractAssigneeIds(req.body);
+
+    if (!assigneeIds.length) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Debes asignar al menos un usuario'
+      });
+    }
+
+    // Filtrar por company y, si corresponde, por área
+    // - admin/root: puede asignar a cualquier activo de la company
+    // - supervisor/user: restringimos a su misma área
+    const areaFilter =
+      role === 'supervisor' || role === 'user' ? areaId : null;
+
+    assigneeIds = await taskModel.filterUserIdsByCompanyAndArea(
+      assigneeIds,
+      companyId,
+      areaFilter
+    );
+
+    if (!assigneeIds.length) {
+      return res.status(400).json({
+        ok: false,
+        message:
+          'Ningún usuario seleccionado es válido/activo en tu compañía/área'
+      });
+    }
+
     const deadline = buildDeadline(deadline_date, deadline_time);
 
-    // 1) Crear tarea base
-    const taskId = await taskModel.createTask({
-      companyId: user.company_id,
+    // Crear la tarea base
+    const newTaskId = await taskModel.createTask({
+      companyId,
       projectId: project_id || null,
       title: title.trim(),
       description: description || null,
       status: status || 'pending',
+      // Tu modelo usa prioridad 'normal' por defecto
       priority: priority || 'normal',
       deadline,
-      creatorId: user.id
+      creatorId
     });
 
-    // 2) Determinar lista de usuarios a asignar
-    let assigneeIds = [];
-
-    if (isAdmin) {
-      // ---- ADMIN: puede asignar a TEAM, área, usuarios específicos o a sí mismo ----
-      const type = assignment_type || 'user';
-
-      if (type === 'team' && team_id) {
-        // miembros activos del team
-        assigneeIds = await taskModel.getActiveUserIdsByTeam(
-          Number(team_id),
-          user.company_id
-        );
-      } else if (type === 'area' && area_id) {
-        assigneeIds = await taskModel.getActiveUserIdsByArea(
-          Number(area_id),
-          user.company_id
-        );
-      } else if (type === 'self') {
-        assigneeIds = [user.id];
-      } else {
-        // type === 'user' (usuarios seleccionados manualmente)
-        const rawUsers =
-          req.body['user_ids[]'] || req.body.user_ids || req.body.assignees;
-        assigneeIds = normalizeIdArray(rawUsers);
-
-        // Filtro de seguridad: solo usuarios activos de la misma company
-        assigneeIds = await taskModel.filterUserIdsByCompanyAndArea(
-          assigneeIds,
-          user.company_id,
-          null
-        );
-      }
-    } else if (isSupervisor) {
-      // ---- SUPERVISOR: SOLO su área, mini-grupos dentro de su área o él mismo ----
-      const rawAssignees =
-        req.body['assignees[]'] || req.body.assignees || [];
-
-      assigneeIds = normalizeIdArray(rawAssignees);
-
-      // Si no seleccionó a nadie, por defecto se asigna a sí mismo
-      if (!assigneeIds.length) {
-        assigneeIds = [user.id];
-      }
-
-      // Seguridad: solo usuarios activos de misma company + misma área
-      assigneeIds = await taskModel.filterUserIdsByCompanyAndArea(
-        assigneeIds,
-        user.company_id,
-        user.area_id
-      );
-    } else {
-      // Por ahora solo admin y supervisor deberían llegar aquí (rutas protegidas)
-      assigneeIds = [user.id];
-    }
-
-    // Eliminar duplicados, por si acaso
-    assigneeIds = [...new Set(assigneeIds)];
-
-    // 3) Insertar asignaciones
-    if (assigneeIds.length) {
-      await taskModel.addAssignments(taskId, assigneeIds);
-    }
+    // Crear asignaciones
+    await taskModel.addAssignments(newTaskId, assigneeIds);
 
     return res.json({
       ok: true,
       message: 'Tarea creada correctamente',
-      data: {
-        task_id: taskId,
-        assignees: assigneeIds
-      }
+      data: { id: newTaskId }
     });
   } catch (err) {
-    console.error('Error al crear tarea:', err);
+    console.error('Error crearTarea:', err);
     return res.status(500).json({
       ok: false,
-      message: 'Error interno al crear la tarea'
+      message: 'Error al crear la tarea'
     });
   }
 }
 
-const ALLOWED_STATUSES = ['pending', 'in_progress', 'review', 'done'];
-
+// ============================================
+// PATCH /api/tasks/:id/status  → cambiar estado
+// ============================================
 async function updateStatus(req, res) {
   try {
-    const taskId = parseInt(req.params.id, 10);
-    const { status } = req.body;
-
-    if (!ALLOWED_STATUSES.includes(status)) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Estado de tarea inválido'
-      });
-    }
-
-    // Seguridad básica: sólo tareas de su company
+    const taskId = req.params.id;
+    const { status } = req.body || {};
     const companyId = req.user.company_id;
     const userId = req.user.id;
 
-    const updated = await taskModel.updateStatus(taskId, status, companyId, userId);
-
-    if (!updated) {
-      return res.status(404).json({
+    const validStatuses = ['pending', 'in_progress', 'review', 'done'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
         ok: false,
-        message: 'Tarea no encontrada o no tienes permisos'
+        message: 'Estado de tarea no válido'
       });
     }
 
-    res.json({ ok: true, message: 'Estado actualizado correctamente' });
+    const affected = await taskModel.updateStatus(
+      taskId,
+      status,
+      companyId,
+      userId
+    );
+
+    if (!affected) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tarea no encontrada o no pertenece a esta empresa'
+      });
+    }
+
+    return res.json({
+      ok: true,
+      message: 'Estado de tarea actualizado'
+    });
   } catch (err) {
-    console.error('Error en updateStatus:', err);
-    res.status(500).json({
+    console.error('Error updateStatus:', err);
+    return res.status(500).json({
       ok: false,
-      message: 'Error interno al actualizar el estado'
+      message: 'Error al actualizar el estado de la tarea'
     });
   }
 }
