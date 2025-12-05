@@ -111,16 +111,24 @@
   </div>
 </nav>
 
+<%
+  const projectsSafe = (
+    typeof projects !== 'undefined' && Array.isArray(projects)
+      ? projects
+      : []
+  );
+%>
+
 <script>
-  // Id del admin actual (para helpers de selección de tareas)
-  window.currentUserId = `<%= user ? user.id : '' %>`;
+  window.currentUserId = "<%= user ? user.id : '' %>";
+  window.projectsAdmin = `<%- JSON.stringify(projectsSafe) %>`;
 </script>
+
 
 <!-- VISTA DASHBOARD ADMIN (NIVEL ESTRATÉGICO) -->
 <section id="adminDashboardView" class="max-w-6xl mx-auto my-8">
-  <% 
+  <%
     const kpis = (typeof adminMetrics !== 'undefined' ? adminMetrics : {});
-    const projectsSafe = (typeof projects !== 'undefined' ? projects : []);
     const areasSummarySafe = (typeof areasSummary !== 'undefined' ? areasSummary : []);
     const recurringSummarySafe = (typeof recurringSummary !== 'undefined' ? recurringSummary : {});
     const nextCriticalTasksSafe = (typeof nextCriticalTasks !== 'undefined' ? nextCriticalTasks : []);
@@ -746,23 +754,27 @@
 
           <!-- Selector de usuario -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Supervisor a editar</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Usuario a editar
+            </label>
             <select
               id="selectUsuarioEditar"
               name="user_id"
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]"
               required>
               <option value="">Seleccionar usuario…</option>
-              <!-- Se rellena vía JS con /api/users -->
+              <!-- Las opciones se cargan vía JS (/api/users) -->
             </select>
             <p class="mt-1 text-[11px] text-gray-400">
-              * Como Admin, solo podrás editar supervisores de tu empresa.
+              * Solo verás usuarios de la empresa actual.
             </p>
           </div>
 
           <!-- Nombre -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre completo</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Nombre completo
+            </label>
             <input
               type="text"
               id="editarUsuarioName"
@@ -773,7 +785,9 @@
 
           <!-- Correo -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Correo corporativo</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Correo corporativo
+            </label>
             <input
               type="email"
               id="editarUsuarioEmail"
@@ -784,7 +798,9 @@
 
           <!-- Teléfono -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Teléfono</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Teléfono
+            </label>
             <input
               type="text"
               id="editarUsuarioTelephone"
@@ -793,19 +809,24 @@
           </div>
 
           <!-- Rol / Estado -->
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Rol</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Rol
+              </label>
               <select
                 id="editarUsuarioRole"
                 name="role"
-                class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600"
-                disabled>
-                <option value="supervisor" selected>Supervisor</option>
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+                <option value="admin">Administrador</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="user">Usuario</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Estado
+              </label>
               <select
                 id="editarUsuarioStatus"
                 name="status"
@@ -818,12 +839,14 @@
 
           <!-- Área -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Área</label>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Área (activas)
+            </label>
             <select
               id="editarUsuarioArea"
               name="area_id"
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-              <option value="">Seleccionar área…</option>
+              <option value="">Sin área asignada</option>
               <% if (areas && areas.length) { %>
                 <% areas.forEach(function(area) { %>
                   <% if (area.status === 'active') { %>
@@ -832,12 +855,23 @@
                 <% }) %>
               <% } %>
             </select>
-            <p class="mt-1 text-[11px] text-gray-400">
-              * El área es obligatoria para supervisores.
-            </p>
           </div>
 
-          <!-- Footer Editar -->
+          <!-- Jefe directo (opcional) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Jefe directo (opcional)
+            </label>
+            <select
+              id="editarUsuarioManager"
+              name="manager_id"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
+              <option value="">Sin jefe asignado</option>
+              <!-- Opciones llenadas vía JS si corresponde -->
+            </select>
+          </div>
+
+          <!-- Footer editar -->
           <div class="flex justify-end gap-2 pt-2">
             <button
               type="button"
@@ -845,18 +879,9 @@
               class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
-
-            <!-- Resetear contraseña a la genérica -->
-            <button
-              type="button"
-              onclick="resetPasswordUsuarioAdmin()"
-              class="px-3 py-1.5 rounded-lg text-xs border border-amber-400 text-amber-600 hover:bg-amber-50">
-              Reset pass genérica
-            </button>
-
             <button
               type="submit"
-              class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
+              class="px-3 py-1.5 rounded-lg text-xs bg-[#0288D1] text-white hover:bg-[#0277BD]">
               Guardar cambios
             </button>
           </div>
@@ -2300,218 +2325,298 @@
   }
 </script>
 
-<!-- MODAL: Registrar / Editar proyecto (Admin) -->
+<!-- MODAL: NUEVO / EDITAR PROYECTO -->
 <div
   id="modalNuevoProyecto"
-  class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
-  <div class="bg-white rounded-2xl shadow-lg w-full max-w-2xl mx-4">
-    <!-- Header -->
-    <div class="px-5 py-3 border-b flex justify-between items-center">
-      <h3 class="text-base font-semibold text-gray-800">
-        Proyectos
-      </h3>
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
+  aria-hidden="true"
+>
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden">
+    <!-- Header con título + botón cerrar -->
+    <div class="flex items-center justify-between px-5 py-3 border-b">
+      <div>
+        <h3 class="text-base font-semibold text-gray-800">
+          Gestión de proyectos
+        </h3>
+        <p class="text-xs text-gray-500">
+          Crea un nuevo proyecto o edita uno existente.
+        </p>
+      </div>
+
       <button
         type="button"
-        class="text-gray-500 hover:text-gray-700"
-        onclick="toggleModal('modalNuevoProyecto', false)">
+        class="text-gray-400 hover:text-gray-600"
+        onclick="toggleModal('modalNuevoProyecto', false)"
+      >
         ✕
       </button>
     </div>
 
     <!-- Tabs -->
-    <div class="px-5 pt-3 border-b flex gap-4 text-sm">
-      <button
-        id="tabProjectRegistrar"
-        type="button"
-        class="pb-2 border-b-2 border-[#7B1FA2] text-[#7B1FA2] font-medium"
-        onclick="switchProjectTab('registrar')">
-        Registrar proyecto
-      </button>
-      <button
-        id="tabProjectEditar"
-        type="button"
-        class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
-        onclick="switchProjectTab('editar')">
-        Editar proyecto
-      </button>
+    <div class="px-5 pt-3 border-b">
+      <div class="flex gap-4">
+        <!-- Tab: Registrar -->
+        <button
+          type="button"
+          id="tabProyectoRegistrar"
+          class="px-3 py-2 text-xs font-medium border-b-2 border-[#7B1FA2] text-[#7B1FA2]"
+          onclick="switchProyectoTab('registrar')"
+        >
+          Registrar proyecto
+        </button>
+
+        <!-- Tab: Editar -->
+        <button
+          type="button"
+          id="tabProyectoEditar"
+          class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+          onclick="switchProyectoTab('editar')"
+        >
+          Editar proyecto
+        </button>
+      </div>
     </div>
 
-    <!-- Contenido -->
-    <div class="px-5 py-4 text-sm">
-      <!-- TAB: REGISTRAR -->
-      <div id="tabContentProjectRegistrar" class="space-y-3">
-        <form id="formNuevoProyecto" class="space-y-3">
-          <!-- Nombre -->
+    <!-- Body -->
+    <div class="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+      <!-- FORM REGISTRAR -->
+      <form
+        id="formNuevoProyecto"
+        class="space-y-3"
+      >
+        <!-- 👇 Ajusta estos campos a los que ya tenías -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            Nombre del proyecto
+          </label>
+          <input
+            type="text"
+            name="name"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Ej: Implementación CRM"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            Descripción
+          </label>
+          <textarea
+            name="description"
+            rows="3"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Descripción breve del proyecto..."
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">
-              Nombre del proyecto
-            </label>
-            <input
-              type="text"
-              name="name"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-              placeholder="Ej: Implementación ERP Planta, Mejora línea de producción 2"
-              required>
-          </div>
-
-          <!-- Estado + Fechas -->
-          <div class="grid gap-3 sm:grid-cols-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <select
-                name="status"
-                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-                required>
-                <option value="active" selected>Activo</option>
-                <option value="paused">Pausado</option>
-                <option value="completed">Completado</option>
-                <option value="cancelled">Cancelado</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Fecha inicio
-              </label>
-              <input
-                type="date"
-                name="start_date"
-                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Fecha término
-              </label>
-              <input
-                type="date"
-                name="end_date"
-                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-            </div>
-          </div>
-
-          <!-- Descripción -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Descripción / alcance
-            </label>
-            <textarea
-              name="description"
-              rows="3"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-              placeholder="Describe brevemente el objetivo, alcance y contexto del proyecto"></textarea>
-          </div>
-        </form>
-      </div>
-
-      <!-- TAB: EDITAR -->
-      <div id="tabContentProjectEditar" class="space-y-3 hidden">
-        <form id="formEditarProyecto" class="space-y-3">
-          <!-- Selector de proyecto -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Proyecto a editar
+              Estado
             </label>
             <select
-              id="selectProyectoEditar"
-              name="project_id"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-              required>
-              <option value="" disabled selected>Seleccionar proyecto…</option>
-              <% if (typeof projects !== 'undefined' && Array.isArray(projects) && projects.length) { %>
-                <% projects.forEach(function (project) { %>
-                  <option value="<%= project.id %>">
-                    <%= project.name %>
-                  </option>
+              name="status"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            >
+              <option value="active">Activo</option>
+              <option value="paused">Pausado</option>
+              <option value="closed">Cerrado</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Área
+            </label>
+            <select
+              name="area_id"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              required
+            >
+              <!-- Placeholder -->
+              <option value="">Selecciona un área…</option>
+
+              <!-- Opción especial: proyecto sin área -->
+              <option value="__NO_AREA__">Sin área (proyecto personal / transversal)</option>
+
+              <% if (areas && areas.length) { %>
+                <% areas.forEach(function(a) { %>
+                  <% if (a.status === 'active') { %>
+                    <option value="<%= a.id %>"><%= a.name %></option>
+                  <% } %>
                 <% }) %>
               <% } %>
             </select>
           </div>
+        </div>
 
-          <!-- Campos editables -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">
-              Nombre del proyecto
+              Fecha inicio
             </label>
             <input
-              type="text"
-              id="editarProyectoName"
-              name="name"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-              required>
+              type="date"
+              name="start_date"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
           </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Fecha término
+            </label>
+            <input
+              type="date"
+              name="end_date"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+      </form>
 
-          <div class="grid gap-3 sm:grid-cols-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <select
-                id="editarProyectoStatus"
-                name="status"
-                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-                required>
-                <option value="active">Activo</option>
-                <option value="paused">Pausado</option>
-                <option value="completed">Completado</option>
-                <option value="cancelled">Cancelado</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Fecha inicio
-              </label>
-              <input
-                type="date"
-                id="editarProyectoStartDate"
-                name="start_date"
-                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">
-                Fecha término
-              </label>
-              <input
-                type="date"
-                id="editarProyectoEndDate"
-                name="end_date"
-                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]">
-            </div>
+      <!-- FORM EDITAR -->
+      <form id="formEditarProyecto" class="space-y-3 hidden">
+        <!-- Selector de proyecto -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            Proyecto a editar
+          </label>
+          <select
+            id="editProyectoSelect"
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            required>
+            <option value="">Seleccionar proyecto…</option>
+            <% if (projectsSafe && projectsSafe.length) { %>
+              <% projectsSafe.forEach(function (project) { %>
+                <option value="<%= project.id %>">
+                  <%= project.name %> (<%= project.status %>)
+                </option>
+              <% }) %>
+            <% } %>
+          </select>
+        </div>
+
+        <!-- ID oculto para el PUT /api/projects/:id -->
+        <input type="hidden" name="id" id="editProyectoId" />
+
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            Nombre del proyecto
+          </label>
+          <input
+            type="text"
+            name="name"
+            id="editProyectoName"
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            required
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Estado
+            </label>
+            <select
+              name="status"
+              id="editProyectoStatus"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            >
+              <option value="active">Activo</option>
+              <option value="paused">Pausado</option>
+              <option value="closed">Cerrado</option>
+            </select>
           </div>
 
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">
-              Descripción / alcance
+              Área
             </label>
-            <textarea
-              id="editarProyectoDescription"
-              name="description"
-              rows="3"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-              placeholder="Descripción del proyecto"></textarea>
+            <select
+              name="area_id"
+              id="editProyectoArea"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            >
+              <option value="">Selecciona un área</option>
+              <% if (areas && areas.length) { %>
+                <% areas.forEach(function(a) { %>
+                  <% if (a.status === 'active') { %>
+                    <option value="<%= a.id %>"><%= a.name %></option>
+                  <% } %>
+                <% }) %>
+              <% } %>
+            </select>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Inicio
+            </label>
+            <input
+              type="date"
+              name="start_date"
+              id="editProyectoStart"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Fin
+            </label>
+            <input
+              type="date"
+              name="end_date"
+              id="editProyectoEnd"
+              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            Descripción / alcance
+          </label>
+          <textarea
+            name="description"
+            id="editProyectoDescription"
+            rows="3"
+            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+            placeholder="Descripción del proyecto..."
+          ></textarea>
+        </div>
+      </form>
     </div>
 
     <!-- Footer -->
-    <div class="px-5 py-3 border-t flex justify-end gap-2">
+    <div class="flex justify-end gap-2 px-5 py-3 border-t bg-gray-50">
       <button
         type="button"
-        class="px-3 py-1.5 rounded-lg border text-sm text-gray-600 hover:bg-gray-50"
-        onclick="toggleModal('modalNuevoProyecto', false)">
-        Cerrar
+        class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
+        onclick="toggleModal('modalNuevoProyecto', false)"
+      >
+        Cancelar
       </button>
+
+      <!-- Botón registrar -->
       <button
+        id="btnGuardarProyectoNuevo"
         type="submit"
         form="formNuevoProyecto"
-        class="px-3 py-1.5 rounded-lg bg-[#7B1FA2] text-white text-sm hover:bg-[#6A1B9A]">
+        class="px-3 py-1.5 rounded-lg bg-[#7B1FA2] text-white text-sm hover:bg-[#6A1B9A]"
+      >
         Guardar nuevo proyecto
       </button>
+
+      <!-- Botón editar (oculto por defecto) -->
       <button
+        id="btnGuardarProyectoEditar"
         type="submit"
         form="formEditarProyecto"
-        class="px-3 py-1.5 rounded-lg bg-[#0288D1] text-white text-sm hover:bg-[#0277BD]">
+        class="px-3 py-1.5 rounded-lg bg-[#0288D1] text-white text-sm hover:bg-[#0277BD] hidden"
+      >
         Guardar cambios
       </button>
     </div>

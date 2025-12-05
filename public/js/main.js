@@ -74,9 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.switchTeamTab('registrar');
       }
 
-      // 🔹 Proyectos (nuevo)
-      if (id === 'modalNuevoProyecto' && typeof window.switchProjectTab === 'function') {
-        window.switchProjectTab('registrar');
+      // 🔹 Proyectos (admin)
+      if (id === 'modalNuevoProyecto' && typeof window.switchProyectoTab === 'function') {
+        window.switchProyectoTab('registrar');
       }
 
       // 🔹 Nueva tarea: volver siempre a asignación por TEAM
@@ -536,26 +536,75 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===============================
   // Edición de proyectos
   // ===============================
+  // 🔹 Enviar cambios del proyecto (formEditarProyecto)
   const formEditarProyecto = document.getElementById('formEditarProyecto');
-
   if (formEditarProyecto) {
-    formEditarProyecto.addEventListener('submit', async (e) => {
+    formEditarProyecto.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      try {
-        // Aquí suponemos que el backend espera PUT/PATCH a /api/projects/:id
-        // pero como postForm probablemente haga POST, podemos usar una ruta tipo /api/projects/update
-        // o enviar _method=PUT. Por ahora usamos una ruta genérica de ejemplo:
-        const resp = await postForm('/api/projects/update', formEditarProyecto);
-        notify(resp);
+      const id =
+        document.getElementById('editProyectoId').value ||
+        document.getElementById('editProyectoSelect').value;
 
-        if (resp.ok) {
-          toggleModal('modalNuevoProyecto', false);
-          window.location.reload();
+      if (!id) {
+        alert('Selecciona un proyecto para editar.');
+        return;
+      }
+
+      const formData = new FormData(formEditarProyecto);
+      const body = {};
+      formData.forEach((value, key) => {
+        // Evitar enviar dos veces id
+        if (key === 'id') return;
+        body[key] = value || null;
+      });
+
+      try {
+        const resp = await fetch(`/api/projects/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok) {
+          console.error('Error al actualizar proyecto:', data);
+          if (window.notify) {
+            window.notify('error', data.message || 'Error al actualizar proyecto');
+          } else {
+            alert(data.message || 'Error al actualizar proyecto');
+          }
+          return;
         }
+
+        // Opcional: actualizar también el array local projectsAdmin
+        const idx = Array.isArray(window.projectsAdmin)
+          ? window.projectsAdmin.findIndex(p => p.id === Number(id))
+          : -1;
+
+        if (idx !== -1) {
+          window.projectsAdmin[idx] = Object.assign({}, window.projectsAdmin[idx], body);
+        }
+
+        if (window.notify) {
+          window.notify('success', 'Proyecto actualizado correctamente');
+        } else {
+          alert('Proyecto actualizado correctamente');
+        }
+
+        // Cerrar modal y recargar para ver cambios en la tabla
+        toggleModal('modalNuevoProyecto', false);
+        window.location.reload();
       } catch (err) {
-        console.error('Error al actualizar proyecto:', err);
-        notify({ ok: false, message: 'Error inesperado al actualizar el proyecto' });
+        console.error(err);
+        if (window.notify) {
+          window.notify('error', 'Error inesperado al actualizar proyecto');
+        } else {
+          alert('Error inesperado al actualizar proyecto');
+        }
       }
     });
   }
@@ -1135,4 +1184,123 @@ function moverTarjetaKanban(taskId, newStatus) {
   }
 }
 
+  // 🔹 Tabs del modal de proyectos (admin)
+window.switchProyectoTab = function (tab) {
+  const formNuevo  = document.getElementById('formNuevoProyecto');
+  const formEditar = document.getElementById('formEditarProyecto');
+  const btnNuevo   = document.getElementById('btnGuardarProyectoNuevo');
+  const btnEditar  = document.getElementById('btnGuardarProyectoEditar');
+
+  const tabRegistrar = document.getElementById('tabProyectoRegistrar');
+  const tabEditar    = document.getElementById('tabProyectoEditar');
+
+  if (!formNuevo || !formEditar || !btnNuevo || !btnEditar || !tabRegistrar || !tabEditar) {
+    return;
+  }
+
+  if (tab === 'registrar') {
+    // Formularios
+    formNuevo.classList.remove('hidden');
+    formEditar.classList.add('hidden');
+
+    // Botones
+    btnNuevo.classList.remove('hidden');
+    btnEditar.classList.add('hidden');
+
+    // Tabs: activar "Registrar"
+    tabRegistrar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+    tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+
+    // Tabs: desactivar "Editar"
+    tabEditar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+    tabEditar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+
+  } else if (tab === 'editar') {
+    // Formularios
+    formNuevo.classList.add('hidden');
+    formEditar.classList.remove('hidden');
+
+    // Botones
+    btnNuevo.classList.add('hidden');
+    btnEditar.classList.remove('hidden');
+
+    // Tabs: activar "Editar"
+    tabEditar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+    tabEditar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+
+    // Tabs: desactivar "Registrar"
+    tabRegistrar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+    tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+  }
+};
+
+  // 🔹 Cargar datos del proyecto al cambiar el select en "Editar proyecto"
+  const editProyectoSelect = document.getElementById('editProyectoSelect');
+  if (editProyectoSelect && Array.isArray(window.projectsAdmin)) {
+    editProyectoSelect.addEventListener('change', function () {
+      const id = parseInt(this.value, 10);
+      const proyecto = window.projectsAdmin.find(function (p) {
+        return p.id === id;
+      });
+
+      if (!proyecto) {
+        // Si no se encontró, limpia el form
+        document.getElementById('editProyectoId').value = '';
+        document.getElementById('editProyectoName').value = '';
+        document.getElementById('editProyectoDescription').value = '';
+        document.getElementById('editProyectoStatus').value = 'pending';
+        document.getElementById('editProyectoArea').value = '';
+        document.getElementById('editProyectoStart').value = '';
+        document.getElementById('editProyectoEnd').value = '';
+        return;
+      }
+
+      // Llenar inputs
+      document.getElementById('editProyectoId').value = proyecto.id;
+      document.getElementById('editProyectoName').value = proyecto.name || '';
+      document.getElementById('editProyectoDescription').value = proyecto.description || '';
+      document.getElementById('editProyectoStatus').value = proyecto.status || 'pending';
+      document.getElementById('editProyectoArea').value = proyecto.area_id || '';
+
+      // Fechas: si vienen con hora tipo '2025-11-28T00:00:00.000Z', cortamos a YYYY-MM-DD
+      const start = proyecto.start_date ? String(proyecto.start_date).substring(0, 10) : '';
+      const end   = proyecto.end_date ? String(proyecto.end_date).substring(0, 10) : '';
+
+      document.getElementById('editProyectoStart').value = start;
+      document.getElementById('editProyectoEnd').value = end;
+    });
+  }
+
+  // ==================================================
+// SINCRONIZAR ADMIN: cargar proyecto al cambiar select
+// (Admin usa editProyectoSelect, Supervisor usa selectProyectoEditar)
+// ==================================================
+(function () {
+
+  const adminSelect = document.getElementById('editProyectoSelect');
+  const adminProjects = Array.isArray(window.projectsAdmin) ? window.projectsAdmin : [];
+
+  if (adminSelect) {
+    adminSelect.addEventListener('change', function () {
+      const id = Number(this.value);
+      const p = adminProjects.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('editProyectoId').value = p.id;
+      document.getElementById('editProyectoName').value = p.name || '';
+      document.getElementById('editProyectoDescription').value = p.description || '';
+      document.getElementById('editProyectoStatus').value = p.status || 'active';
+      document.getElementById('editProyectoArea').value = p.area_id || '';
+
+      const start = p.start_date ? String(p.start_date).substring(0, 10) : '';
+      const end   = p.end_date   ? String(p.end_date).substring(0, 10) : '';
+
+      document.getElementById('editProyectoStart').value = start;
+      document.getElementById('editProyectoEnd').value = end;
+    });
+  }
+
+})();
+
 });
+

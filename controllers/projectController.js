@@ -84,10 +84,14 @@ async function crearProject(req, res) {
 
     let areaIdToUse = null;
 
-    if (role === 'supervisor' || role === 'user') {
-      areaIdToUse = userAreaId || null;
-    } else if (role === 'admin' || role === 'root') {
-      areaIdToUse = area_id || userAreaId || null;
+    if (role === 'supervisor') {
+      areaIdToUse = userAreaId;
+    } else if (role === 'admin') {
+      if (area_id && area_id !== '__NO_AREA__') {
+        areaIdToUse = area_id;
+      } else {
+        areaIdToUse = null; // proyecto sin área
+      }
     }
 
     const projectData = {

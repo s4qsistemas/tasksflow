@@ -20,6 +20,8 @@ const taskCommitController = require('../controllers/taskCommitController');
 
 const taskModel = require('../models/taskModel');
 
+const { panelAdminView } = require('../controllers/adminController');
+
 const {
   panelRootView,
   obtenerAdminRootJSON,
@@ -98,7 +100,7 @@ router.get(
   '/admin',
   requireAuth,
   requireRole('admin', 'root'),
-  listarAreasView
+  panelAdminView
 );
 
 // Panel Supervisor (supervisor + root)

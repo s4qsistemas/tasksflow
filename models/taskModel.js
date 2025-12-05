@@ -192,6 +192,27 @@ async function getByCompanyAndArea(companyId, areaId) {
   return rows;
 }
 
+// ===============================
+// Obtener todas las tareas de una compañía (para admin)
+// ===============================
+async function getAllByCompany(companyId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+      t.*,
+      p.name AS project_name
+    FROM tasks t
+    LEFT JOIN projects p
+      ON p.id = t.project_id
+    WHERE t.company_id = ?
+    ORDER BY t.created_at DESC
+    `,
+    [companyId]
+  );
+
+  return rows;
+}
+
 module.exports = {
   createTask,
   addAssignments,
@@ -200,5 +221,6 @@ module.exports = {
   filterUserIdsByCompanyAndArea,
   getByAssignee,
   updateStatus,
-  getByCompanyAndArea
+  getByCompanyAndArea,
+  getAllByCompany
 };

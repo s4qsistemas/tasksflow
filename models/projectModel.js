@@ -9,6 +9,7 @@ function mapRow(row) {
     id: row.id,
     company_id: row.company_id,
     area_id: row.area_id,
+    creator_id: row.creator_id,
     name: row.name,
     description: row.description,
     status: row.status,
@@ -16,7 +17,7 @@ function mapRow(row) {
     end_date: row.end_date,
     created_at: row.created_at,
     area_name: row.area_name || null,
-    progress: row.progress || 0 // por si ya calculas algo
+    progress: row.progress || 0
   };
 }
 
@@ -25,19 +26,23 @@ function mapRow(row) {
 // ===============================
 async function getAllByCompany(companyId) {
   const [rows] = await pool.query(
-    `
-    SELECT
-      p.*,
-      a.name AS area_name
-    FROM projects p
-    LEFT JOIN areas a ON a.id = p.area_id
-    WHERE p.company_id = ?
-    ORDER BY p.created_at DESC
-    `,
+    `SELECT
+       id,
+       company_id,
+       area_id,
+       creator_id,
+       name,
+       description,
+       status,
+       start_date,
+       end_date,
+       created_at
+     FROM projects
+     WHERE company_id = ?
+     ORDER BY created_at DESC`,
     [companyId]
   );
-
-  return rows.map(mapRow);
+  return rows;
 }
 
 // ===============================
@@ -45,20 +50,24 @@ async function getAllByCompany(companyId) {
 // ===============================
 async function getAllByCompanyAndArea(companyId, areaId) {
   const [rows] = await pool.query(
-    `
-    SELECT
-      p.*,
-      a.name AS area_name
-    FROM projects p
-    LEFT JOIN areas a ON a.id = p.area_id
-    WHERE p.company_id = ?
-      AND (p.area_id = ? OR p.area_id IS NULL)
-    ORDER BY p.created_at DESC
-    `,
+    `SELECT
+       id,
+       company_id,
+       area_id,
+       creator_id,
+       name,
+       description,
+       status,
+       start_date,
+       end_date,
+       created_at
+     FROM projects
+     WHERE company_id = ?
+       AND area_id = ?
+     ORDER BY created_at DESC`,
     [companyId, areaId]
   );
-
-  return rows.map(mapRow);
+  return rows;
 }
 
 // ===============================
@@ -69,9 +78,11 @@ async function getById(companyId, projectId) {
     `
     SELECT
       p.*,
-      a.name AS area_name
+      a.name AS area_name,
+      u.name AS creator_name
     FROM projects p
     LEFT JOIN areas a ON a.id = p.area_id
+    LEFT JOIN users u ON u.id = p.creator_id
     WHERE p.company_id = ?
       AND p.id = ?
     LIMIT 1
@@ -80,7 +91,11 @@ async function getById(companyId, projectId) {
   );
 
   if (!rows.length) return null;
-  return mapRow(rows[0]);
+
+  const row = rows[0];
+  const mapped = mapRow(row);
+  mapped.creator_name = row.creator_name || null;
+  return mapped;
 }
 
 // ===============================
@@ -89,28 +104,28 @@ async function getById(companyId, projectId) {
 async function create({
   companyId,
   areaId,
+  creatorId,
   name,
   description,
   status,
   startDate,
-  endDate,
-  creatorId        // 👈 NUEVO
+  endDate
 }) {
   const [result] = await pool.query(
     `
     INSERT INTO projects
-      (company_id, area_id, name, description, status, start_date, end_date, creator_id)
+      (company_id, area_id, creator_id, name, description, status, start_date, end_date)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       companyId,
       areaId || null,
+      creatorId,
       name,
       description || '',
       status || 'active',
       startDate || null,
-      endDate || null,
-      creatorId          // 👈 NUEVO
+      endDate || null
     ]
   );
 

@@ -701,12 +701,16 @@ video {
   height: 100%;
 }
 
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
-
 .max-h-64 {
   max-height: 16rem;
+}
+
+.max-h-\[60vh\] {
+  max-height: 60vh;
+}
+
+.max-h-\[90vh\] {
+  max-height: 90vh;
 }
 
 .min-h-screen {
@@ -1526,14 +1530,6 @@ video {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-}
-
-.\[oaicite\:11\] {
-  oaicite: 11;
-}
-
-.\[oaicite\:12\] {
-  oaicite: 12;
 }
 
 .hover\:bg-\[\#0277BD\]:hover {

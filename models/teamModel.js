@@ -110,6 +110,29 @@ async function quitarMiembroTeam(teamId, companyId, userId) {
   return result.affectedRows > 0;
 }
 
+// ===============================
+// Obtener todos los equipos de una compañía
+// ===============================
+async function getAllByCompany(companyId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+      id,
+      company_id,
+      area_id,
+      name,
+      status,
+      created_at
+    FROM teams
+    WHERE company_id = ?
+    ORDER BY name
+    `,
+    [companyId]
+  );
+
+  return rows;
+}
+
 module.exports = {
   listarTeamsPorCompany,
   obtenerTeamPorId,
@@ -117,5 +140,6 @@ module.exports = {
   actualizarTeam,
   listarMiembrosTeam,
   agregarMiembroTeam,
-  quitarMiembroTeam
+  quitarMiembroTeam,
+  getAllByCompany
 };

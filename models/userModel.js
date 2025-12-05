@@ -254,6 +254,31 @@ async function getUserByIdAnyCompany(id) {
   return rows[0] || null;
 }
 
+// ===============================
+// Obtener todos los usuarios de una compañía
+// ===============================
+async function getAllByCompany(companyId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+      id,
+      company_id,
+      area_id,
+      name,
+      email,
+      role_id,
+      status,
+      created_at
+    FROM users
+    WHERE company_id = ?
+    ORDER BY name
+    `,
+    [companyId]
+  );
+
+  return rows;
+}
+
 module.exports = {
   getUsersByCompany,
   getUserById,
@@ -263,5 +288,6 @@ module.exports = {
   resetPassword,
   updatePassword,
   getAdminsWithCompany,
-  getUserByIdAnyCompany
+  getUserByIdAnyCompany,
+  getAllByCompany
 };
