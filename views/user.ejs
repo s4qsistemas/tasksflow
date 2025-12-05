@@ -934,13 +934,11 @@
                 required>
                 <option value="" disabled selected>Seleccionar proyecto…</option>
                 <% if (typeof projects !== 'undefined' && projects.length) { %>
-                  <% projects.forEach(function(project) { 
-                      if (project.creator_id === user.id) { %>
-                        <option value="<%= project.id %>">
-                          <%= project.name %> (<%= project.status %>)
-                        </option>
-                  <%   }
-                    }) %>
+                  <% projects.forEach(function(project) { %>
+                    <option value="<%= project.id %>">
+                      <%= project.name %> (<%= project.status %>)
+                    </option>
+                  <% }) %>
                 <% } else { %>
                   <option value="" disabled>(Sin proyectos creados por ti)</option>
                 <% } %>

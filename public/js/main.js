@@ -533,81 +533,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ===============================
-  // Edición de proyectos
-  // ===============================
-  // 🔹 Enviar cambios del proyecto (formEditarProyecto)
-  const formEditarProyecto = document.getElementById('formEditarProyecto');
-  if (formEditarProyecto) {
-    formEditarProyecto.addEventListener('submit', async function (e) {
-      e.preventDefault();
+// ===============================
+// Edición de proyectos (admin + user)
+// ===============================
+const formEditarProyecto = document.getElementById('formEditarProyecto');
 
-      const id =
-        document.getElementById('editProyectoId').value ||
-        document.getElementById('editProyectoSelect').value;
+if (formEditarProyecto) {
+  formEditarProyecto.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-      if (!id) {
-        alert('Selecciona un proyecto para editar.');
+    // Detectar ID según la vista:
+    //  - admin:  editProyectoId / editProyectoSelect
+    //  - user:   selectProyectoEditar
+    let id = null;
+
+    const inputIdAdmin = document.getElementById('editProyectoId');
+    const selectAdmin  = document.getElementById('editProyectoSelect');
+    const selectUser   = document.getElementById('selectProyectoEditar');
+
+    if (inputIdAdmin && inputIdAdmin.value) {
+      id = inputIdAdmin.value;
+    } else if (selectAdmin && selectAdmin.value) {
+      id = selectAdmin.value;
+    } else if (selectUser && selectUser.value) {
+      id = selectUser.value;
+    }
+
+    if (!id) {
+      alert('Selecciona un proyecto para editar.');
+      return;
+    }
+
+    const formData = new FormData(formEditarProyecto);
+
+    // Construimos el body para el endpoint /api/projects/update
+    const body = {
+      project_id: id   // 👈 lo que espera el backend
+    };
+
+    formData.forEach((value, key) => {
+      // evitamos duplicar project_id si viene en el form
+      if (key === 'project_id') return;
+      if (key === 'id') return;
+      body[key] = value || null;
+    });
+
+    try {
+      const resp = await fetch('/api/projects/update', {
+        method: 'POST', // 👈 NO es PUT, es POST
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.ok) {
+        console.error('Error al actualizar proyecto:', data);
+        if (window.notify) {
+          window.notify('error', data.message || 'Error al actualizar proyecto');
+        } else {
+          alert(data.message || 'Error al actualizar proyecto');
+        }
         return;
       }
 
-      const formData = new FormData(formEditarProyecto);
-      const body = {};
-      formData.forEach((value, key) => {
-        // Evitar enviar dos veces id
-        if (key === 'id') return;
-        body[key] = value || null;
-      });
-
-      try {
-        const resp = await fetch(`/api/projects/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-
-        const data = await resp.json();
-
-        if (!resp.ok || !data.ok) {
-          console.error('Error al actualizar proyecto:', data);
-          if (window.notify) {
-            window.notify('error', data.message || 'Error al actualizar proyecto');
-          } else {
-            alert(data.message || 'Error al actualizar proyecto');
-          }
-          return;
-        }
-
-        // Opcional: actualizar también el array local projectsAdmin
-        const idx = Array.isArray(window.projectsAdmin)
-          ? window.projectsAdmin.findIndex(p => p.id === Number(id))
-          : -1;
-
-        if (idx !== -1) {
-          window.projectsAdmin[idx] = Object.assign({}, window.projectsAdmin[idx], body);
-        }
-
-        if (window.notify) {
-          window.notify('success', 'Proyecto actualizado correctamente');
-        } else {
-          alert('Proyecto actualizado correctamente');
-        }
-
-        // Cerrar modal y recargar para ver cambios en la tabla
-        toggleModal('modalNuevoProyecto', false);
-        window.location.reload();
-      } catch (err) {
-        console.error(err);
-        if (window.notify) {
-          window.notify('error', 'Error inesperado al actualizar proyecto');
-        } else {
-          alert('Error inesperado al actualizar proyecto');
-        }
+      if (window.notify) {
+        window.notify('success', 'Proyecto actualizado correctamente');
+      } else {
+        alert('Proyecto actualizado correctamente');
       }
-    });
-  }
+
+      // Cerrar modal y refrescar para ver cambios
+      toggleModal('modalNuevoProyecto', false);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      if (window.notify) {
+        window.notify('error', 'Error inesperado al actualizar proyecto');
+      } else {
+        alert('Error inesperado al actualizar proyecto');
+      }
+    }
+  });
+}
 
   // Cargar datos de proyecto en el formulario de edición
   // Más adelante, cuando tengas /api/projects/:id, podemos agregar algo tipo:

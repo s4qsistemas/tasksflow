@@ -162,10 +162,33 @@ async function update({ id, companyId, areaId, name, description, status, startD
   );
 }
 
+async function getAllByCompanyAndCreator(companyId, creatorId) {
+  const [rows] = await pool.query(
+    `SELECT
+       id,
+       company_id,
+       area_id,
+       creator_id,
+       name,
+       description,
+       status,
+       start_date,
+       end_date,
+       created_at
+     FROM projects
+     WHERE company_id = ?
+       AND creator_id = ?
+     ORDER BY created_at DESC`,
+    [companyId, creatorId]
+  );
+  return rows;
+}
+
 module.exports = {
   getAllByCompany,
   getAllByCompanyAndArea,
   getById,
   create,
-  update
+  update,
+  getAllByCompanyAndCreator
 };

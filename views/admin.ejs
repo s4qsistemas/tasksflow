@@ -857,20 +857,6 @@
             </select>
           </div>
 
-          <!-- Jefe directo (opcional) -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Jefe directo (opcional)
-            </label>
-            <select
-              id="editarUsuarioManager"
-              name="manager_id"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#2E7D32]">
-              <option value="">Sin jefe asignado</option>
-              <!-- Opciones llenadas vía JS si corresponde -->
-            </select>
-          </div>
-
           <!-- Footer editar -->
           <div class="flex justify-end gap-2 pt-2">
             <button
@@ -2177,7 +2163,7 @@
               class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
               required>
               <option value="low">Baja</option>
-              <option value="medium" selected>Media</option>
+              <option value="normal" selected>Media</option>
               <option value="high">Alta</option>
               <option value="critical">Crítica</option>
             </select>

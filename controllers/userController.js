@@ -406,16 +406,16 @@ async function panelUserView(req, res) {
     const companyId = user.company_id;
     const areaId = user.area_id;
 
-    // Tareas asignadas al user actual (ya traen project_name, etc.)
+    // Tareas asignadas al user actual
     const tasks = await taskModel.getByAssignee(user.id, companyId);
 
-    // Proyectos del área (se siguen usando para los modales "Nueva tarea", etc.)
-    let projects = [];
-    if (areaId) {
-      projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
-    }
+    // 🔹 Proyectos personales creados por el usuario actual
+    const projects = await projectModel.getAllByCompanyAndCreator(
+      companyId,
+      user.id
+    );
 
-    // 🔹 Proyectos donde el user REALMENTE participa (al menos una tarea)
+    // 🔹 Proyectos donde el user participa (para el filtro del Kanban)
     const userProjects = [];
     const seen = new Set();
 
@@ -439,8 +439,8 @@ async function panelUserView(req, res) {
       title: 'Panel Usuario',
       user,
       tasks,
-      projects,      // para modales
-      userProjects   // 👈 SOLO estos se usan en el filtro del Kanban
+      projects,     // ahora son proyectos CREADOS por el user
+      userProjects  // donde participa (para el select de Kanban)
     });
   } catch (err) {
     console.error('Error en panelUserView:', err);
