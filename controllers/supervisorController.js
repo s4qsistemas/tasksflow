@@ -1,8 +1,4 @@
 // controllers/supervisorController.js
-const dashboardSupModel = require('../models/supervisorDashboardModel');
-const projectModel = require('../models/projectModel');
-const userModel = require('../models/userModel');
-
 async function panelSupervisorView(req, res) {
   try {
     const user = req.user;
@@ -18,6 +14,7 @@ async function panelSupervisorView(req, res) {
       kanbanTasks,
       userProjects,
       projects,
+      projectsCreator,
       users
     ] = await Promise.all([
       dashboardSupModel.getSupervisorMetrics(companyId, supervisorId),
@@ -27,7 +24,13 @@ async function panelSupervisorView(req, res) {
       dashboardSupModel.getUpcomingTasks7d(companyId, supervisorId),
       dashboardSupModel.getKanbanTasks(companyId, supervisorId),
       dashboardSupModel.getUserProjects(companyId, supervisorId),
+
+      // ➜ todos los proyectos del área del supervisor
       projectModel.getAllByCompanyAndArea(companyId, user.area_id),
+
+      // ➜ proyectos creados por el supervisor actual
+      projectModel.getAllByCompanyAndCreator(companyId, supervisorId),
+
       userModel.getAllByCompany(companyId)
     ]);
 
@@ -46,7 +49,10 @@ async function panelSupervisorView(req, res) {
       upcomingRecurring: upcomingTasks,
       tacticalAlerts,
       kanbanTasks,
-      projects,
+
+      // OJO: aquí defines qué conjunto usar en la vista
+      projects: projectsCreator.length ? projectsCreator : projects,
+
       users,
       userProjects
     });
@@ -55,7 +61,3 @@ async function panelSupervisorView(req, res) {
     res.status(500).send('Error al cargar panel del supervisor');
   }
 }
-
-module.exports = {
-  panelSupervisorView
-};

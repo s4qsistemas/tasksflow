@@ -114,12 +114,34 @@ router.get(
       const areaId = req.user.area_id;
 
       // ==========================
-      // 1) Proyectos del área
+      // 1) Proyectos del área + proyectos creados por mí
       // ==========================
-      let projects = [];
+      let projectsArea = [];
       if (areaId) {
-        projects = await projectModel.getAllByCompanyAndArea(companyId, areaId);
+        projectsArea = await projectModel.getAllByCompanyAndArea(companyId, areaId);
       }
+
+      // Proyectos creados por el supervisor actual (independiente del área)
+      const projectsCreator = await projectModel.getAllByCompanyAndCreator(
+        companyId,
+        req.user.id
+      );
+
+      // Unión: proyectos del área ∪ proyectos donde soy creator_id
+      const projectMap = new Map();
+
+      // Primero los del área
+      projectsArea.forEach((p) => {
+        projectMap.set(p.id, p);
+      });
+
+      // Luego los que yo creé (si alguno ya está, se pisa con la misma info)
+      projectsCreator.forEach((p) => {
+        projectMap.set(p.id, p);
+      });
+
+      // Array final para pasar a la vista
+      const projects = Array.from(projectMap.values());
 
       // ==========================
       // 2) Usuarios de la misma empresa
