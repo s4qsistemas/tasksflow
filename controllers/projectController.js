@@ -66,14 +66,22 @@ async function obtenerProjectJSON(req, res) {
 // CREAR PROJECT
 // ===============================
 // Usado por: POST /api/projects
+// ===============================
+// CREAR PROJECT
+// ===============================
+// Usado por: POST /api/projects
 async function crearProject(req, res) {
   try {
-    const companyId = req.user.company_id;
-    const role = getUserRole(req);
-    const userAreaId = getUserAreaId(req);
-    const creatorId = req.user.id;   // 👈 NUEVO
+    const companyId   = req.user.company_id;
+    const creatorId   = req.user.id;
+    const userAreaId  = req.user.area_id || null;   // 👈 directo
+    const role        = req.user.role_name || null; // 👈 USAMOS role_name
 
     const { name, description, status, start_date, end_date, area_id } = req.body;
+
+    console.log('▶️ crearProject - req.user:', req.user);
+    console.log('▶️ crearProject - role:', role, 'userAreaId:', userAreaId);
+    console.log('▶️ crearProject - req.body:', req.body);
 
     if (!name || !name.trim()) {
       return res.status(400).json({
@@ -84,11 +92,13 @@ async function crearProject(req, res) {
 
     let areaIdToUse = null;
 
-    if (role === 'supervisor') {
+    if (role === 'supervisor' || role === 'user') {
+      // Supervisor y user: siempre su propia área
       areaIdToUse = userAreaId;
-    } else if (role === 'admin') {
+    } else if (role === 'admin' || role === 'root') {
+      // Admin/root: pueden elegir área o dejar sin área
       if (area_id && area_id !== '__NO_AREA__') {
-        areaIdToUse = area_id;
+        areaIdToUse = parseInt(area_id, 10) || null;
       } else {
         areaIdToUse = null; // proyecto sin área
       }
@@ -102,8 +112,10 @@ async function crearProject(req, res) {
       status: status || 'active',
       startDate: start_date || null,
       endDate: end_date || null,
-      creatorId          // 👈 NUEVO
+      creatorId
     };
+
+    console.log('▶️ crearProject - projectData a guardar:', projectData);
 
     const newId = await projectModel.create(projectData);
 
@@ -113,7 +125,7 @@ async function crearProject(req, res) {
       data: { id: newId }
     });
   } catch (err) {
-    console.error('Error crearProject:', err);
+    console.error('❌ Error crearProject:', err);
     return res.status(500).json({
       ok: false,
       message: 'Error al crear proyecto'

@@ -13,9 +13,10 @@ async function panelSupervisorView(req, res) {
       upcomingTasks,
       kanbanTasks,
       userProjects,
-      projects,
+      projectsArea,
       projectsCreator,
-      users
+      userTasks,   // 👈 NUEVO
+      users        // 👈 ahora sí son los usuarios
     ] = await Promise.all([
       dashboardSupModel.getSupervisorMetrics(companyId, supervisorId),
       dashboardSupModel.getTeamLoad(companyId, supervisorId),
@@ -25,12 +26,16 @@ async function panelSupervisorView(req, res) {
       dashboardSupModel.getKanbanTasks(companyId, supervisorId),
       dashboardSupModel.getUserProjects(companyId, supervisorId),
 
-      // ➜ todos los proyectos del área del supervisor
+      // ✅ todos los proyectos del ÁREA del supervisor
       projectModel.getAllByCompanyAndArea(companyId, user.area_id),
 
-      // ➜ proyectos creados por el supervisor actual
+      // ✅ proyectos creados por el supervisor actual
       projectModel.getAllByCompanyAndCreator(companyId, supervisorId),
 
+      // ✅ Tareas asignadas al user actual
+      taskModel.getByAssignee(user.id, companyId),
+
+      // ✅ Usuarios de la empresa
       userModel.getAllByCompany(companyId)
     ]);
 
@@ -50,11 +55,12 @@ async function panelSupervisorView(req, res) {
       tacticalAlerts,
       kanbanTasks,
 
-      // OJO: aquí defines qué conjunto usar en la vista
-      projects: projectsCreator.length ? projectsCreator : projects,
+      // ✅ si el supervisor tiene proyectos propios, usa esos; si no, usa los del área
+      projects: projectsCreator.length ? projectsCreator : projectsArea,
 
       users,
-      userProjects
+      userProjects,
+      userTasks // 👈 si quieres usarlo en la vista
     });
   } catch (err) {
     console.error('Error en panelSupervisorView:', err);
