@@ -950,12 +950,14 @@ if (filtroTarea) {
     });
   }
 
-  const userKanbanView = document.getElementById('userKanbanView');
+  const userKanbanView       = document.getElementById('userKanbanView');
   const supervisorKanbanView = document.getElementById('supervisorKanbanView');
+  const adminKanbanView      = document.getElementById('adminKanbanView');
 
   // Inicializar Kanban en la vista que corresponda
   initKanbanDragAndDrop(userKanbanView);
   initKanbanDragAndDrop(supervisorKanbanView);
+  initKanbanDragAndDrop(adminKanbanView);
 
   // ===============================
   // Modal de commits de tarea (vista usuario)

@@ -18,6 +18,23 @@ async function panelAdminView(req, res) {
       taskModel.getAllByCompany(companyId)
     ]);
 
+    // ===============================
+    // Armar estructura Kanban (igual idea que supervisor)
+    // ===============================
+    const kanbanTasks = {
+      pending: [],
+      in_progress: [],
+      review: [],
+      done: []
+    };
+
+    // tasks viene con todas las tareas de la company (cualquier área)
+    tasks.forEach((t) => {
+      if (t && t.status && kanbanTasks[t.status]) {
+        kanbanTasks[t.status].push(t);
+      }
+    });
+
     return res.render('admin', {
       title: 'Panel Admin',
       user: req.user,
@@ -25,7 +42,9 @@ async function panelAdminView(req, res) {
       users,
       teams,
       projects,
-      tasks
+      tasks,
+      // 👇 nuevo: tablero Kanban para admin (company-wide)
+      kanbanTasks
     });
   } catch (err) {
     console.error('Error en panelAdminView:', err);
