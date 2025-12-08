@@ -900,6 +900,14 @@
 
           <!-- Footer editar -->
           <div class="flex justify-end gap-2 pt-2">
+
+            <!-- Resetear contraseña a la genérica -->
+            <button
+              type="button"
+              onclick="resetPasswordUsuarioSupervisor()"
+              class="px-3 py-1.5 rounded-lg text-xs border border-amber-400 text-amber-600 hover:bg-amber-50">
+              Reset pass genérica
+            </button>
             <button
               type="button"
               onclick="toggleModal('modalNuevoUsuario', false)"
@@ -2841,5 +2849,48 @@
     </div>
   </div>
 </div>
+
+<!-- Script reset password -->
+<script>
+      // 4) Resetear contraseña a la genérica (solo trabajadores a cargo)
+    async function resetPasswordUsuarioSupervisor() {
+      if (!selectUsuarioEditar) {
+        alert('No se encontró el selector de usuarios.');
+        return;
+      }
+
+      const id = selectUsuarioEditar.value;
+      if (!id) {
+        alert('Selecciona un usuario primero.');
+        return;
+      }
+
+      const confirmar = confirm(
+        '¿Seguro que deseas resetear la contraseña de este usuario ' +
+        'a la contraseña genérica del sistema?'
+      );
+      if (!confirmar) return;
+
+      try {
+        const res = await fetch(`/api/users/${id}/reset-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        alert(data.message || 'Operación realizada.');
+      } catch (err) {
+        console.error(err);
+        alert('Error al resetear la contraseña.');
+      }
+    }
+
+    // Exponer función al scope global para usarla en onclick
+    window.resetPasswordUsuarioSupervisor = resetPasswordUsuarioSupervisor;
+  </script>
+</script>
 
 
