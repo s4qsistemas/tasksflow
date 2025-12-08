@@ -42,15 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!el) return;
 
     if (show) {
-      // Mostrar modal
+      // 🔹 Cerrar cualquier otro modal abierto (IDs que empiezan con "modal")
+      document.querySelectorAll('[id^="modal"]').forEach((m) => {
+        if (m === el) return;
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      });
+
+      // Mostrar este modal
       el.classList.remove('hidden');
       el.classList.add('flex');
     } else {
-      // 🔹 Al cerrar el modal, reseteamos todos los formularios internos
+      // 🔹 Al cerrar, reseteamos formularios y pestañas como ya lo tenías
       const forms = el.querySelectorAll('form');
       forms.forEach((f) => f.reset());
 
-      // 🔹 Y, si aplica, volvemos siempre a la pestaña "Registrar"
       if (id === 'modalNuevaArea' && typeof window.switchAreaTab === 'function') {
         window.switchAreaTab('registrar');
       }
@@ -59,32 +65,26 @@ document.addEventListener('DOMContentLoaded', () => {
         window.switchUsuarioTab('registrar');
       }
 
-      // 🔹 Companies (root)
       if (id === 'modalNuevaCompany' && typeof window.switchCompanyTab === 'function') {
         window.switchCompanyTab('registrar');
       }
 
-      // 🔹 Admin del root
       if (id === 'modalRootAdminUsers' && typeof window.switchRootAdminTab === 'function') {
         window.switchRootAdminTab('registrar');
       }
 
-      // 🔹 Grupos de trabajo (admin)
       if (id === 'modalNuevoGrupo' && typeof window.switchTeamTab === 'function') {
         window.switchTeamTab('registrar');
       }
 
-      // 🔹 Proyectos (admin)
       if (id === 'modalNuevoProyecto' && typeof window.switchProyectoTab === 'function') {
         window.switchProyectoTab('registrar');
       }
 
-      // 🔹 Nueva tarea: volver siempre a asignación por TEAM
       if (id === 'modalNuevaTarea' && typeof window.switchTaskAssignment === 'function') {
         window.switchTaskAssignment('team');
       }
 
-      // Ocultar modal
       el.classList.add('hidden');
       el.classList.remove('flex');
     }

@@ -121,295 +121,98 @@
 
 <script>
   window.currentUserId = "<%= user ? user.id : '' %>";
-  window.projectsAdmin = `<%- JSON.stringify(projectsSafe) %>`;
+  window.projectsAdmin = <%- JSON.stringify(projectsSafe) %>;
 </script>
 
-
-<!-- VISTA DASHBOARD ADMIN (NIVEL ESTRATÉGICO) -->
-<section id="adminDashboardView" class="max-w-6xl mx-auto my-8">
+<!-- VISTA DASHBOARD ADMIN (vista por defecto) -->
+<section
+  id="adminDashboardView"
+  class="bg-white rounded-2xl p-6 shadow max-w-6xl mx-auto my-8"
+>
   <%
-    const kpis = (typeof adminMetrics !== 'undefined' ? adminMetrics : {});
-    const areasSummarySafe = (typeof areasSummary !== 'undefined' ? areasSummary : []);
-    const recurringSummarySafe = (typeof recurringSummary !== 'undefined' ? recurringSummary : {});
-    const nextCriticalTasksSafe = (typeof nextCriticalTasks !== 'undefined' ? nextCriticalTasks : []);
-    const strategicAlertsSafe = (typeof strategicAlerts !== 'undefined' ? strategicAlerts : []);
+    const areasSafe = (
+      typeof areas !== 'undefined' && Array.isArray(areas)
+        ? areas
+        : []
+    );
+    const usersSafe = (
+      typeof users !== 'undefined' && Array.isArray(users)
+        ? users
+        : []
+    );
+    const teamsSafe = (
+      typeof teams !== 'undefined' && Array.isArray(teams)
+        ? teams
+        : []
+    );
+    const tasksSafe = (
+      typeof tasks !== 'undefined' && Array.isArray(tasks)
+        ? tasks
+        : []
+    );
+
+    const totalAreas = areasSafe.length;
+    const totalUsers = usersSafe.length;
+    const totalTeams = teamsSafe.length;
+
+    function countByStatus(status) {
+      return tasksSafe.filter(function (t) {
+        return t && t.status === status;
+      }).length;
+    }
+
+    const totalTasks      = tasksSafe.length;
+    const pendingCount    = countByStatus('pending');
+    const inProgressCount = countByStatus('in_progress');
+    const reviewCount     = countByStatus('review');
+    const doneCount       = countByStatus('done');
   %>
 
-  <!-- Encabezado: nivel de la pirámide -->
-  <div class="bg-white rounded-2xl p-6 shadow mb-6">
-    <h2 class="text-2xl font-semibold text-[#2E7D32] mb-1">
-      Panel Admin · Vista Estratégica
-    </h2>
-    <p class="text-sm text-gray-600 mb-3">
-      Jefatura / Gerencia general. Información sintetizada para decisiones de
-      mediano y largo plazo: estado global de la empresa, proyectos y carga
-      de trabajo por áreas.
-    </p>
+  <!-- Encabezado -->
+  <h2 class="text-xl font-semibold text-[#2E7D32] mb-1">
+    Panel Admin · Visión general de la compañía
+  </h2>
+  <p class="text-sm text-gray-600 mb-4">
+    Resumen de áreas, equipos, usuarios y tareas de la empresa actual.
+  </p>
 
-    <div class="grid gap-4 md:grid-cols-3 text-xs text-gray-600">
-      <div>
-        <p class="font-semibold text-gray-800 mb-1">Rol en la pirámide</p>
-        <p>Punta · Jefes, Gerentes, Directores.</p>
-      </div>
-      <div>
-        <p class="font-semibold text-gray-800 mb-1">Tipo de decisión</p>
-        <p>Estratégico · Políticas, prioridades, visión global.</p>
-      </div>
-      <div>
-        <p class="font-semibold text-gray-800 mb-1">Naturaleza de la información</p>
-        <p>Resumida, agregada, enfocada a tendencias y riesgos.</p>
-      </div>
+  <!-- Cards resumen principales -->
+  <div class="grid gap-4 sm:grid-cols-4 mb-6">
+    <div class="bg-[#F1F8E9] rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Áreas activas</p>
+      <p class="text-2xl font-semibold text-[#33691E]"><%= totalAreas %></p>
+    </div>
+    <div class="bg-[#E3F2FD] rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Usuarios</p>
+      <p class="text-2xl font-semibold text-[#1565C0]"><%= totalUsers %></p>
+    </div>
+    <div class="bg-[#F3E5F5] rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Grupos de trabajo</p>
+      <p class="text-2xl font-semibold text-[#7B1FA2]"><%= totalTeams %></p>
+    </div>
+    <div class="bg-[#FFF3E0] rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Tareas totales</p>
+      <p class="text-2xl font-semibold text-[#EF6C00]"><%= totalTasks %></p>
     </div>
   </div>
 
-  <!-- KPIs sintetizados -->
-  <div class="grid gap-4 md:grid-cols-4 mb-6">
-    <!-- Proyectos -->
-    <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">
-        Proyectos activos
-      </p>
-      <p class="text-3xl font-semibold text-[#2E7D32] mt-1">
-        <%= kpis.projectsActive || 0 %>
-      </p>
-      <p class="text-xs text-gray-500 mt-1">
-        <%= kpis.projectsDelayed || 0 %> con atraso
-      </p>
+  <!-- Resumen por estado de tareas -->
+  <div class="grid gap-4 sm:grid-cols-4">
+    <div class="bg-white border rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Pendientes</p>
+      <p class="text-xl font-semibold text-gray-800"><%= pendingCount %></p>
     </div>
-
-    <!-- Carga por tareas -->
-    <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">
-        Tareas abiertas (empresa)
-      </p>
-      <p class="text-3xl font-semibold text-[#0288D1] mt-1">
-        <%= kpis.tasksOpen || 0 %>
-      </p>
-      <p class="text-xs text-gray-500 mt-1">
-        <%= kpis.tasksOverdue || 0 %> vencidas
-      </p>
+    <div class="bg-white border rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">En progreso</p>
+      <p class="text-xl font-semibold text-gray-800"><%= inProgressCount %></p>
     </div>
-
-    <!-- Cumplimiento -->
-    <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">
-        Cumplimiento mensual
-      </p>
-      <p class="text-3xl font-semibold text-[#F9A825] mt-1">
-        <%= kpis.completionRate || 0 %>%
-      </p>
-      <p class="text-xs text-gray-500 mt-1">
-        Objetivo: <%= kpis.targetCompletion || 90 %>% de cierre.
-      </p>
+    <div class="bg-white border rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">En revisión</p>
+      <p class="text-xl font-semibold text-gray-800"><%= reviewCount %></p>
     </div>
-
-    <!-- Tareas recurrentes -->
-    <div class="bg-white p-4 rounded-2xl shadow">
-      <p class="text-xs uppercase tracking-wide text-gray-500">
-        Tareas recurrentes críticas
-      </p>
-      <p class="text-3xl font-semibold text-[#E64A19] mt-1">
-        <%= kpis.recurringCritical || 0 %>
-      </p>
-      <p class="text-xs text-gray-500 mt-1">
-        Con impacto en producción / seguridad.
-      </p>
-    </div>
-  </div>
-
-  <!-- Visión por proyectos y por áreas -->
-  <div class="grid gap-6 md:grid-cols-2 mb-6">
-    <!-- Proyectos (agrupador de tareas) -->
-    <div class="bg-white rounded-2xl shadow p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold text-gray-800">
-          Proyectos en curso
-        </h3>
-        <span class="text-xs text-gray-500">
-          Vista resumida (Top 5 por prioridad)
-        </span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="text-left text-gray-500 border-b text-xs uppercase">
-              <th class="py-2 pr-3">Proyecto</th>
-              <th class="py-2 pr-3">Área líder</th>
-              <th class="py-2 pr-3">% avance</th>
-              <th class="py-2">Estado</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y text-xs sm:text-sm">
-            <% if (projectsSafe.length) { %>
-              <% projectsSafe.forEach(function(p) { %>
-                <tr>
-                  <td class="py-2 pr-3 font-medium text-gray-800">
-                    <%= p.name %>
-                  </td>
-                  <td class="py-2 pr-3">
-                    <%= p.area_name || '-' %>
-                  </td>
-                  <td class="py-2 pr-3">
-                    <span class="font-semibold">
-                      <%= p.progress || 0 %>%
-                    </span>
-                  </td>
-                  <td class="py-2">
-                    <span
-                      class="px-2 py-0.5 rounded-full text-[11px] font-semibold
-                      <%= p.status === 'active' ? 'bg-[#E3F2FD] text-[#1565C0]'
-                        : p.status === 'paused' ? 'bg-[#FFF3E0] text-[#EF6C00]'
-                        : 'bg-[#FFEBEE] text-[#C62828]' %>">
-                      <%= p.status %>
-                    </span>
-                  </td>
-                </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="4" class="py-3 text-center text-xs text-gray-500">
-                  Aún no hay proyectos configurados.
-                </td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Áreas (carga y salud) -->
-    <div class="bg-white rounded-2xl shadow p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-semibold text-gray-800">Áreas de la empresa</h3>
-        <span class="text-xs text-gray-500">
-          Carga de trabajo y cumplimiento.
-        </span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="text-left text-gray-500 border-b text-xs uppercase">
-              <th class="py-2 pr-3">Área</th>
-              <th class="py-2 pr-3">Tareas abiertas</th>
-              <th class="py-2 pr-3">% cierre mes</th>
-              <th class="py-2">Riesgo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y text-xs sm:text-sm">
-            <% if (areasSummarySafe.length) { %>
-              <% areasSummarySafe.forEach(function(a) { %>
-                <tr>
-                  <td class="py-2 pr-3 font-medium text-gray-800">
-                    <%= a.name %>
-                  </td>
-                  <td class="py-2 pr-3">
-                    <%= a.tasksOpen || 0 %>
-                  </td>
-                  <td class="py-2 pr-3">
-                    <%= a.completionRate || 0 %>%
-                  </td>
-                  <td class="py-2">
-                    <span
-                      class="px-2 py-0.5 rounded-full text-[11px] font-semibold
-                      <%= a.risk === 'high' ? 'bg-[#FFEBEE] text-[#C62828]'
-                        : a.risk === 'medium' ? 'bg-[#FFF8E1] text-[#F9A825]'
-                        : 'bg-[#E8F5E9] text-[#2E7D32]' %>">
-                      <%= a.riskLabel || a.risk || 'Bajo' %>
-                    </span>
-                  </td>
-                </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="4" class="py-3 text-center text-xs text-gray-500">
-                  Sin datos de áreas aún.
-                </td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Periodicidad y alertas estratégicas -->
-  <div class="bg-white rounded-2xl shadow p-4">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-semibold text-gray-800">
-        Periodicidad de tareas y alertas
-      </h3>
-      <span class="text-xs text-gray-500">
-        Resumen de tareas diarias, semanales y mensuales.
-      </span>
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-3 text-xs sm:text-sm">
-      <!-- Resumen de recurrencia -->
-      <div>
-        <p class="text-gray-500 mb-1">Resumen de tareas recurrentes</p>
-        <ul class="space-y-1">
-          <li class="flex justify-between">
-            <span>Diarias</span>
-            <span class="font-semibold">
-              <%= recurringSummarySafe.daily || 0 %>
-            </span>
-          </li>
-          <li class="flex justify-between">
-            <span>Semanales</span>
-            <span class="font-semibold">
-              <%= recurringSummarySafe.weekly || 0 %>
-            </span>
-          </li>
-          <li class="flex justify-between">
-            <span>Mensuales</span>
-            <span class="font-semibold">
-              <%= recurringSummarySafe.monthly || 0 %>
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Próximas tareas clave -->
-      <div>
-        <p class="text-gray-500 mb-1">Próximas tareas críticas</p>
-        <ul class="space-y-1">
-          <% if (nextCriticalTasksSafe.length) { %>
-            <% nextCriticalTasksSafe.forEach(function(t) { %>
-              <li>
-                <span class="font-medium"><%= t.title %></span>
-                <span class="block text-[11px] text-gray-500">
-                  Próxima ejecución: <%= t.next_run_human %> · Responsable: <%= t.owner_name %>
-                </span>
-              </li>
-            <% }) %>
-          <% } else { %>
-            <li class="text-xs text-gray-500">
-              No hay tareas críticas recurrentes configuradas.
-            </li>
-          <% } %>
-        </ul>
-      </div>
-
-      <!-- Alertas estratégicas -->
-      <div>
-        <p class="text-gray-500 mb-1">Alertas estratégicas</p>
-        <ul class="space-y-1">
-          <% if (strategicAlertsSafe.length) { %>
-            <% strategicAlertsSafe.forEach(function(a) { %>
-              <li>
-                <span class="font-medium"><%= a.title %></span>
-                <span class="block text-[11px] text-gray-500"><%= a.detail %></span>
-              </li>
-            <% }) %>
-          <% } else { %>
-            <li class="text-xs text-gray-500">
-              Sin alertas críticas por ahora. Mantener seguimiento periódico.
-            </li>
-          <% } %>
-        </ul>
-      </div>
+    <div class="bg-white border rounded-xl p-4">
+      <p class="text-xs text-gray-500 mb-1">Completadas</p>
+      <p class="text-xl font-semibold text-gray-800"><%= doneCount %></p>
     </div>
   </div>
 </section>
@@ -2347,7 +2150,7 @@
 
 <!-- MODAL: Crear nueva tarea (Admin) -->
 <div
-  id="modalNuevaTarea"
+  id=""
   class="fixed inset-0 z-40 hidden items-center justify-center bg-black/40">
   <div class="bg-white rounded-2xl shadow-lg w-full max-w-xl mx-4">
     <!-- Header -->
@@ -2487,7 +2290,7 @@
               type="button"
               class="px-2 py-1 rounded-lg text-[11px] border text-gray-700 hover:bg-gray-100"
               onclick="seleccionarTodaMiArea()">
-              Seleccionar a todos
+              Seleccionar todo
             </button>
             <button
               type="button"
@@ -2501,7 +2304,17 @@
               onclick="limpiarSeleccionArea()">
               Limpiar selección
             </button>
-          </div>
+            <div>
+              <select
+                name="priority"
+                class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                required>
+                <option value="low">Baja</option>
+                <option value="normal" selected>Media</option>
+                <option value="high">Alta</option>
+                <option value="critical">Crítica</option>
+              </select>
+            </div>
         </div>
 
         <!-- Hidden: status inicial (pending) -->
@@ -2555,338 +2368,6 @@
       opt.selected = false;
     }
   }
-</script>
-
-<!-- MODAL: NUEVO / EDITAR PROYECTO -->
-<div
-  id="modalNuevoProyecto"
-  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40"
-  aria-hidden="true"
->
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl overflow-hidden">
-    <!-- Header con título + botón cerrar -->
-    <div class="flex items-center justify-between px-5 py-3 border-b">
-      <div>
-        <h3 class="text-base font-semibold text-gray-800">
-          Gestión de proyectos
-        </h3>
-        <p class="text-xs text-gray-500">
-          Crea un nuevo proyecto o edita uno existente.
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="text-gray-400 hover:text-gray-600"
-        onclick="toggleModal('modalNuevoProyecto', false)"
-      >
-        ✕
-      </button>
-    </div>
-
-    <!-- Tabs -->
-    <div class="px-5 pt-3 border-b">
-      <div class="flex gap-4">
-        <!-- Tab: Registrar -->
-        <button
-          type="button"
-          id="tabProyectoRegistrar"
-          class="px-3 py-2 text-xs font-medium border-b-2 border-[#7B1FA2] text-[#7B1FA2]"
-          onclick="switchProyectoTab('registrar')"
-        >
-          Registrar proyecto
-        </button>
-
-        <!-- Tab: Editar -->
-        <button
-          type="button"
-          id="tabProyectoEditar"
-          class="px-3 py-2 text-xs font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
-          onclick="switchProyectoTab('editar')"
-        >
-          Editar proyecto
-        </button>
-      </div>
-    </div>
-
-    <!-- Body -->
-    <div class="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
-      <!-- FORM REGISTRAR -->
-      <form
-        id="formNuevoProyecto"
-        class="space-y-3"
-      >
-        <!-- 👇 Ajusta estos campos a los que ya tenías -->
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Nombre del proyecto
-          </label>
-          <input
-            type="text"
-            name="name"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            placeholder="Ej: Implementación CRM"
-            required
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Descripción
-          </label>
-          <textarea
-            name="description"
-            rows="3"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            placeholder="Descripción breve del proyecto..."
-          ></textarea>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Estado
-            </label>
-            <select
-              name="status"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            >
-              <option value="active">Activo</option>
-              <option value="paused">Pausado</option>
-              <option value="closed">Cerrado</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Área
-            </label>
-            <select
-              name="area_id"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              required
-            >
-              <!-- Placeholder -->
-              <option value="">Selecciona un área…</option>
-
-              <!-- Opción especial: proyecto sin área -->
-              <option value="__NO_AREA__">Sin área (proyecto personal / transversal)</option>
-
-              <% if (areas && areas.length) { %>
-                <% areas.forEach(function(a) { %>
-                  <% if (a.status === 'active') { %>
-                    <option value="<%= a.id %>"><%= a.name %></option>
-                  <% } %>
-                <% }) %>
-              <% } %>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Fecha inicio
-            </label>
-            <input
-              type="date"
-              name="start_date"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Fecha término
-            </label>
-            <input
-              type="date"
-              name="end_date"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-      </form>
-
-      <!-- FORM EDITAR -->
-      <form id="formEditarProyecto" class="space-y-3 hidden">
-        <!-- Selector de proyecto -->
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Proyecto a editar
-          </label>
-          <select
-            id="editProyectoSelect"
-            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            required>
-            <option value="">Seleccionar proyecto…</option>
-            <% if (projectsSafe && projectsSafe.length) { %>
-              <% projectsSafe.forEach(function (project) { %>
-                <option value="<%= project.id %>">
-                  <%= project.name %> (<%= project.status %>)
-                </option>
-              <% }) %>
-            <% } %>
-          </select>
-        </div>
-
-        <!-- ID oculto para el PUT /api/projects/:id -->
-        <input type="hidden" name="id" id="editProyectoId" />
-
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Nombre del proyecto
-          </label>
-          <input
-            type="text"
-            name="name"
-            id="editProyectoName"
-            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            required
-          />
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Estado
-            </label>
-            <select
-              name="status"
-              id="editProyectoStatus"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            >
-              <option value="active">Activo</option>
-              <option value="paused">Pausado</option>
-              <option value="closed">Cerrado</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Área
-            </label>
-            <select
-              name="area_id"
-              id="editProyectoArea"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            >
-              <option value="">Selecciona un área</option>
-              <% if (areas && areas.length) { %>
-                <% areas.forEach(function(a) { %>
-                  <% if (a.status === 'active') { %>
-                    <option value="<%= a.id %>"><%= a.name %></option>
-                  <% } %>
-                <% }) %>
-              <% } %>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Inicio
-            </label>
-            <input
-              type="date"
-              name="start_date"
-              id="editProyectoStart"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Fin
-            </label>
-            <input
-              type="date"
-              name="end_date"
-              id="editProyectoEnd"
-              class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Descripción / alcance
-          </label>
-          <textarea
-            name="description"
-            id="editProyectoDescription"
-            rows="3"
-            class="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
-            placeholder="Descripción del proyecto..."
-          ></textarea>
-        </div>
-      </form>
-    </div>
-
-    <!-- Footer -->
-    <div class="flex justify-end gap-2 px-5 py-3 border-t bg-gray-50">
-      <button
-        type="button"
-        class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-100"
-        onclick="toggleModal('modalNuevoProyecto', false)"
-      >
-        Cancelar
-      </button>
-
-      <!-- Botón registrar -->
-      <button
-        id="btnGuardarProyectoNuevo"
-        type="submit"
-        form="formNuevoProyecto"
-        class="px-3 py-1.5 rounded-lg bg-[#7B1FA2] text-white text-sm hover:bg-[#6A1B9A]"
-      >
-        Guardar nuevo proyecto
-      </button>
-
-      <!-- Botón editar (oculto por defecto) -->
-      <button
-        id="btnGuardarProyectoEditar"
-        type="submit"
-        form="formEditarProyecto"
-        class="px-3 py-1.5 rounded-lg bg-[#0288D1] text-white text-sm hover:bg-[#0277BD] hidden"
-      >
-        Guardar cambios
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Script tabs proyectos -->
-<script>
-  function switchProjectTab(mode) {
-    const tabReg = document.getElementById('tabProjectRegistrar');
-    const tabEd = document.getElementById('tabProjectEditar');
-    const contentReg = document.getElementById('tabContentProjectRegistrar');
-    const contentEd = document.getElementById('tabContentProjectEditar');
-
-    if (!tabReg || !tabEd || !contentReg || !contentEd) return;
-
-    if (mode === 'editar') {
-      tabEd.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
-      tabEd.classList.remove('border-transparent', 'text-gray-500');
-
-      tabReg.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
-      tabReg.classList.add('border-transparent', 'text-gray-500');
-
-      contentEd.classList.remove('hidden');
-      contentReg.classList.add('hidden');
-    } else {
-      tabEd.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
-      tabEd.classList.add('border-transparent', 'text-gray-500');
-
-      tabReg.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
-      tabReg.classList.remove('border-transparent', 'text-gray-500');
-
-      contentEd.classList.add('hidden');
-      contentReg.classList.remove('hidden');
-    }
-  }
-
-  window.switchProjectTab = switchProjectTab;
 </script>
 
 <!-- MODAL: Commits de tarea (vista usuario) -->
@@ -3088,4 +2569,5 @@
     // Exponer función al scope global para usarla en onclick
     window.resetPasswordUsuarioSupervisor = resetPasswordUsuarioSupervisor;
 </script>
+
 
