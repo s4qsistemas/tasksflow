@@ -133,6 +133,33 @@ async function getAllByCompany(companyId) {
   return rows;
 }
 
+async function getContextoMiembro(teamId, userId, companyId) {
+  const [rows] = await pool.query(
+    `
+    SELECT
+      tm.team_id,
+      tm.user_id,
+      tm.role_in_team,
+      u.id         AS user_id_real,
+      u.name       AS user_name,
+      u.company_id,
+      u.area_id,
+      t.name       AS team_name,
+      t.status     AS team_status
+    FROM team_members tm
+    INNER JOIN users u ON tm.user_id = u.id
+    INNER JOIN teams t ON t.id = tm.team_id
+    WHERE tm.team_id   = ?
+      AND tm.user_id   = ?
+      AND u.company_id = ?
+    LIMIT 1
+    `,
+    [teamId, userId, companyId]
+  );
+
+  return rows[0] || null;
+}
+
 module.exports = {
   listarTeamsPorCompany,
   obtenerTeamPorId,
@@ -141,5 +168,6 @@ module.exports = {
   listarMiembrosTeam,
   agregarMiembroTeam,
   quitarMiembroTeam,
-  getAllByCompany
+  getAllByCompany,
+  getContextoMiembro
 };

@@ -1,5 +1,6 @@
 // controllers/teamController.js
 const teamModel = require('../models/teamModel');
+const projectModel = require('../models/projectModel');
 
 // Helper de respuesta estándar
 function jsonOk(res, data = null, message = 'OK') {
@@ -126,7 +127,6 @@ async function agregarMiembroTeam(req, res) {
     const { user_id, role_in_team } = req.body;
 
     if (!user_id) return jsonError(res, 'user_id obligatorio', 400);
-
     const ok = await teamModel.agregarMiembroTeam(
       id,
       companyId,
@@ -135,6 +135,25 @@ async function agregarMiembroTeam(req, res) {
     );
 
     if (!ok) return jsonError(res, 'No se pudo agregar el miembro (team inválido)', 400);
+
+    // ========= 🔥 MÍNIMO CAMBIO: crear proyecto automático =========
+    const contexto = await teamModel.getContextoMiembro(id, user_id, companyId);
+
+    if (contexto) {
+      const nombreProyecto = contexto.team_name;
+      const descripcionProyecto =
+        `Proyecto creado automáticamente al agregar a ${contexto.user_name} ` +
+        `al equipo "${contexto.team_name}".`;
+
+      await projectModel.createAutoProjectForMember({
+        companyId: contexto.company_id,
+        areaId: contexto.area_id || null,
+        creatorId: contexto.user_id_real,
+        name: nombreProyecto,
+        description: descripcionProyecto
+      });
+    }
+    // ===============================================================
 
     const miembros = await teamModel.listarMiembrosTeam(id, companyId);
     return jsonOk(res, miembros, 'Miembro agregado correctamente');

@@ -184,11 +184,104 @@ async function getAllByCompanyAndCreator(companyId, creatorId) {
   return rows;
 }
 
+async function createAutoProjectForMember({
+  companyId,
+  areaId,
+  creatorId,
+  name,
+  description
+}) {
+  const [result] = await pool.query(
+    `
+    INSERT INTO projects (
+      company_id,
+      area_id,
+      creator_id,
+      name,
+      description,
+      status,
+      start_date,
+      end_date
+    )
+    VALUES (?, ?, ?, ?, ?, 'active', CURDATE(), NULL)
+    `,
+    [companyId, areaId, creatorId, name, description]
+  );
+
+  const projectId = result.insertId;
+
+  const [rows] = await pool.query(
+    `
+    SELECT
+      id,
+      company_id,
+      area_id,
+      creator_id,
+      name,
+      description,
+      status,
+      start_date,
+      end_date,
+      created_at
+    FROM projects
+    WHERE id = ?
+    `,
+    [projectId]
+  );
+
+  return rows[0];
+}
+
+// Proyectos donde el usuario participa (asignado en tareas, creador de tareas o creador del proyecto)
+async function getProjectsByParticipation(companyId, userId) {
+  const [rows] = await pool.query(
+    `
+    SELECT DISTINCT
+      p.id,
+      p.company_id,
+      p.area_id,
+      p.creator_id,
+      p.name,
+      p.description,
+      p.status,
+      p.start_date,
+      p.end_date,
+      p.created_at
+    FROM projects p
+    WHERE
+      p.company_id = ?
+      AND (
+        p.id IN (
+          SELECT t.project_id
+          FROM tasks t
+          WHERE
+            t.company_id = ?
+            AND (
+              t.id IN (
+                SELECT ta.task_id
+                FROM task_assignments ta
+                WHERE ta.user_id = ?
+              )
+              OR t.creator_id = ?
+            )
+        )
+        OR p.creator_id = ?
+      )
+    ORDER BY p.created_at DESC
+    `,
+    [companyId, companyId, userId, userId, userId]
+  );
+
+  return rows;
+}
+
 module.exports = {
   getAllByCompany,
   getAllByCompanyAndArea,
   getById,
   create,
   update,
-  getAllByCompanyAndCreator
+  getAllByCompanyAndCreator,
+  createAutoProjectForMember,
+  getProjectsByParticipation
 };

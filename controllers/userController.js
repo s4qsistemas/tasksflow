@@ -404,18 +404,19 @@ async function panelUserView(req, res) {
   try {
     const user = req.user;
     const companyId = user.company_id;
-    const areaId = user.area_id;
 
-    // Tareas asignadas al user actual
+    // 1) TAREAS completas asignadas al usuario actual (como antes)
     const tasks = await taskModel.getByAssignee(user.id, companyId);
 
-    // 🔹 Proyectos personales creados por el usuario actual
-    const projects = await projectModel.getAllByCompanyAndCreator(
+    // 2) PROYECTOS donde el user participa o es creador
+    const projects = await projectModel.getProjectsByParticipation(
       companyId,
       user.id
     );
 
-    // 🔹 Proyectos donde el user participa (para el filtro del Kanban)
+    // 3) Proyectos para el select del Kanban (userProjects)
+    //    - primero los proyectos que vienen desde las tareas
+    //    - luego agregamos los que el user creó aunque no tengan tareas
     const userProjects = [];
     const seen = new Set();
 
@@ -424,6 +425,7 @@ async function panelUserView(req, res) {
         if (t.project_id && t.project_name && !seen.has(t.project_id)) {
           seen.add(t.project_id);
 
+          // buscamos info extra en projects (status, etc)
           const p = projects.find((prj) => prj.id === t.project_id);
 
           userProjects.push({
@@ -435,12 +437,27 @@ async function panelUserView(req, res) {
       });
     }
 
+    // 4) Agregar proyectos creados por el usuario donde quizás NO hay tareas
+    if (projects && projects.length) {
+      projects.forEach((p) => {
+        if (!seen.has(p.id)) {
+          seen.add(p.id);
+          userProjects.push({
+            id: p.id,
+            name: p.name,
+            status: p.status
+          });
+        }
+      });
+    }
+
+    // 5) Render con los datos correctos
     res.render('user', {
       title: 'Panel Usuario',
       user,
-      tasks,
-      projects,     // ahora son proyectos CREADOS por el user
-      userProjects  // donde participa (para el select de Kanban)
+      tasks,       // ahora sí son tareas completas para el dashboard + kanban
+      projects,    // proyectos creados / donde participa
+      userProjects // para el <select> "Filtrar por proyecto" del Kanban
     });
   } catch (err) {
     console.error('Error en panelUserView:', err);

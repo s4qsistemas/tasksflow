@@ -213,6 +213,32 @@ async function getAllByCompany(companyId) {
   return rows;
 }
 
+// Proyectos (IDs) donde el usuario participa vía tareas (asignado o creador)
+async function getProjectIdsByUserTasks(companyId, userId) {
+  const [rows] = await pool.query(
+    `
+    SELECT DISTINCT
+      t.project_id
+    FROM tasks t
+    WHERE
+      t.company_id = ?
+      AND t.project_id IS NOT NULL
+      AND (
+        t.id IN (
+          SELECT ta.task_id
+          FROM task_assignments ta
+          WHERE ta.user_id = ?
+        )
+        OR t.creator_id = ?
+      )
+    `,
+    [companyId, userId, userId]
+  );
+
+  // devolvemos solo el array de IDs
+  return rows.map((r) => r.project_id);
+}
+
 module.exports = {
   createTask,
   addAssignments,
@@ -222,5 +248,6 @@ module.exports = {
   getByAssignee,
   updateStatus,
   getByCompanyAndArea,
-  getAllByCompany
+  getAllByCompany,
+  getProjectIdsByUserTasks
 };
