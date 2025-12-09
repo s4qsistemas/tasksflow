@@ -118,11 +118,11 @@ router.get(
       // ==========================
       let projectsArea = [];
       if (areaId) {
-        projectsArea = await projectModel.getAllByCompanyAndArea(companyId, areaId);
+        projectsArea = await projectModel.getProjectsByParticipationSubquery(companyId, areaId);
       }
 
       // Proyectos creados por el supervisor actual (independiente del área)
-      const projectsCreator = await projectModel.getAllByCompanyAndCreator(
+      const projectsCreator = await projectModel.getProjectsByParticipationSubquery(
         companyId,
         req.user.id
       );

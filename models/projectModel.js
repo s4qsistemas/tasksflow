@@ -248,6 +248,42 @@ async function getProjectsByParticipation(companyId, userId) {
       p.end_date,
       p.created_at
     FROM projects p
+    LEFT JOIN tasks t
+      ON t.project_id = p.id
+      AND t.company_id = p.company_id
+    LEFT JOIN task_assignments ta
+      ON ta.task_id = t.id
+    WHERE
+      p.company_id = ?
+      AND (
+        ta.user_id   = ?
+        OR t.creator_id = ?
+        OR p.creator_id = ?
+      )
+    ORDER BY p.created_at DESC
+    `,
+    [companyId, userId, userId, userId]
+  );
+
+  return rows;
+}
+
+// Proyectos donde el usuario participa (versión con subconsultas IN)
+async function getProjectsByParticipationSubquery(companyId, userId) {
+  const [rows] = await pool.query(
+    `
+    SELECT DISTINCT
+      p.id,
+      p.company_id,
+      p.area_id,
+      p.creator_id,
+      p.name,
+      p.description,
+      p.status,
+      p.start_date,
+      p.end_date,
+      p.created_at
+    FROM projects p
     WHERE
       p.company_id = ?
       AND (
@@ -283,5 +319,6 @@ module.exports = {
   update,
   getAllByCompanyAndCreator,
   createAutoProjectForMember,
-  getProjectsByParticipation
+  getProjectsByParticipation,
+  getProjectsByParticipationSubquery
 };

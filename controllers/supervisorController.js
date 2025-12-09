@@ -27,10 +27,10 @@ async function panelSupervisorView(req, res) {
       dashboardSupModel.getUserProjects(companyId, supervisorId),
 
       // ✅ todos los proyectos del ÁREA del supervisor
-      projectModel.getAllByCompanyAndArea(companyId, user.area_id),
+      projectModel.getProjectsByParticipationSubquery(companyId, user.area_id),
 
       // ✅ proyectos creados por el supervisor actual
-      projectModel.getAllByCompanyAndCreator(companyId, supervisorId),
+      projectModel.getProjectsByParticipationSubquery(companyId, supervisorId),
 
       // ✅ Tareas asignadas al user actual
       taskModel.getByAssignee(user.id, companyId),
