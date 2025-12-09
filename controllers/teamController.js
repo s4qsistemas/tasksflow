@@ -49,6 +49,62 @@ async function obtenerTeamJSON(req, res) {
 async function crearTeam(req, res) {
   try {
     const companyId = req.user.company_id;
+    const creatorId = req.user.id;           // ⬅️ usamos al usuario actual como creator_id
+    const areaId = req.user.area_id || null; // ⬅️ si el user tiene área, la usamos
+
+    if (!companyId) {
+      return jsonError(res, 'Empresa no definida para el usuario', 400);
+    }
+
+    const { name, description, type, status } = req.body;
+
+    if (!name || !name.trim()) {
+      return jsonError(res, 'El nombre del grupo es obligatorio', 400);
+    }
+
+    // 1) Crear el TEAM
+    const id = await teamModel.crearTeam({
+      company_id: companyId,
+      name: name.trim(),
+      description: description?.trim() || null,
+      type: type || 'other',
+      status: status || 'active'
+    });
+
+    // 2) ✅ Crear el PROJECT asociado (cambio mínimo aquí)
+    //    Usamos el mismo nombre del team como nombre del proyecto
+    try {
+      await projectModel.createAutoProjectForMember({
+        companyId,
+        areaId,                       // puede ser null
+        creatorId,                    // user actual
+        name: name.trim(),
+        description:
+          description?.trim() ||
+          `Proyecto asociado automáticamente al equipo "${name.trim()}"`,
+        status: 'active',
+        startDate: null,
+        endDate: null
+      });
+    } catch (errProj) {
+      console.error('⚠️ Error creando proyecto asociado al team:', errProj);
+      // NO rompemos la creación del team por esto, solo lo dejamos logueado
+    }
+
+    // 3) Respondemos como antes (sin cambiar el formato)
+    const team = await teamModel.obtenerTeamPorId(id, companyId);
+    return jsonOk(res, team, 'Grupo creado correctamente');
+  } catch (err) {
+    console.error('Error crearTeam:', err);
+    return jsonError(res);
+  }
+};
+
+/*
+// POST /api/teams
+async function crearTeam(req, res) {
+  try {
+    const companyId = req.user.company_id;
     if (!companyId) return jsonError(res, 'Empresa no definida para el usuario', 400);
 
     const { name, description, type, status } = req.body;
@@ -72,6 +128,7 @@ async function crearTeam(req, res) {
     return jsonError(res);
   }
 }
+*/
 
 // POST /api/teams/:id/edit
 async function actualizarTeam(req, res) {
@@ -126,6 +183,37 @@ async function agregarMiembroTeam(req, res) {
     const companyId = req.user.company_id;
     const { user_id, role_in_team } = req.body;
 
+    if (!user_id) {
+      return jsonError(res, 'user_id obligatorio', 400);
+    }
+
+    const ok = await teamModel.agregarMiembroTeam(
+      id,
+      companyId,
+      user_id,
+      role_in_team || 'member'
+    );
+
+    if (!ok) {
+      return jsonError(res, 'No se pudo agregar el miembro (team inválido)', 400);
+    }
+
+    const miembros = await teamModel.listarMiembrosTeam(id, companyId);
+    return jsonOk(res, miembros, 'Miembro agregado correctamente');
+  } catch (err) {
+    console.error('Error agregarMiembroTeam:', err);
+    return jsonError(res);
+  }
+}
+
+/*
+// POST /api/teams/:id/members/add
+async function agregarMiembroTeam(req, res) {
+  try {
+    const { id } = req.params; // team_id
+    const companyId = req.user.company_id;
+    const { user_id, role_in_team } = req.body;
+
     if (!user_id) return jsonError(res, 'user_id obligatorio', 400);
     const ok = await teamModel.agregarMiembroTeam(
       id,
@@ -162,6 +250,7 @@ async function agregarMiembroTeam(req, res) {
     return jsonError(res);
   }
 }
+*/
 
 // POST /api/teams/:id/members/remove
 async function quitarMiembroTeam(req, res) {

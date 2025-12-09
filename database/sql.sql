@@ -12,3 +12,18 @@ SELECT DISTINCT p.id,p.company_id,p.area_id,p.creator_id,p.name,p.status FROM pr
 
 -- todas las tareas del rep.user.id
 SELECT t.project_id FROM tasks t WHERE t.id IN (SELECT ta.task_id FROM task_assignments ta WHERE ta.user_id=8) OR t.creator_id=8;
+
+-- todos los proyectos 
+select p.id,p.company_id,p.area_id,p.creator_id,p.name,p.status from projects p;
+
+-- todas las tareas
+select t.id,t.company_id,t.project_id,t.title,t.status,t.creator_id from tasks t;
+
+-- todos los asignados con tareas
+select ta.task_id,ta.user_id from task_assignments ta;
+
+-- todos los equipos
+select te.id,te.company_id,te.name,te.status from teams te;
+
+-- todos los miembros de equipos
+select tm.team_id,tm.user_id from team_members tm;
