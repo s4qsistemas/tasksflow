@@ -1,0 +1,91 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="admin_activities" name="Actividades Admin">
+    <mxGraphModel dx="864" dy="1295" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="inicio" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Inicio (Admin autenticado)" vertex="1">
+          <mxGeometry height="60" width="180" x="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="abrir_panel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Abrir panel Admin" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="decision_root" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="¿Es Root-Admin?" vertex="1">
+          <mxGeometry height="70" width="120" x="380" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="gest_emp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Gestionar Empresa" vertex="1">
+          <mxGeometry height="50" width="160" x="560" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="join_after_emp" parent="1" style="line;html=1;" vertex="1">
+          <mxGeometry height="10" width="40" x="420" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="gest_areas" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Gestionar Áreas" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="gest_equipos" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Gestionar Equipos" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="gest_usuarios" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Gestionar Usuarios" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="crear_proy" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Crear Proyecto" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="asignar_tareas" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Asignar Tareas" vertex="1">
+          <mxGeometry height="50" width="160" x="360" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="kanban_global" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Supervisar Kanban global" vertex="1">
+          <mxGeometry height="50" width="200" x="340" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="validar_estados" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Validar estados de tareas y proyectos" vertex="1">
+          <mxGeometry height="60" width="240" x="320" y="857" as="geometry" />
+        </mxCell>
+        <mxCell id="cerrar_sesion" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Cerrar sesión" vertex="1">
+          <mxGeometry height="60" width="140" x="370" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="inicio" target="abrir_panel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="abrir_panel" target="decision_root">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="decision_root" target="gest_emp" value="Sí">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="decision_root" target="join_after_emp" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="gest_emp" target="join_after_emp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="join_after_emp" target="gest_areas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="gest_areas" target="gest_equipos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="gest_equipos" target="gest_usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="gest_usuarios" target="crear_proy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="crear_proy" target="asignar_tareas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="asignar_tareas" target="kanban_global">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="kanban_global" target="validar_estados">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="validar_estados" target="cerrar_sesion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XUIwLAsCU5dQBK9p815r-1" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Diagrama Actividades Admin" vertex="1">
+          <mxGeometry height="1080" width="550" x="190" y="-30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

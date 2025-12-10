@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="CU02" name="CU-02 Gestionar Usuarios">
+    <mxGraphModel dx="864" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actor_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Admin" vertex="1">
+          <mxGeometry height="80" width="40" x="211" y="256" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_main" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="CU-02&lt;br&gt;Gestionar Usuarios" vertex="1">
+          <mxGeometry height="80" width="190" x="271" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_root_main" edge="1" parent="1" source="actor_root" style="endArrow=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_admin_main" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_crear" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Crear Usuario" vertex="1">
+          <mxGeometry height="60" width="160" x="501" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_editar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Editar Usuario" vertex="1">
+          <mxGeometry height="60" width="160" x="501" y="196" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_desactivar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Desactivar Usuario" vertex="1">
+          <mxGeometry height="60" width="160" x="286" y="326" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_correo" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Correo Único" vertex="1">
+          <mxGeometry height="60" width="190" x="726" y="196" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_encriptar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Encriptar Contraseña" vertex="1">
+          <mxGeometry height="60" width="190" x="721" y="316" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_correo" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Correo Duplicado" vertex="1">
+          <mxGeometry height="60" width="200" x="721" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_rol" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Rol No Permitido" vertex="1">
+          <mxGeometry height="60" width="200" x="471" y="316" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_crear" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_crear" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_editar" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_editar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_desactivar" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_desactivar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_crear_correo" edge="1" parent="1" source="uc_crear" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_correo" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_crear_encriptar" edge="1" parent="1" source="uc_crear" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_encriptar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_correo" edge="1" parent="1" source="uc_error_correo" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_correo" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_rol" edge="1" parent="1" source="uc_error_rol" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_main" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hRm9F3ONglsE81eNK43_-5" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Gestionar Usuarios: Root, Admin, Supervisor" vertex="1">
+          <mxGeometry height="400" width="840" x="150" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hRm9F3ONglsE81eNK43_-7" parent="hRm9F3ONglsE81eNK43_-5" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Supervisor" vertex="1">
+          <mxGeometry height="80" width="40" x="136" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_root" parent="hRm9F3ONglsE81eNK43_-5" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Root" vertex="1">
+          <mxGeometry height="80" width="40" x="50" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="hRm9F3ONglsE81eNK43_-8" edge="1" parent="1" source="uc_main" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="hRm9F3ONglsE81eNK43_-7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="360" y="170" as="sourcePoint" />
+            <mxPoint x="330" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

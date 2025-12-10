@@ -1,0 +1,91 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="supervisor_activities" name="Actividades Supervisor">
+    <mxGraphModel dx="864" dy="1295" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="inicio" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Inicio (Supervisor autenticado)" vertex="1">
+          <mxGeometry height="60" width="220" x="145" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="panel_sup" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Ingresar al panel Supervisor" vertex="1">
+          <mxGeometry height="50" width="190" x="160" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="ver_kpi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Ver KPIs del equipo" vertex="1">
+          <mxGeometry height="50" width="170" x="170" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ver_area" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Ver área y carga de trabajo" vertex="1">
+          <mxGeometry height="50" width="210" x="150" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="crear_tareas" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Crear tareas para el equipo" vertex="1">
+          <mxGeometry height="50" width="210" x="150" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="actualizar_tareas" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Actualizar tareas existentes" vertex="1">
+          <mxGeometry height="50" width="210" x="150" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="mover_kanban" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Mover estado en tablero Kanban" vertex="1">
+          <mxGeometry height="50" width="250" x="130" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="revisar_commits" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Revisar commits de tareas" vertex="1">
+          <mxGeometry height="50" width="210" x="150" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="validar_avance" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Validar avance del equipo" vertex="1">
+          <mxGeometry height="50" width="210" x="150" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="decision_tarea" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="¿Tarea completada?" vertex="1">
+          <mxGeometry height="80" width="150" x="180" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="devolver_tarea" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Devolver tarea para revisión" vertex="1">
+          <mxGeometry height="50" width="210" x="40" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="marcar_completa" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Marcar tarea completa" vertex="1">
+          <mxGeometry height="50" width="170" x="310" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="cerrar_sesion" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Cerrar sesión" vertex="1">
+          <mxGeometry height="60" width="140" x="190" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="inicio" target="panel_sup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="panel_sup" target="ver_kpi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ver_kpi" target="ver_area">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ver_area" target="crear_tareas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="crear_tareas" target="actualizar_tareas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="actualizar_tareas" target="mover_kanban">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="mover_kanban" target="revisar_commits">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="revisar_commits" target="validar_avance">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="validar_avance" target="decision_tarea">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="decision_tarea" target="devolver_tarea" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="decision_tarea" target="marcar_completa" value="Sí">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="devolver_tarea" target="cerrar_sesion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="marcar_completa" target="cerrar_sesion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EzWzXp4vFyXsDtjjHCth-1" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Diagrama Actividades Supervisor" vertex="1">
+          <mxGeometry height="1010" width="510" x="10" y="-30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

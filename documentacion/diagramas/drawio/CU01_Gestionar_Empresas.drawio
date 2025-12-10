@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="CU01" name="CU-01 Gestionar Empresas">
+    <mxGraphModel dx="864" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="uc_main" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="CU-01&lt;br&gt;Gestionar Empresas" vertex="1">
+          <mxGeometry height="80" width="180" x="400" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_root_main" edge="1" parent="1" source="actor_root" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_registrar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar Empresa" vertex="1">
+          <mxGeometry height="60" width="160" x="410" y="384" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_modificar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Modificar Empresa" vertex="1">
+          <mxGeometry height="60" width="160" x="280" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_desactivar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Desactivar Empresa" vertex="1">
+          <mxGeometry height="60" width="160" x="160" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Datos de Empresa" vertex="1">
+          <mxGeometry height="60" width="190" x="585" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Error de Conexión" vertex="1">
+          <mxGeometry height="60" width="200" x="140" y="384" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_reg" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_registrar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_mod" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_modificar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_des" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_desactivar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_reg_val" edge="1" parent="1" source="uc_registrar" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_mod_val" edge="1" parent="1" source="uc_modificar" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_reg_err" edge="1" parent="1" source="uc_error" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_registrar" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_mod_err" edge="1" parent="1" source="uc_error" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_modificar" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_des_err" edge="1" parent="1" source="uc_error" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_desactivar" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LqiYu6utQe9y7PWxAujf-2" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Gestionar Empresas: Root" vertex="1">
+          <mxGeometry height="440" width="730" x="90" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_root" parent="LqiYu6utQe9y7PWxAujf-2" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Root" vertex="1">
+          <mxGeometry height="80" width="40" x="590" y="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

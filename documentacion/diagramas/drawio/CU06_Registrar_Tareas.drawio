@@ -1,0 +1,96 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="CU06" name="CU-06 Registrar Tareas">
+    <mxGraphModel dx="864" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actor_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Admin" vertex="1">
+          <mxGeometry height="80" width="40" x="40" y="158" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_supervisor" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Supervisor" vertex="1">
+          <mxGeometry height="70" width="40" x="40" y="273" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="User" vertex="1">
+          <mxGeometry height="80" width="40" x="40" y="378" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_main" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="CU-06&lt;br&gt;Registrar Tareas" vertex="1">
+          <mxGeometry height="80" width="200" x="120" y="248" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_admin_main" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_supervisor_main" edge="1" parent="1" source="actor_supervisor" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_main" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_definir" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Definir Datos de Tarea" vertex="1">
+          <mxGeometry height="60" width="210" x="80" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_asignar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Asignar Usuarios a Tarea" vertex="1">
+          <mxGeometry height="60" width="210" x="260" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_asociar_proyecto" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Asociar Proyecto a Tarea" vertex="1">
+          <mxGeometry height="60" width="220" x="350" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_permisos" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Permisos Área/Equipo" vertex="1">
+          <mxGeometry height="60" width="230" x="290" y="343" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_registrar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registrar Tarea y Asignaciones" vertex="1">
+          <mxGeometry height="60" width="240" x="100" y="438" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_usuario" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Usuario de Área/Equipo" vertex="1">
+          <mxGeometry height="60" width="240" x="370" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_proyecto" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Proyecto Activo" vertex="1">
+          <mxGeometry height="60" width="210" x="565" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_actualizar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Actualizar Dashboards y Kanban" vertex="1">
+          <mxGeometry height="60" width="260" x="380" y="458" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_usuario" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Usuario Fuera del Área" vertex="1">
+          <mxGeometry height="60" width="240" x="515" y="158" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_proyecto" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Proyecto Inactivo" vertex="1">
+          <mxGeometry height="60" width="220" x="560" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_definir" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_definir" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_asignar" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_asignar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_asociar_proyecto" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_asociar_proyecto" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_validar_permisos" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_permisos" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_registrar" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_registrar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_asignar_validar_usuario" edge="1" parent="1" source="uc_asignar" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_usuario" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_asociar_validar_proyecto" edge="1" parent="1" source="uc_asociar_proyecto" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_proyecto" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_registrar_actualizar" edge="1" parent="1" source="uc_registrar" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_actualizar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_usuario" edge="1" parent="1" source="uc_error_usuario" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_usuario" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_proyecto" edge="1" parent="1" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_proyecto" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="318" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bhHn1UJ4u8C6u0vacrEs-3" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Registrar Tareas: Admin, Supervisor, User" vertex="1">
+          <mxGeometry height="560" width="780" x="20" y="10" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

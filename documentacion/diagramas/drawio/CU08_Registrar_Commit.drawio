@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.1.1">
+  <diagram id="CU08" name="CU-08 Registrar Commit">
+    <mxGraphModel dx="864" dy="468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actor_user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="User" vertex="1">
+          <mxGeometry height="80" width="40" x="20" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_supervisor" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Supervisor" vertex="1">
+          <mxGeometry height="80" width="40" x="30" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_main" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="CU-08&lt;br&gt;Registrar Commit" vertex="1">
+          <mxGeometry height="80" width="200" x="70" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_user_main" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_supervisor_main" edge="1" parent="1" source="actor_supervisor" style="endArrow=none;html=1;" target="uc_main">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_abrir_modal" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Abrir Modal de Commits" vertex="1">
+          <mxGeometry height="60" width="210" x="25" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_escribir" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Escribir Mensaje de Commit" vertex="1">
+          <mxGeometry height="60" width="230" x="310" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_cambiar_estado" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" value="Cambiar Estado de Tarea (opcional)" vertex="1">
+          <mxGeometry height="60" width="260" x="280" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_guardar" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Guardar Commit" vertex="1">
+          <mxGeometry height="60" width="180" x="220" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_actualizar_historial" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Actualizar Historial de Commits" vertex="1">
+          <mxGeometry height="60" width="240" x="25" y="384" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_permiso" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Permiso sobre Tarea" vertex="1">
+          <mxGeometry height="60" width="230" x="240" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_validar_datos" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Validar Datos de Commit" vertex="1">
+          <mxGeometry height="60" width="220" x="510" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_vacio" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Mensaje Vacío" vertex="1">
+          <mxGeometry height="60" width="210" x="530" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_error_invalido" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Manejar Campo Inválido" vertex="1">
+          <mxGeometry height="60" width="210" x="530" y="324" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_abrir_modal" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_abrir_modal" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_escribir" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_escribir" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_cambiar_estado" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_cambiar_estado" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_guardar" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_guardar" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_actualizar_historial" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_actualizar_historial" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_main_validar_permiso" edge="1" parent="1" source="uc_main" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_permiso" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_escribir_validar_datos" edge="1" parent="1" source="uc_escribir" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_datos" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_vacio" edge="1" parent="1" source="uc_error_vacio" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_datos" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_error_invalido" edge="1" parent="1" source="uc_error_invalido" style="endArrow=block;dashed=1;html=1;labelBackgroundColor=none;" target="uc_validar_datos" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sna8UjISYwKoHV5kLLXX-6" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Registrar Commit: Admin, Supervisor, User" vertex="1">
+          <mxGeometry height="470" width="750" x="10" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
