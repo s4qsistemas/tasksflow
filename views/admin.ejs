@@ -117,6 +117,16 @@
       ? projects
       : []
   );
+
+  function priorityLabel(p) {
+    switch (p) {
+      case 'low': return 'baja';
+      case 'normal': return 'media';
+      case 'high': return 'alta';
+      case 'critical': return 'crítica';
+      default: return p || 'sin prioridad';
+    }
+  }
 %>
 
 <script>
@@ -480,7 +490,8 @@
               data-project-id="<%= t.project_id || '' %>"
               data-task-title="<%= t.title || t.name || '' %>"
               data-task-project="<%= t.project_name || '' %>"
-              data-task-assignee="<%= t.assignee_name || '' %>">
+              data-task-assignee="<%= t.assignee_name || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -494,6 +505,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -519,7 +533,8 @@
               data-project-id="<%= t.project_id || '' %>"
               data-task-title="<%= t.title || t.name || '' %>"
               data-task-project="<%= t.project_name || '' %>"
-              data-task-assignee="<%= t.assignee_name || '' %>">
+              data-task-assignee="<%= t.assignee_name || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -533,6 +548,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -558,7 +576,8 @@
               data-project-id="<%= t.project_id || '' %>"
               data-task-title="<%= t.title || t.name || '' %>"
               data-task-project="<%= t.project_name || '' %>"
-              data-task-assignee="<%= t.assignee_name || '' %>">
+              data-task-assignee="<%= t.assignee_name || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -572,6 +591,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -597,7 +619,8 @@
               data-project-id="<%= t.project_id || '' %>"
               data-task-title="<%= t.title || t.name || '' %>"
               data-task-project="<%= t.project_name || '' %>"
-              data-task-assignee="<%= t.assignee_name || '' %>">
+              data-task-assignee="<%= t.assignee_name || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -611,6 +634,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>

@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =========================================
+   PRIORIDAD TAREA (CSS PLANO, SIN LAYER)
+   ========================================= */
+
+.task-priority-pill{
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.task-priority-low{
+  background-color: aqua;
+  color: #0f172a;
+}
+
+.task-priority-normal{
+  background-color: greenyellow;
+  color: #0f172a;
+}
+
+.task-priority-high{
+  background-color: #ff8a00;
+  color: #fff;
+}
+
+.task-priority-critical{
+  background-color: #ff2d55;
+  color: #fff;
+}

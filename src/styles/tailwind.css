@@ -22,3 +22,20 @@ Aquí se pueden agregar utilidades personalizadas:
 
     <button class="btn-primary">Guardar</button>
 */
+
+@layer utilities {
+  .task-priority-pill{
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .task-priority-low      { background-color: rgba(34,211,238,.18) !important; }
+  .task-priority-normal   { background-color: rgba(34,197, 94,.18) !important; }
+  .task-priority-high     { background-color: rgba(251,146,60,.20) !important; }
+  .task-priority-critical { background-color: rgba(239, 68,68,.20) !important; }
+  .task-priority-high { color: #9a3412 !important; }
+  .task-priority-critical { color: #7f1d1d !important; }
+}

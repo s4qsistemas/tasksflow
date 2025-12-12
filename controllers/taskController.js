@@ -54,8 +54,6 @@ async function crearTarea(req, res) {
       status,
       deadline_date,
       deadline_time
-      // NOTA: los asignatarios vienen por extractAssigneeIds(body)
-      //       y NO hace falta declararlos aquí
     } = req.body;
 
     if (!title || !title.trim()) {
@@ -104,7 +102,6 @@ async function crearTarea(req, res) {
       title: title.trim(),
       description: description || null,
       status: status || 'pending',
-      // Tu modelo usa prioridad 'normal' por defecto
       priority: priority || 'normal',
       deadline,
       creatorId

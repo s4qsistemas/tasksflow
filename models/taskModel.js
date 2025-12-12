@@ -172,23 +172,25 @@ async function getByCompanyAndArea(companyId, areaId) {
       t.id,
       t.title,
       t.status,
+      t.priority,
       t.project_id,
       p.name AS project_name,
-      u.name AS assignee_name
+      MIN(u.name) AS assignee_name
     FROM tasks t
-    LEFT JOIN projects p       ON p.id = t.project_id
-    INNER JOIN task_assignments ta ON ta.task_id = t.id
-    INNER JOIN users u             ON u.id = ta.user_id
+    LEFT JOIN projects p            ON p.id = t.project_id
+    INNER JOIN task_assignments ta  ON ta.task_id = t.id
+    INNER JOIN users u              ON u.id = ta.user_id
     WHERE 
       t.company_id = ?
       AND u.area_id = ?
       AND u.status = 'active'
       AND t.status IN ('pending', 'in_progress', 'review', 'done')
-    ORDER BY t.created_at DESC
+    GROUP BY
+      t.id, t.title, t.status, t.priority, t.project_id, p.name
+    ORDER BY MAX(t.created_at) DESC
     `,
     [companyId, areaId]
   );
-
   return rows;
 }
 

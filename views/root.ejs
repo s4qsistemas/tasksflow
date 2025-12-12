@@ -556,6 +556,13 @@
               class="px-3 py-1.5 rounded-lg text-xs border text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
+            <!-- Resetear contraseña a la genérica -->
+            <button
+              type="button"
+              onclick="resetPasswordUsuarioSupervisor()"
+              class="px-3 py-1.5 rounded-lg text-xs border border-amber-400 text-amber-600 hover:bg-amber-50">
+              Reset pass genérica
+            </button>
             <button
               type="submit"
               class="px-3 py-1.5 rounded-lg text-xs bg-[#2E7D32] text-white hover:bg-[#1B5E20]">
@@ -812,4 +819,46 @@
       }
     });
   }
+</script>
+
+<!-- Resetear contraseña a la genérica -->
+<script>
+  async function resetPasswordUsuarioSupervisor() {
+    // Usamos el select correcto del modal root: selectRootAdminEditar
+    if (!selectRootAdminEditar) {
+      alert('No se encontró el selector de usuarios Admin.');
+      return;
+    }
+
+    const id = selectRootAdminEditar.value;
+    if (!id) {
+      alert('Selecciona un usuario Admin primero.');
+      return;
+    }
+
+    const confirmar = confirm(
+      '¿Seguro que deseas resetear la contraseña de este usuario ' +
+      'a la contraseña genérica del sistema?'
+    );
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        credentials: 'same-origin'
+      });
+
+      const data = await res.json();
+      alert(data.message || 'Operación realizada.');
+    } catch (err) {
+      console.error(err);
+      alert('Error al resetear la contraseña.');
+    }
+  }
+
+  // Exponer función al scope global para usarla en onclick
+  window.resetPasswordUsuarioSupervisor = resetPasswordUsuarioSupervisor;
 </script>

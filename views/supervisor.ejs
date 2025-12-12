@@ -71,6 +71,28 @@
     window.currentUserId = `<%= user ? user.id : '' %>`;
   </script>
 
+  <%
+  function statusLabel(st) {
+    switch (st) {
+      case 'pending': return 'pendiente';
+      case 'in_progress': return 'en progreso';
+      case 'review': return 'en revisión';
+      case 'done': return 'completada';
+      default: return st;
+    }
+  }
+
+  function priorityLabel(p) {
+    switch (p) {
+      case 'low': return 'baja';
+      case 'normal': return 'media';
+      case 'high': return 'alta';
+      case 'critical': return 'crítica';
+      default: return p || 'sin prioridad';
+    }
+  }
+%>
+
   <!-- VISTA DASHBOARD SUPERVISOR (NIVEL TÁCTICO) -->
   <section
     id="supervisorDashboardView"
@@ -221,7 +243,7 @@
                             t.status === 'in_progress' ? 'bg-[#E3F2FD] text-[#1565C0]' :
                             t.status === 'review' ? 'bg-[#F3E5F5] text-[#7B1FA2]' :
                             'bg-[#E8F5E9] text-[#2E7D32]' %>">
-                        <%= t.status %>
+                        <%= statusLabel(t.status) %>
                       </span>
                     </td>
                     <td class="py-2 px-3 text-[11px] text-gray-600">
@@ -367,7 +389,8 @@
               draggable="true"
               data-task-id="<%= t.id %>"
               data-task-status="pending"
-              data-project-id="<%= t.project_id || '' %>">
+              data-project-id="<%= t.project_id || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -381,6 +404,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -403,7 +429,8 @@
               draggable="true"
               data-task-id="<%= t.id %>"
               data-task-status="in_progress"
-              data-project-id="<%= t.project_id || '' %>">
+              data-project-id="<%= t.project_id || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -417,6 +444,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -439,7 +469,8 @@
               draggable="true"
               data-task-id="<%= t.id %>"
               data-task-status="review"
-              data-project-id="<%= t.project_id || '' %>">
+              data-project-id="<%= t.project_id || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -453,6 +484,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>
@@ -475,7 +509,8 @@
               draggable="true"
               data-task-id="<%= t.id %>"
               data-task-status="done"
-              data-project-id="<%= t.project_id || '' %>">
+              data-project-id="<%= t.project_id || '' %>"
+              data-task-priority="<%= t.priority || 'normal' %>">
               <h4 class="font-semibold text-gray-800"><%= t.title || t.name %></h4>
 
               <% if (t.project_name) { %>
@@ -489,6 +524,9 @@
                   Asignado a: <%= t.assignee_name %>
                 </p>
               <% } %>
+              <p class="task-priority-pill text-[11px] task-priority-<%= (t.priority || 'normal') %>">
+                Prioridad: <%= priorityLabel(t.priority) %>
+              </p>
             </article>
           <% }); %>
         <% } else { %>

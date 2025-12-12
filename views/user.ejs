@@ -51,43 +51,45 @@
 </nav>
 
 <main class="max-w-6xl mx-auto my-8">
-  <% 
-    function statusLabel(st) {
-      switch (st) {
-        case 'pending': return 'pendiente';
-        case 'in_progress': return 'en progreso';
-        case 'review': return 'en revisión';
-        case 'done': return 'completada';
-        default: return st;
-      }
+<% 
+  function statusLabel(st) {
+    switch (st) {
+      case 'pending': return 'pendiente';
+      case 'in_progress': return 'en progreso';
+      case 'review': return 'en revisión';
+      case 'done': return 'completada';
+      default: return st;
     }
+  }
 
-    // --- Cálculos para el dashboard usuario ---
-    const hasTasks = (typeof tasks !== 'undefined') && tasks && tasks.length;
-    const totalTasks = hasTasks ? tasks.length : 0;
-
-    let totalInProgress = 0;
-    let totalDone = 0;
-    let totalReview = 0;
-    let totalPending = 0;
-
-    if (hasTasks) {
-      tasks.forEach(function (t) {
-        if (t.status === 'pending') {
-          totalPending++;
-        }
-        if (t.status === 'in_progress') {
-          totalInProgress++;
-        }
-        if (t.status === 'done') {
-          totalDone++;
-        }
-        if (t.status === 'review') {
-          totalReview++;
-        }
-      });
+  function priorityLabel(p) {
+    switch (p) {
+      case 'low': return 'baja';
+      case 'normal': return 'media';
+      case 'high': return 'alta';
+      case 'critical': return 'crítica';
+      default: return p || 'sin prioridad';
     }
-  %>
+  }
+
+  // --- Cálculos para el dashboard usuario ---
+  const hasTasks = (typeof tasks !== 'undefined') && tasks && tasks.length;
+  const totalTasks = hasTasks ? tasks.length : 0;
+
+  let totalInProgress = 0;
+  let totalDone = 0;
+  let totalReview = 0;
+  let totalPending = 0;
+
+  if (hasTasks) {
+    tasks.forEach(function (t) {
+      if (t.status === 'pending') totalPending++;
+      if (t.status === 'in_progress') totalInProgress++;
+      if (t.status === 'done') totalDone++;
+      if (t.status === 'review') totalReview++;
+    });
+  }
+%>
   <!-- VISTA DASHBOARD USUARIO -->
   <section
     id="userDashboardView"
@@ -202,7 +204,8 @@
             draggable="true"
             data-task-id="<%= t.id %>"
             data-task-status="<%= t.status %>"
-            data-project-id="<%= t.project_id || '' %>">
+            data-project-id="<%= t.project_id || '' %>"
+            data-task-priority="<%= t.priority || 'normal' %>">
             <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
 
             <!-- Proyecto -->
@@ -256,6 +259,11 @@
                 }
               %>
               <%= scopeParts.join(' • ') %>
+            </p>
+
+            <!-- Prioridad -->
+            <p class="task-priority-pill text-xs text-gray-500">
+              Prioridad: <%= priorityLabel(t.priority) %>
             </p>
           </article>
           <% } }); %>
@@ -277,7 +285,8 @@
             draggable="true"
             data-task-id="<%= t.id %>"
             data-task-status="<%= t.status %>"
-            data-project-id="<%= t.project_id || '' %>">
+            data-project-id="<%= t.project_id || '' %>"
+            data-task-priority="<%= t.priority || 'normal' %>">
             <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
 
             <!-- Proyecto -->
@@ -332,6 +341,12 @@
               %>
               <%= scopeParts.join(' • ') %>
             </p>
+
+            <!-- Prioridad -->
+            <p class="task-priority-pill text-xs text-gray-500">
+              Prioridad: <%= priorityLabel(t.priority) %>
+            </p>
+
           </article>
           <% } }); %>
         <% } else { %>
@@ -352,7 +367,8 @@
             draggable="true"
             data-task-id="<%= t.id %>"
             data-task-status="<%= t.status %>"
-            data-project-id="<%= t.project_id || '' %>">
+            data-project-id="<%= t.project_id || '' %>"
+            data-task-priority="<%= t.priority || 'normal' %>">
             <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
 
             <!-- Proyecto -->
@@ -406,6 +422,11 @@
                 }
               %>
               <%= scopeParts.join(' • ') %>
+            </p>
+
+            <!-- Prioridad -->
+            <p class="task-priority-pill text-xs text-gray-500">
+              Prioridad: <%= priorityLabel(t.priority) %>
             </p>
           </article>
           <% } }); %>
@@ -427,7 +448,8 @@
             draggable="true"
             data-task-id="<%= t.id %>"
             data-task-status="<%= t.status %>"
-            data-project-id="<%= t.project_id || '' %>">
+            data-project-id="<%= t.project_id || '' %>"
+            data-task-priority="<%= t.priority || 'normal' %>">
             <h4 class="font-semibold text-gray-800"><%= t.title %></h4>
 
             <!-- Proyecto -->
@@ -481,6 +503,11 @@
                 }
               %>
               <%= scopeParts.join(' • ') %>
+            </p>
+
+            <!-- Prioridad -->
+            <p class="task-priority-pill text-xs text-gray-500">
+              Prioridad: <%= priorityLabel(t.priority) %>
             </p>
           </article>
           <% } }); %>
