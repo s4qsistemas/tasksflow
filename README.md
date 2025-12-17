@@ -1,126 +1,167 @@
-# 🧩 Proyecto TasksFlow — Kanban Empresarial con Trazabilidad de Tareas
+# 🧩 TasksFlow — Kanban Empresarial con Trazabilidad de Tareas
 
-## 📘 Descripción General
+## 📘 Descripción general
 
-Este proyecto forma parte del **Taller de Proyecto de Especialidad (TPE401)** de la carrera **Técnico de Nivel Superior en Programación y Análisis de Sistemas** del **Instituto Profesional AIEP**.  
-Su propósito es desarrollar una **aplicación web tipo Kanban** para la **gestión centralizada de tareas empresariales**, organizada por **áreas, supervisores y trabajadores**.
+**TasksFlow** es una aplicación web tipo **Kanban** para la gestión centralizada de tareas en empresas, organizada por **roles** (Root, Admin, Supervisor, User), **áreas**, **equipos** y **proyectos**.
 
-La aplicación permitirá crear tableros de tareas, asignar responsables, registrar avances y mantener un **historial de cambios y acciones inspirado en las buenas prácticas de Git**.  
-Con ello se busca **mejorar la organización, la comunicación y la trazabilidad** de las actividades cotidianas dentro de las empresas.
+El sistema incorpora un módulo de **trazabilidad inspirado en Git**, registrando acciones e historial de cambios sobre las tareas para mejorar el control, la transparencia y el seguimiento.
+
+> Proyecto académico: **Taller de Proyecto de Especialidad (TPE401)** —  
+> **Técnico de Nivel Superior en Programación y Análisis de Sistemas**, **AIEP** (2025).
 
 ---
 
 ## 🧠 Problemática
 
-En muchas empresas y organizaciones, la gestión de tareas diarias se realiza de manera **descentralizada**, utilizando hojas de cálculo, correos electrónicos o canales de mensajería dispersos.  
-Esta fragmentación **dificulta el control del avance, la trazabilidad y la coordinación** entre áreas y equipos de trabajo.  
-Supervisores y empleados carecen de una herramienta unificada que facilite el seguimiento y la colaboración estructurada.
+En muchas organizaciones la gestión diaria se realiza de forma **descentralizada** (planillas, correos, mensajería), lo que dificulta:
+
+- Control del avance real.
+- Coordinación entre áreas/equipos.
+- Trazabilidad de cambios y responsables.
+- Auditoría y continuidad operativa.
 
 ---
 
-## 🚀 Propuesta de Solución
+## 🚀 Propuesta de solución
 
-Desarrollar una **aplicación web tipo Kanban** que permita:
-- Gestionar tareas por **áreas, supervisores y trabajadores**.  
-- Visualizar el flujo de trabajo mediante un tablero con columnas **To Do / In Progress / Done**.  
-- Registrar acciones e historial de cambios **inspirado en Git**, permitiendo trazabilidad completa.  
-- Facilitar la **organización, comunicación y transparencia** interna de los procesos.
+Desarrollar una plataforma web que permita:
 
----
-
-## 🎯 Objetivo General
-
-**Gestionar mediante una aplicación web tipo Kanban** la administración centralizada de tareas en empresas, organizada por áreas, supervisores y trabajadores, que permita asignar, registrar y dar seguimiento a actividades cotidianas con trazabilidad de acciones inspirada en Git.
+- Tablero Kanban con columnas **To Do / In Progress / Done**.
+- Gestión por **roles** y permisos.
+- Asignación de tareas a usuarios/equipos.
+- Registro de acciones tipo “commit” para trazabilidad.
+- Interfaz web con vistas por rol (Root/Admin/Supervisor/User).
 
 ---
 
-## 🎯 Objetivos Específicos
+## 🎯 Objetivos
 
-1. Levantar y documentar los requerimientos funcionales y no funcionales del sistema.  
-2. Diseñar la arquitectura y el modelo de base de datos relacional.  
-3. Implementar una API REST en **Node.js con Express y MySQL2** para la gestión de usuarios, áreas y tareas.  
-4. Desarrollar la interfaz web responsiva con tablero Kanban conectado al backend.  
-5. Integrar un módulo de **registro de acciones e historial de cambios inspirado en Git**.  
-6. Realizar pruebas funcionales, documentación técnica y despliegue básico del sistema.
+### Objetivo general
+Gestionar mediante una aplicación web tipo Kanban la administración centralizada de tareas en empresas, organizada por áreas y roles, permitiendo asignar, registrar y dar seguimiento a actividades con trazabilidad de acciones inspirada en Git.
 
----
-
-## 💡 Elementos de Innovación
-
-El proyecto propone una **innovación funcional**, aplicando principios de **control de versiones y trazabilidad** (propios del desarrollo de software con Git) a la **gestión de tareas empresariales**.  
-Cada tarea contará con un **historial de acciones estructurado**, lo que aporta **transparencia, orden y responsabilidad** entre supervisores y empleados.  
-La estructura jerárquica por **áreas, supervisores y trabajadores** permite adaptar la aplicación a distintos tipos de organizaciones.
-
----
-
-## 🧩 Reflexión: *La Catedral y el Bazar*
-
-El proyecto combina elementos de ambos modelos:
-- **Catedral:** planificación estructurada, jerarquía de roles y control organizacional.  
-- **Bazar:** colaboración abierta, comunicación y mejora continua.  
-
-Este equilibrio busca fomentar un entorno digital más **colaborativo y eficiente** dentro de las empresas.
-
----
-
-## ⚖️ Licencia
-
-Este proyecto se distribuye bajo la **Licencia Pública General de GNU (GPL v3)**.  
-Esta licencia garantiza que el código fuente permanezca abierto y disponible para todos los usuarios, quienes podrán **usar, estudiar, modificar y redistribuir** el software, siempre que mantengan los mismos términos de libertad en las versiones derivadas.  
-La elección de la GPL refuerza el compromiso con la **colaboración, transparencia y desarrollo comunitario**.
-
----
-
-## 🗂️ Estructura Inicial del Proyecto
-
-```bash
-├── src/
-│   ├── routes/
-│   ├── controllers/
-│   ├── services/
-│   ├── db/
-│   └── app.js
-├── .env.example
-├── package.json
-├── README.md
-└── LICENSE
-```
-
----
-
-## 🗓️ Planificación General (12 semanas)
-
-| Semana | Actividad principal |
-|:-------:|---------------------|
-| 1–2 | Levantamiento de requerimientos y análisis. |
-| 3 | Diseño de arquitectura y modelo de datos. |
-| 4–7 | Implementación de API REST. |
-| 8–10 | Desarrollo de interfaz Kanban y trazabilidad. |
-| 11 | Pruebas funcionales y documentación. |
-| 12 | Presentación y despliegue final. |
+### Objetivos específicos
+1. Levantar y documentar requerimientos funcionales y no funcionales.  
+2. Diseñar arquitectura y modelo relacional (MER + diseño físico).  
+3. Implementar API en **Node.js + Express** con **MySQL (mysql2)**.  
+4. Desarrollar interfaz web con tablero Kanban conectado al backend.  
+5. Integrar módulo de historial de acciones (commits) para tareas.  
+6. Realizar pruebas funcionales, documentación y despliegue básico.
 
 ---
 
 ## 🧰 Tecnologías
 
-- **Backend:** Node.js, Express, API REST  
+- **Backend:** Node.js, Express  
 - **Base de datos:** MySQL + mysql2  
-- **Frontend:** HTML5, CSS3, JavaScript (con posible uso de EJS o Tailwind CSS)  
-- **Versionamiento:** Git y GitHub (con tablero Kanban para Issues y tareas)
+- **Frontend:** EJS, HTML5, CSS3, JavaScript, Tailwind CSS  
+- **Sesiones y roles:** express-session  
+- **Hashing:** argon2  
+- **Control de versiones:** Git / GitHub
+
+---
+
+## 📦 Instalación y ejecución (local)
+
+### Requisitos
+- Node.js (LTS recomendado)
+- MySQL (local o remoto)
+- Variables de entorno configuradas (`.env`)
+
+### Pasos
+```bash
+# 1) instalar dependencias
+npm install
+
+# 2) construir estilos (una vez)
+npm run build:css
+
+# 3) levantar servidor
+npm start
+```
+
+### Desarrollo de estilos (watch)
+```bash
+npm run dev:css
+```
+
+---
+
+## 🗂️ Estructura del proyecto (real)
+
+> Estructura obtenida desde el directorio del repositorio (se omiten `.git/` y `node_modules/`).
+
+```bash
+tasksflow/
+├── argon2/
+│   └── hashPass.js
+├── config/
+│   └── db.js
+├── controllers/
+│   ├── adminController.js
+│   ├── areaController.js
+│   ├── authController.js
+│   ├── companyController.js
+│   ├── projectController.js
+│   ├── rootController.js
+│   ├── supervisorController.js
+│   ├── taskCommitController.js
+│   ├── taskController.js
+│   └── teamController.js
+├── database/
+│   ├── create_table.sql
+│   └── sql.sql
+├── documentacion/
+│   └── (diagramas, wireframes, wireflows y material del informe)
+├── middlewares/
+├── models/
+├── public/
+│   ├── css/
+│   ├── img/
+│   ├── js/
+│   └── site.webmanifest
+├── routes/
+├── src/
+│   └── styles/
+│       └── input.css
+├── views/
+│   ├── admin.ejs
+│   ├── cambiar-password.ejs
+│   ├── layout.ejs
+│   ├── login.ejs
+│   ├── portal.ejs
+│   ├── root.ejs
+│   ├── supervisor.ejs
+│   └── user.ejs
+├── .env
+├── .gitignore
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── server.js
+└── tailwind.config.js
+```
+
+---
+
+## ⚖️ Licencia
+
+Este proyecto se distribuye bajo **GNU GPL v3**.  
+Permite usar, estudiar, modificar y redistribuir el software manteniendo las mismas libertades en derivados.
+
+---
+
+## 🏷️ Versionamiento y Releases
+
+Se utilizan **Git tags** y **GitHub Releases** para formalidad y trazabilidad:
+
+- Tag semántico sugerido: `vMAJOR.MINOR.PATCH` (ej. `v1.0.0`)
+- Cada Release agrupa una versión estable con notas de cambios
+
+Repositorio: https://github.com/s4qsistemas/tasksflow/
 
 ---
 
 ## 👥 Autor
 
-**Nombre:** Diego Ignacio Alvial Arrepol  
-**Carrera:** Técnico Nivel Superior en Programación y Análisis de Sistemas  
-**Asignatura:** TPE401 – Taller de Proyecto de Especialidad  
-**Institución:** Instituto Profesional AIEP  
-**Año:** 2025  
-
----
-
-## 🧩 Estado del Proyecto
-
-> **Avance 1:** Informe inicial corregido con observaciones del profesor, objetivos SMART actualizados, licencia GPL adoptada, y DFD preliminar completado.  
-> **Siguiente:** Elaborar Avance 2 con requerimientos RF/RNF, MER, Casos de Uso, wireframes y base de datos inicial.
+**Diego Ignacio Alvial Arrepol**  
+AIEP — TPE401 (2025)
