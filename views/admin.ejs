@@ -2494,7 +2494,7 @@
             <% if (typeof users !== 'undefined' && Array.isArray(users)) { %>
               <% users.forEach(function (u) { %>
                 <% if (u.status === 'active') { %>
-                  <option value="<%= u.id %>">
+                  <option value="<%= u.id %>" data-area-id="<%= u.area_id || '' %>">
                     <%= u.name %>
                     <% if (user && u.id === user.id) { %> · Yo <% } %>
                     <% if (u.area_name) { %> · <%= u.area_name %> <% } %>
@@ -2514,7 +2514,25 @@
               class="px-2 py-1 rounded-lg text-[11px] border text-gray-700 hover:bg-gray-100"
               onclick="seleccionarTodaMiArea()">
               Seleccionar a todos
-            </button>
+            </button> <!-- Botón Seleccionar a todos existente -->
+
+             <!-- Nuevo Select de Áreas para selección masiva -->
+             <div class="inline-block ml-2">
+              <select
+                id="areaSelectAction"
+                class="border rounded-lg px-2 py-1 text-[11px] text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#7B1FA2]"
+                onchange="seleccionarPorArea(this)"
+              >
+                <option value="">Seleccionar por área...</option>
+                <% if (typeof areas !== 'undefined' && Array.isArray(areas)) { %>
+                  <% areas.forEach(function(a) { %>
+                    <% if (a.status === 'active') { %>
+                      <option value="<%= a.id %>"><%= a.name %></option>
+                    <% } %>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
             <button
               type="button"
               class="px-2 py-1 rounded-lg text-[11px] border text-gray-700 hover:bg-gray-100"
@@ -2580,6 +2598,31 @@
     for (const opt of sel.options) {
       opt.selected = false;
     }
+    // Resetear también el select de áreas para que quede limpio
+    const areaSel = document.getElementById('areaSelectAction');
+    if (areaSel) areaSel.value = '';
+  }
+
+  function seleccionarPorArea(selectEl) {
+    const areaId = selectEl.value;
+    if (!areaId) return;
+
+    const sel = document.getElementById('taskAssignees');
+    if (!sel) return;
+
+    let count = 0;
+    for (const opt of sel.options) {
+      const uArea = opt.getAttribute('data-area-id');
+      // Si el usuario pertenece al área seleccionada, lo marcamos
+      // Nota: es aditivo, no borra lo que ya estaba seleccionado
+      if (uArea === areaId) {
+        opt.selected = true;
+        count++;
+      }
+    }
+    
+    // Opcional: feedback visual o log
+    // console.log(`Seleccionados ${count} usuarios del área ${areaId}`);
   }
 </script>
 

@@ -347,7 +347,16 @@ async function resetearPassword(req, res, next) {
       });
     }
 
-    const target = await User.getUserById(id, companyId);
+    let target = null;
+
+    // Si es root, buscamos el usuario en CUALQUIER empresa
+    if (actorRole === 'root') {
+      target = await User.getUserByIdAnyCompany(id);
+    } else {
+      // Si no es root, buscamos solo dentro de su empresa
+      target = await User.getUserById(id, companyId);
+    }
+
     if (!target) {
       return res.status(404).json({
         ok: false,
@@ -356,11 +365,14 @@ async function resetearPassword(req, res, next) {
     }
 
     const targetRole = mapRoleIdToName(target.role_id);
+    // Para el reset, usamos la company del target (importante si soy root)
+    const targetCompanyId = target.company_id;
 
     // Reglas de jerarquía
     if (actorRole === 'root') {
       // root puede resetear a cualquiera
     } else if (actorRole === 'admin') {
+      // Admin solo ve los de su company (ya filtrado por getUserById)
       if (targetRole !== 'supervisor') {
         return res.status(403).json({
           ok: false,
@@ -368,6 +380,7 @@ async function resetearPassword(req, res, next) {
         });
       }
     } else if (actorRole === 'supervisor') {
+      // Supervisor solo ve los de su company (ya filtrado)
       if (targetRole !== 'user' || target.manager_id !== actor.id) {
         return res.status(403).json({
           ok: false,
@@ -381,7 +394,7 @@ async function resetearPassword(req, res, next) {
       });
     }
 
-    const success = await User.resetPassword(id, companyId);
+    const success = await User.resetPassword(id, targetCompanyId);
     if (!success) {
       return res.status(500).json({
         ok: false,
