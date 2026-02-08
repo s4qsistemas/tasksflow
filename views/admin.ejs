@@ -1806,7 +1806,7 @@
     // ===============================
 
     // IDs de áreas activas (inyectadas desde el servidor)
-    window.activeAreaIds = <% - JSON.stringify(
+    window.activeAreaIds = <%- JSON.stringify(
       (typeof areas !== 'undefined' && Array.isArray(areas)
         ? areas
           .filter(function (a) { return a.status === 'active'; })
@@ -1816,7 +1816,7 @@
     ) %>;
 
     const selectGrupo = document.getElementById('grupoSeleccionado');
-    const btnRefrescarGrupo = document.querySelector('#modalEditarGrupo btnRefrescarGrupo');
+    const btnRefrescarGrupo = document.querySelector('#modalEditarGrupo #btnRefrescarGrupo');
     const filtroArea = document.getElementById('filtroArea');
     const filtroTipoUsuario = document.getElementById('filtroTipoUsuario');
     const buscadorUsuarioGrupo = document.getElementById('buscadorUsuarioGrupo');
@@ -1845,14 +1845,12 @@
           selectGrupo.remove(1);
         }
 
-        // 🔹 Solo teams activos
+        // 🔹 Mostrar todos los teams
         data.data
-          .filter((t) => t.status === 'active')
           .forEach((t) => {
             const opt = document.createElement('option');
             opt.value = t.id;
-            // puedes dejar solo el nombre, porque ya son todos activos
-            opt.textContent = t.name;
+            opt.textContent = `${t.name} (${t.status})`;
             selectGrupo.appendChild(opt);
           });
       } catch (err) {

@@ -101,9 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const isInit = !!opts.init;   // 👈 para saber si es llamada de inicialización
 
     const candidates = [
-      { dashId: 'adminDashboardView',      kanbanId: 'adminKanbanView',      role: 'admin' },
+      { dashId: 'adminDashboardView', kanbanId: 'adminKanbanView', role: 'admin' },
       { dashId: 'supervisorDashboardView', kanbanId: 'supervisorKanbanView', role: 'supervisor' },
-      { dashId: 'userDashboardView',       kanbanId: 'userKanbanView',       role: 'user' }
+      { dashId: 'userDashboardView', kanbanId: 'userKanbanView', role: 'user' }
     ];
 
     let dash = null;
@@ -140,23 +140,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 🔹 Lógica especial SOLO para SUPERVISOR
       if (currentRole === 'supervisor') {
-        const btnNuevoUsuario  = document.getElementById('btnSupervisorNuevoUsuario');
-        const btnNuevaTarea    = document.getElementById('btnSupervisorNuevaTarea');
-        const btnProyectos     = document.getElementById('btnSupervisorProyectos');
+        const btnNuevoUsuario = document.getElementById('btnSupervisorNuevoUsuario');
+        const btnNuevaTarea = document.getElementById('btnSupervisorNuevaTarea');
+        const btnProyectos = document.getElementById('btnSupervisorProyectos');
 
         if (btnNuevoUsuario) btnNuevoUsuario.classList.add('hidden');
-        if (btnNuevaTarea)   btnNuevaTarea.classList.remove('hidden');
-        if (btnProyectos)    btnProyectos.classList.remove('hidden'); // 👈 mostrar en Kanban
+        if (btnNuevaTarea) btnNuevaTarea.classList.remove('hidden');
+        if (btnProyectos) btnProyectos.classList.remove('hidden'); // 👈 mostrar en Kanban
       }
 
       // 🔹 Lógica especial SOLO para ADMIN
       if (currentRole === 'admin') {
-        const btnArea         = document.getElementById('btnAdminNuevaArea');
-        const btnUsuario      = document.getElementById('btnAdminNuevoUsuario');
-        const btnNuevoGrupo   = document.getElementById('btnAdminNuevoGrupo');
-        const btnEditarGrupo  = document.getElementById('btnAdminEditarGrupo');
-        const btnProyectos    = document.getElementById('btnAdminProyectos');
-        const btnNuevaTarea   = document.getElementById('btnAdminNuevaTarea');
+        const btnArea = document.getElementById('btnAdminNuevaArea');
+        const btnUsuario = document.getElementById('btnAdminNuevoUsuario');
+        const btnNuevoGrupo = document.getElementById('btnAdminNuevoGrupo');
+        const btnEditarGrupo = document.getElementById('btnAdminEditarGrupo');
+        const btnProyectos = document.getElementById('btnAdminProyectos');
+        const btnNuevaTarea = document.getElementById('btnAdminNuevaTarea');
 
         // Ocultar áreas/usuarios/teams (romper también el sm:inline-flex)
         if (btnArea) {
@@ -177,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Mostrar proyectos y tareas
-        if (btnProyectos)   btnProyectos.classList.remove('hidden');
-        if (btnNuevaTarea)  btnNuevaTarea.classList.remove('hidden');
+        if (btnProyectos) btnProyectos.classList.remove('hidden');
+        if (btnNuevaTarea) btnNuevaTarea.classList.remove('hidden');
       }
 
     } else {
@@ -201,23 +201,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 🔹 Lógica especial SOLO para SUPERVISOR
       if (currentRole === 'supervisor') {
-        const btnNuevoUsuario  = document.getElementById('btnSupervisorNuevoUsuario');
-        const btnNuevaTarea    = document.getElementById('btnSupervisorNuevaTarea');
-        const btnProyectos     = document.getElementById('btnSupervisorProyectos');
+        const btnNuevoUsuario = document.getElementById('btnSupervisorNuevoUsuario');
+        const btnNuevaTarea = document.getElementById('btnSupervisorNuevaTarea');
+        const btnProyectos = document.getElementById('btnSupervisorProyectos');
 
         if (btnNuevoUsuario) btnNuevoUsuario.classList.remove('hidden');
-        if (btnNuevaTarea)   btnNuevaTarea.classList.add('hidden');
-        if (btnProyectos)    btnProyectos.classList.add('hidden'); // 👈 ocultar en Dashboard
+        if (btnNuevaTarea) btnNuevaTarea.classList.add('hidden');
+        if (btnProyectos) btnProyectos.classList.add('hidden'); // 👈 ocultar en Dashboard
       }
 
       // 🔹 Lógica especial SOLO para ADMIN (solo en inicialización)
       if (currentRole === 'admin') {
-        const btnArea         = document.getElementById('btnAdminNuevaArea');
-        const btnUsuario      = document.getElementById('btnAdminNuevoUsuario');
-        const btnNuevoGrupo   = document.getElementById('btnAdminNuevoGrupo');
-        const btnEditarGrupo  = document.getElementById('btnAdminEditarGrupo');
-        const btnProyectos    = document.getElementById('btnAdminProyectos');
-        const btnNuevaTarea   = document.getElementById('btnAdminNuevaTarea');
+        const btnArea = document.getElementById('btnAdminNuevaArea');
+        const btnUsuario = document.getElementById('btnAdminNuevoUsuario');
+        const btnNuevoGrupo = document.getElementById('btnAdminNuevoGrupo');
+        const btnEditarGrupo = document.getElementById('btnAdminEditarGrupo');
+        const btnProyectos = document.getElementById('btnAdminProyectos');
+        const btnNuevaTarea = document.getElementById('btnAdminNuevaTarea');
 
         // En dashboard: mostrar áreas/usuarios/teams (de nuevo con sm:inline-flex)
         if (btnArea) {
@@ -238,8 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Ocultar proyectos y tareas en dashboard
-        if (btnProyectos)   btnProyectos.classList.add('hidden');
-        if (btnNuevaTarea)  btnNuevaTarea.classList.add('hidden');
+        if (btnProyectos) btnProyectos.classList.add('hidden');
+        if (btnNuevaTarea) btnNuevaTarea.classList.add('hidden');
       }
     }
   }
@@ -518,6 +518,9 @@ document.addEventListener('DOMContentLoaded', () => {
     formNuevoProyecto.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const btnSubmit = document.getElementById('btnGuardarProyectoNuevo');
+      if (btnSubmit) btnSubmit.disabled = true;
+
       try {
         const resp = await postForm('/api/projects', formNuevoProyecto);
         notify(resp);
@@ -525,99 +528,102 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resp.ok) {
           toggleModal('modalNuevoProyecto', false);
           window.location.reload();
+        } else {
+          if (btnSubmit) btnSubmit.disabled = false;
         }
       } catch (err) {
         console.error('Error al crear proyecto:', err);
         notify({ ok: false, message: 'Error inesperado al crear el proyecto' });
+        if (btnSubmit) btnSubmit.disabled = false;
       }
     });
   }
 
-// ===============================
-// Edición de proyectos (admin + user)
-// ===============================
-const formEditarProyecto = document.getElementById('formEditarProyecto');
+  // ===============================
+  // Edición de proyectos (admin + user)
+  // ===============================
+  const formEditarProyecto = document.getElementById('formEditarProyecto');
 
-if (formEditarProyecto) {
-  formEditarProyecto.addEventListener('submit', async function (e) {
-    e.preventDefault();
+  if (formEditarProyecto) {
+    formEditarProyecto.addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-    // Detectar ID según la vista:
-    //  - admin:  editProyectoId / editProyectoSelect
-    //  - user:   selectProyectoEditar
-    let id = null;
+      // Detectar ID según la vista:
+      //  - admin:  editProyectoId / editProyectoSelect
+      //  - user:   selectProyectoEditar
+      let id = null;
 
-    const inputIdAdmin = document.getElementById('editProyectoId');
-    const selectAdmin  = document.getElementById('editProyectoSelect');
-    const selectUser   = document.getElementById('selectProyectoEditar');
+      const inputIdAdmin = document.getElementById('editProyectoId');
+      const selectAdmin = document.getElementById('editProyectoSelect');
+      const selectUser = document.getElementById('selectProyectoEditar');
 
-    if (inputIdAdmin && inputIdAdmin.value) {
-      id = inputIdAdmin.value;
-    } else if (selectAdmin && selectAdmin.value) {
-      id = selectAdmin.value;
-    } else if (selectUser && selectUser.value) {
-      id = selectUser.value;
-    }
+      if (inputIdAdmin && inputIdAdmin.value) {
+        id = inputIdAdmin.value;
+      } else if (selectAdmin && selectAdmin.value) {
+        id = selectAdmin.value;
+      } else if (selectUser && selectUser.value) {
+        id = selectUser.value;
+      }
 
-    if (!id) {
-      alert('Selecciona un proyecto para editar.');
-      return;
-    }
-
-    const formData = new FormData(formEditarProyecto);
-
-    // Construimos el body para el endpoint /api/projects/update
-    const body = {
-      project_id: id   // 👈 lo que espera el backend
-    };
-
-    formData.forEach((value, key) => {
-      // evitamos duplicar project_id si viene en el form
-      if (key === 'project_id') return;
-      if (key === 'id') return;
-      body[key] = value || null;
-    });
-
-    try {
-      const resp = await fetch('/api/projects/update', {
-        method: 'POST', // 👈 NO es PUT, es POST
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await resp.json();
-
-      if (!resp.ok || !data.ok) {
-        console.error('Error al actualizar proyecto:', data);
-        if (window.notify) {
-          window.notify('error', data.message || 'Error al actualizar proyecto');
-        } else {
-          alert(data.message || 'Error al actualizar proyecto');
-        }
+      if (!id) {
+        alert('Selecciona un proyecto para editar.');
         return;
       }
 
-      if (window.notify) {
-        window.notify('success', 'Proyecto actualizado correctamente');
-      } else {
-        alert('Proyecto actualizado correctamente');
-      }
+      const formData = new FormData(formEditarProyecto);
 
-      // Cerrar modal y refrescar para ver cambios
-      toggleModal('modalNuevoProyecto', false);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      if (window.notify) {
-        window.notify('error', 'Error inesperado al actualizar proyecto');
-      } else {
-        alert('Error inesperado al actualizar proyecto');
+      // Construimos el body para el endpoint /api/projects/update
+      const body = {
+        project_id: id   // 👈 lo que espera el backend
+      };
+
+      formData.forEach((value, key) => {
+        // evitamos duplicar project_id si viene en el form
+        if (key === 'project_id') return;
+        if (key === 'id') return;
+        body[key] = value || null;
+      });
+
+      try {
+        const resp = await fetch('/api/projects/update', {
+          method: 'POST', // 👈 NO es PUT, es POST
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok) {
+          console.error('Error al actualizar proyecto:', data);
+          if (window.notify) {
+            window.notify('error', data.message || 'Error al actualizar proyecto');
+          } else {
+            alert(data.message || 'Error al actualizar proyecto');
+          }
+          return;
+        }
+
+        if (window.notify) {
+          window.notify('success', 'Proyecto actualizado correctamente');
+        } else {
+          alert('Proyecto actualizado correctamente');
+        }
+
+        // Cerrar modal y refrescar para ver cambios
+        toggleModal('modalNuevoProyecto', false);
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        if (window.notify) {
+          window.notify('error', 'Error inesperado al actualizar proyecto');
+        } else {
+          alert('Error inesperado al actualizar proyecto');
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   // Cargar datos de proyecto en el formulario de edición
   // Más adelante, cuando tengas /api/projects/:id, podemos agregar algo tipo:
@@ -651,51 +657,51 @@ if (formEditarProyecto) {
     });
   }
 
-// ===============================
-// Filtro de tareas en el Kanban (user / supervisor) POR PROYECTO
-// ===============================
-const filtroTarea = document.getElementById('filtroTarea');
+  // ===============================
+  // Filtro de tareas en el Kanban (user / supervisor) POR PROYECTO
+  // ===============================
+  const filtroTarea = document.getElementById('filtroTarea');
 
-if (filtroTarea) {
-  filtroTarea.addEventListener('change', (e) => {
-    const selected = e.target.value;
+  if (filtroTarea) {
+    filtroTarea.addEventListener('change', (e) => {
+      const selected = e.target.value;
 
-    // Detectar qué Kanban está presente en la vista actual
-    let rootSelector = '#userKanbanView';
-    if (document.getElementById('supervisorKanbanView')) {
-      rootSelector = '#supervisorKanbanView';
-    }
-
-    const cards = document.querySelectorAll(`${rootSelector} [data-task-id]`);
-
-    cards.forEach((card) => {
-      const cardProjectId = card.getAttribute('data-project-id') || '';
-
-      // 1) Sin filtro: mostrar todo
-      if (!selected) {
-        card.classList.remove('hidden');
-        return;
+      // Detectar qué Kanban está presente en la vista actual
+      let rootSelector = '#userKanbanView';
+      if (document.getElementById('supervisorKanbanView')) {
+        rootSelector = '#supervisorKanbanView';
       }
 
-      // 2) Solo tareas sin proyecto
-      if (selected === '__no_project__') {
-        if (!cardProjectId) {
+      const cards = document.querySelectorAll(`${rootSelector} [data-task-id]`);
+
+      cards.forEach((card) => {
+        const cardProjectId = card.getAttribute('data-project-id') || '';
+
+        // 1) Sin filtro: mostrar todo
+        if (!selected) {
+          card.classList.remove('hidden');
+          return;
+        }
+
+        // 2) Solo tareas sin proyecto
+        if (selected === '__no_project__') {
+          if (!cardProjectId) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+          return;
+        }
+
+        // 3) Filtro por proyecto específico
+        if (cardProjectId === selected) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
         }
-        return;
-      }
-
-      // 3) Filtro por proyecto específico
-      if (cardProjectId === selected) {
-        card.classList.remove('hidden');
-      } else {
-        card.classList.add('hidden');
-      }
+      });
     });
-  });
-}
+  }
 
   // ===============================
   // Kanban drag & drop (user / supervisor)
@@ -826,9 +832,9 @@ if (filtroTarea) {
     });
   }
 
-  const userKanbanView       = document.getElementById('userKanbanView');
+  const userKanbanView = document.getElementById('userKanbanView');
   const supervisorKanbanView = document.getElementById('supervisorKanbanView');
-  const adminKanbanView      = document.getElementById('adminKanbanView');
+  const adminKanbanView = document.getElementById('adminKanbanView');
 
   // Inicializar Kanban en la vista que corresponda
   initKanbanDragAndDrop(userKanbanView);
@@ -838,16 +844,16 @@ if (filtroTarea) {
   // ===============================
   // Modal de commits de tarea (vista usuario)
   // ===============================
-  const modalTaskCommit       = document.getElementById('modalTaskCommit');
-  const formNuevoCommit       = document.getElementById('formNuevoCommit');
-  const commitTaskTitle       = document.getElementById('commitTaskTitle');
-  const commitTaskIdLabel     = document.getElementById('commitTaskIdLabel');
+  const modalTaskCommit = document.getElementById('modalTaskCommit');
+  const formNuevoCommit = document.getElementById('formNuevoCommit');
+  const commitTaskTitle = document.getElementById('commitTaskTitle');
+  const commitTaskIdLabel = document.getElementById('commitTaskIdLabel');
   const commitTaskStatusBadge = document.getElementById('commitTaskStatusBadge');
-  const commitTaskIdInput     = document.getElementById('commitTaskId');
-  const commitFromStatus      = document.getElementById('commitFromStatus');
-  const commitToStatus        = document.getElementById('commitToStatus');
-  const commitMessage         = document.getElementById('commitMessage');
-  const commitList            = document.getElementById('commitList');
+  const commitTaskIdInput = document.getElementById('commitTaskId');
+  const commitFromStatus = document.getElementById('commitFromStatus');
+  const commitToStatus = document.getElementById('commitToStatus');
+  const commitMessage = document.getElementById('commitMessage');
+  const commitList = document.getElementById('commitList');
 
   function applyStatusBadgeStyle(badgeEl, status) {
     if (!badgeEl) return;
@@ -899,12 +905,12 @@ if (filtroTarea) {
         : '';
 
       const fromSt = c.from_status;
-      const toSt   = c.to_status;
+      const toSt = c.to_status;
 
       let statusLine = '';
       if (fromSt || toSt) {
         const fromLabel = STATUS_LABELS_ES[fromSt] || fromSt || '—';
-        const toLabel   = STATUS_LABELS_ES[toSt]   || toSt   || '—';
+        const toLabel = STATUS_LABELS_ES[toSt] || toSt || '—';
         statusLine = `
           <p class="text-[11px] text-gray-500 mt-0.5">
             Estado: <strong>${fromLabel}</strong> → <strong>${toLabel}</strong>
@@ -1046,79 +1052,79 @@ if (filtroTarea) {
   }
 
   // Mueve la tarjeta desde el modal de commits
-function moverTarjetaKanban(taskId, newStatus) {
-  const card = document.querySelector(`[data-task-id="${taskId}"]`);
+  function moverTarjetaKanban(taskId, newStatus) {
+    const card = document.querySelector(`[data-task-id="${taskId}"]`);
 
-  if (!card) return;
+    if (!card) return;
 
-  const column = document.querySelector(
-    `[data-column-status="${newStatus}"] .kanban-column-body`
-  );
+    const column = document.querySelector(
+      `[data-column-status="${newStatus}"] .kanban-column-body`
+    );
 
-  if (!column) return;
+    if (!column) return;
 
-  // mover tarjeta
-  column.appendChild(card);
+    // mover tarjeta
+    column.appendChild(card);
 
-  // actualizar dataset
-  card.dataset.taskStatus = newStatus;
+    // actualizar dataset
+    card.dataset.taskStatus = newStatus;
 
-  // actualizar etiqueta de estado
-  const label = card.querySelector('[data-role="task-status-label"]');
-  if (label) {
-    label.textContent = 'Estado: ' + (STATUS_LABELS_ES[newStatus] || newStatus);
+    // actualizar etiqueta de estado
+    const label = card.querySelector('[data-role="task-status-label"]');
+    if (label) {
+      label.textContent = 'Estado: ' + (STATUS_LABELS_ES[newStatus] || newStatus);
+    }
   }
-}
 
   // 🔹 Tabs del modal de proyectos (admin)
-window.switchProyectoTab = function (tab) {
-  const formNuevo  = document.getElementById('formNuevoProyecto');
-  const formEditar = document.getElementById('formEditarProyecto');
-  const btnNuevo   = document.getElementById('btnGuardarProyectoNuevo');
-  const btnEditar  = document.getElementById('btnGuardarProyectoEditar');
+  window.switchProyectoTab = function (tab) {
+    const formNuevo = document.getElementById('formNuevoProyecto');
+    const formEditar = document.getElementById('formEditarProyecto');
+    const btnNuevo = document.getElementById('btnGuardarProyectoNuevo');
+    const btnEditar = document.getElementById('btnGuardarProyectoEditar');
 
-  const tabRegistrar = document.getElementById('tabProyectoRegistrar');
-  const tabEditar    = document.getElementById('tabProyectoEditar');
+    const tabRegistrar = document.getElementById('tabProyectoRegistrar');
+    const tabEditar = document.getElementById('tabProyectoEditar');
 
-  if (!formNuevo || !formEditar || !btnNuevo || !btnEditar || !tabRegistrar || !tabEditar) {
-    return;
-  }
+    if (!formNuevo || !formEditar || !btnNuevo || !btnEditar || !tabRegistrar || !tabEditar) {
+      return;
+    }
 
-  if (tab === 'registrar') {
-    // Formularios
-    formNuevo.classList.remove('hidden');
-    formEditar.classList.add('hidden');
+    if (tab === 'registrar') {
+      // Formularios
+      formNuevo.classList.remove('hidden');
+      formEditar.classList.add('hidden');
 
-    // Botones
-    btnNuevo.classList.remove('hidden');
-    btnEditar.classList.add('hidden');
+      // Botones
+      btnNuevo.classList.remove('hidden');
+      btnEditar.classList.add('hidden');
 
-    // Tabs: activar "Registrar"
-    tabRegistrar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
-    tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+      // Tabs: activar "Registrar"
+      tabRegistrar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+      tabRegistrar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
 
-    // Tabs: desactivar "Editar"
-    tabEditar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
-    tabEditar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+      // Tabs: desactivar "Editar"
+      tabEditar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+      tabEditar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
 
-  } else if (tab === 'editar') {
-    // Formularios
-    formNuevo.classList.add('hidden');
-    formEditar.classList.remove('hidden');
+    } else if (tab === 'editar') {
+      // Formularios
+      formNuevo.classList.add('hidden');
+      formEditar.classList.remove('hidden');
 
-    // Botones
-    btnNuevo.classList.add('hidden');
-    btnEditar.classList.remove('hidden');
+      // Botones
+      btnNuevo.classList.add('hidden');
+      btnEditar.classList.remove('hidden');
 
-    // Tabs: activar "Editar"
-    tabEditar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
-    tabEditar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+      // Tabs: activar "Editar"
+      tabEditar.classList.add('border-[#7B1FA2]', 'text-[#7B1FA2]');
+      tabEditar.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700');
 
-    // Tabs: desactivar "Registrar"
-    tabRegistrar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
-    tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
-  }
-};
+      // Tabs: desactivar "Registrar"
+      tabRegistrar.classList.remove('border-[#7B1FA2]', 'text-[#7B1FA2]');
+      tabRegistrar.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700');
+    }
+  };
 
   // 🔹 Cargar datos del proyecto al cambiar el select en "Editar proyecto"
   const editProyectoSelect = document.getElementById('editProyectoSelect');
@@ -1150,7 +1156,7 @@ window.switchProyectoTab = function (tab) {
 
       // Fechas: si vienen con hora tipo '2025-11-28T00:00:00.000Z', cortamos a YYYY-MM-DD
       const start = proyecto.start_date ? String(proyecto.start_date).substring(0, 10) : '';
-      const end   = proyecto.end_date ? String(proyecto.end_date).substring(0, 10) : '';
+      const end = proyecto.end_date ? String(proyecto.end_date).substring(0, 10) : '';
 
       document.getElementById('editProyectoStart').value = start;
       document.getElementById('editProyectoEnd').value = end;
@@ -1158,60 +1164,60 @@ window.switchProyectoTab = function (tab) {
   }
 
   // ==================================================
-// SINCRONIZAR ADMIN: cargar proyecto al cambiar select
-// (Admin usa editProyectoSelect, Supervisor usa selectProyectoEditar)
-// ==================================================
-(function () {
+  // SINCRONIZAR ADMIN: cargar proyecto al cambiar select
+  // (Admin usa editProyectoSelect, Supervisor usa selectProyectoEditar)
+  // ==================================================
+  (function () {
 
-  const adminSelect = document.getElementById('editProyectoSelect');
-  const adminProjects = Array.isArray(window.projectsAdmin) ? window.projectsAdmin : [];
+    const adminSelect = document.getElementById('editProyectoSelect');
+    const adminProjects = Array.isArray(window.projectsAdmin) ? window.projectsAdmin : [];
 
-  if (adminSelect) {
-    adminSelect.addEventListener('change', function () {
-      const id = Number(this.value);
-      const p = adminProjects.find(x => x.id === id);
-      if (!p) return;
+    if (adminSelect) {
+      adminSelect.addEventListener('change', function () {
+        const id = Number(this.value);
+        const p = adminProjects.find(x => x.id === id);
+        if (!p) return;
 
-      document.getElementById('editProyectoId').value = p.id;
-      document.getElementById('editProyectoName').value = p.name || '';
-      document.getElementById('editProyectoDescription').value = p.description || '';
-      document.getElementById('editProyectoStatus').value = p.status || 'active';
-      document.getElementById('editProyectoArea').value = p.area_id || '';
+        document.getElementById('editProyectoId').value = p.id;
+        document.getElementById('editProyectoName').value = p.name || '';
+        document.getElementById('editProyectoDescription').value = p.description || '';
+        document.getElementById('editProyectoStatus').value = p.status || 'active';
+        document.getElementById('editProyectoArea').value = p.area_id || '';
 
-      const start = p.start_date ? String(p.start_date).substring(0, 10) : '';
-      const end   = p.end_date   ? String(p.end_date).substring(0, 10) : '';
+        const start = p.start_date ? String(p.start_date).substring(0, 10) : '';
+        const end = p.end_date ? String(p.end_date).substring(0, 10) : '';
 
-      document.getElementById('editProyectoStart').value = start;
-      document.getElementById('editProyectoEnd').value = end;
+        document.getElementById('editProyectoStart').value = start;
+        document.getElementById('editProyectoEnd').value = end;
+      });
+    }
+
+  })();
+
+  // Prioridad en tareas cards kanban
+  function applyPriorityStyles(root = document) {
+    const cards = root.querySelectorAll('[data-task-priority]');
+    cards.forEach((card) => {
+      const p = (card.getAttribute('data-task-priority') || 'normal').toLowerCase();
+
+      const pill = card.querySelector('.task-priority-pill');
+      if (!pill) return;
+
+      pill.classList.remove(
+        'task-priority-low',
+        'task-priority-normal',
+        'task-priority-high',
+        'task-priority-critical'
+      );
+
+      if (p === 'low') pill.classList.add('task-priority-low');
+      else if (p === 'high') pill.classList.add('task-priority-high');
+      else if (p === 'critical') pill.classList.add('task-priority-critical');
+      else pill.classList.add('task-priority-normal');
     });
   }
 
-})();
-
-// Prioridad en tareas cards kanban
-function applyPriorityStyles(root = document) {
-  const cards = root.querySelectorAll('[data-task-priority]');
-  cards.forEach((card) => {
-    const p = (card.getAttribute('data-task-priority') || 'normal').toLowerCase();
-
-    const pill = card.querySelector('.task-priority-pill');
-    if (!pill) return;
-
-    pill.classList.remove(
-      'task-priority-low',
-      'task-priority-normal',
-      'task-priority-high',
-      'task-priority-critical'
-    );
-
-    if (p === 'low') pill.classList.add('task-priority-low');
-    else if (p === 'high') pill.classList.add('task-priority-high');
-    else if (p === 'critical') pill.classList.add('task-priority-critical');
-    else pill.classList.add('task-priority-normal');
-  });
-}
-
-applyPriorityStyles();
+  applyPriorityStyles();
 
 });
 
