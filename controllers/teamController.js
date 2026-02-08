@@ -49,8 +49,8 @@ async function obtenerTeamJSON(req, res) {
 async function crearTeam(req, res) {
   try {
     const companyId = req.user.company_id;
-    const creatorId = req.user.id;           // ⬅️ usamos al usuario actual como creator_id
-    const areaId = req.user.area_id || null; // ⬅️ si el user tiene área, la usamos
+    const creatorId = req.user.id;
+    const areaId = req.user.area_id || null;
 
     if (!companyId) {
       return jsonError(res, 'Empresa no definida para el usuario', 400);
@@ -63,7 +63,7 @@ async function crearTeam(req, res) {
     }
 
     // 1) Crear el TEAM
-    const id = await teamModel.crearTeam({
+    const teamId = await teamModel.crearTeam({
       company_id: companyId,
       name: name.trim(),
       description: description?.trim() || null,
@@ -71,34 +71,30 @@ async function crearTeam(req, res) {
       status: status || 'active'
     });
 
-    // 2) ✅ Crear el PROJECT asociado (cambio mínimo aquí)
-    //    Usamos el mismo nombre del team como nombre del proyecto
+    // 2) Crear el PROJECT asociado (solo este model recibe teamId)
     try {
       await projectModel.createAutoProjectForMember({
         companyId,
-        areaId,                       // puede ser null
-        creatorId,                    // user actual
+        areaId,          // puede ser null
+        teamId,          // 👈 ahora sí
+        creatorId,
         name: name.trim(),
         description:
           description?.trim() ||
-          `Proyecto asociado automáticamente al equipo "${name.trim()}"`,
-        status: 'active',
-        startDate: null,
-        endDate: null
+          `Proyecto asociado automáticamente al equipo "${name.trim()}"`
       });
     } catch (errProj) {
       console.error('⚠️ Error creando proyecto asociado al team:', errProj);
-      // NO rompemos la creación del team por esto, solo lo dejamos logueado
     }
 
-    // 3) Respondemos como antes (sin cambiar el formato)
-    const team = await teamModel.obtenerTeamPorId(id, companyId);
+    // 3) Respuesta intacta
+    const team = await teamModel.obtenerTeamPorId(teamId, companyId);
     return jsonOk(res, team, 'Grupo creado correctamente');
   } catch (err) {
     console.error('Error crearTeam:', err);
     return jsonError(res);
   }
-};
+}
 
 /*
 // POST /api/teams

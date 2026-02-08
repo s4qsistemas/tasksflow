@@ -112,6 +112,7 @@ CREATE TABLE projects (
   id INT AUTO_INCREMENT PRIMARY KEY,
   company_id INT NOT NULL,
   area_id INT NULL,
+  team_id INT NULL DEFAULT NULL
   creator_id INT NOT NULL,
   name VARCHAR(150) NOT NULL,
   description TEXT,
@@ -121,8 +122,15 @@ CREATE TABLE projects (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id),
   FOREIGN KEY (area_id) REFERENCES areas(id),
+  FOREIGN KEY (team_id) REFERENCES teams(id),
   FOREIGN KEY (creator_id) REFERENCES users(id)
 );
+
+--ALTER TABLE projects
+--ADD COLUMN team_id INT NULL DEFAULT NULL
+--AFTER area_id,
+--ADD CONSTRAINT fk_projects_team
+--FOREIGN KEY (team_id) REFERENCES teams(id);
 
 -- --------------------------------------------------------------------------
 -- Tareas

@@ -104,6 +104,7 @@ async function getById(companyId, projectId) {
 async function create({
   companyId,
   areaId,
+  teamId = null,
   creatorId,
   name,
   description,
@@ -114,12 +115,13 @@ async function create({
   const [result] = await pool.query(
     `
     INSERT INTO projects
-      (company_id, area_id, creator_id, name, description, status, start_date, end_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (company_id, area_id, team_id, creator_id, name, description, status, start_date, end_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     [
       companyId,
       areaId || null,
+      teamId,
       creatorId,
       name,
       description || '',
@@ -187,6 +189,7 @@ async function getAllByCompanyAndCreator(companyId, creatorId) {
 async function createAutoProjectForMember({
   companyId,
   areaId,
+  teamId = null,
   creatorId,
   name,
   description
@@ -196,6 +199,7 @@ async function createAutoProjectForMember({
     INSERT INTO projects (
       company_id,
       area_id,
+      team_id,
       creator_id,
       name,
       description,
@@ -203,9 +207,16 @@ async function createAutoProjectForMember({
       start_date,
       end_date
     )
-    VALUES (?, ?, ?, ?, ?, 'active', CURDATE(), NULL)
+    VALUES (?, ?, ?, ?, ?, ?, 'active', CURDATE(), NULL)
     `,
-    [companyId, areaId, creatorId, name, description]
+    [
+      companyId,
+      areaId || null,
+      teamId,
+      creatorId,
+      name,
+      description || ''
+    ]
   );
 
   const projectId = result.insertId;
@@ -216,6 +227,7 @@ async function createAutoProjectForMember({
       id,
       company_id,
       area_id,
+      team_id,
       creator_id,
       name,
       description,
