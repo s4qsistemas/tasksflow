@@ -46,8 +46,8 @@ async function getSupervisorMetrics(companyId, supervisorId) {
       WHERE t.company_id = ?
         AND ta.user_id IN (?)
         AND t.status IN ('pending','in_progress','review')
-        AND t.deadline_at IS NOT NULL
-        AND t.deadline_at < NOW()`,
+        AND t.deadline IS NOT NULL
+        AND t.deadline < NOW()`,
     [companyId, teamIds]
   );
   const tasksOverdue = overRows[0]?.cnt || 0;
@@ -97,8 +97,8 @@ async function getTeamLoad(companyId, supervisorId) {
         SUM(t.status = 'in_progress')                       AS tasksInProgress,
         SUM(
           t.status IN ('pending','in_progress','review')
-          AND t.deadline_at IS NOT NULL
-          AND t.deadline_at < NOW()
+          AND t.deadline IS NOT NULL
+          AND t.deadline < NOW()
         ) AS tasksOverdue
      FROM users u
      LEFT JOIN task_assignments ta ON ta.user_id = u.id
@@ -123,15 +123,15 @@ async function getTodayTasks(companyId, supervisorId) {
         t.id,
         t.title,
         t.status,
-        DATE_FORMAT(t.deadline_at, '%d-%m-%Y %H:%i') AS due_human,
+        DATE_FORMAT(t.deadline, '%d-%m-%Y %H:%i') AS due_human,
         u.name AS assignee_name
      FROM tasks t
      JOIN task_assignments ta ON ta.task_id = t.id
      JOIN users u ON u.id = ta.user_id
     WHERE t.company_id = ?
       AND u.manager_id = ?
-      AND DATE(t.deadline_at) = CURDATE()
-    ORDER BY t.deadline_at ASC`,
+      AND DATE(t.deadline) = CURDATE()
+    ORDER BY t.deadline ASC`,
     [companyId, supervisorId]
   );
 
@@ -147,11 +147,11 @@ async function getTodayTasks(companyId, supervisorId) {
 async function getTeamDeadlineHorizon(companyId, supervisorId) {
   const [rows] = await pool.query(
     `SELECT
-        SUM(DATE(t.deadline_at) = CURDATE())                               AS daily,
-        SUM(DATE(t.deadline_at) > CURDATE()
-            AND t.deadline_at <= (NOW() + INTERVAL 7 DAY))                  AS weekly,
-        SUM(DATE(t.deadline_at) > (CURDATE() + INTERVAL 7 DAY)
-            AND t.deadline_at <= (NOW() + INTERVAL 30 DAY))                 AS monthly
+        SUM(DATE(t.deadline) = CURDATE())                               AS daily,
+        SUM(DATE(t.deadline) > CURDATE()
+            AND t.deadline <= (NOW() + INTERVAL 7 DAY))                  AS weekly,
+        SUM(DATE(t.deadline) > (CURDATE() + INTERVAL 7 DAY)
+            AND t.deadline <= (NOW() + INTERVAL 30 DAY))                 AS monthly
      FROM tasks t
      JOIN task_assignments ta ON ta.task_id = t.id
      JOIN users u ON u.id = ta.user_id
@@ -163,8 +163,8 @@ async function getTeamDeadlineHorizon(companyId, supervisorId) {
 
   const r = rows[0] || {};
   return {
-    daily:   Number(r.daily   || 0),
-    weekly:  Number(r.weekly  || 0),
+    daily: Number(r.daily || 0),
+    weekly: Number(r.weekly || 0),
     monthly: Number(r.monthly || 0)
   };
 }
@@ -178,17 +178,17 @@ async function getUpcomingTasks7d(companyId, supervisorId) {
         t.id,
         t.title,
         u.name AS assignee_name,
-        DATE_FORMAT(t.deadline_at, '%d-%m-%Y %H:%i') AS next_run_human
+        DATE_FORMAT(t.deadline, '%d-%m-%Y %H:%i') AS next_run_human
      FROM tasks t
      JOIN task_assignments ta ON ta.task_id = t.id
      JOIN users u ON u.id = ta.user_id
     WHERE t.company_id = ?
       AND u.manager_id = ?
       AND t.status IN ('pending','in_progress','review')
-      AND t.deadline_at IS NOT NULL
-      AND t.deadline_at > NOW()
-      AND t.deadline_at <= (NOW() + INTERVAL 7 DAY)
-    ORDER BY t.deadline_at ASC
+      AND t.deadline IS NOT NULL
+      AND t.deadline > NOW()
+      AND t.deadline <= (NOW() + INTERVAL 7 DAY)
+    ORDER BY t.deadline ASC
     LIMIT 10`,
     [companyId, supervisorId]
   );
@@ -235,6 +235,7 @@ async function getKanbanTasks(companyId, supervisorId) {
     `SELECT
         t.id,
         t.title,
+        t.priority,
         t.status,
         t.project_id,
         p.name AS project_name,
@@ -245,7 +246,7 @@ async function getKanbanTasks(companyId, supervisorId) {
      LEFT JOIN projects p ON p.id = t.project_id
     WHERE t.company_id = ?
       AND u.manager_id = ?
-    ORDER BY t.status, t.deadline_at IS NULL, t.deadline_at`,
+    ORDER BY t.status, t.deadline IS NULL, t.deadline`,
     [companyId, supervisorId]
   );
 

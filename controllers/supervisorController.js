@@ -1,4 +1,8 @@
 // controllers/supervisorController.js
+const dashboardSupModel = require('../models/supervisorDashboardModel');
+const projectModel = require('../models/projectModel');
+const taskModel = require('../models/taskModel');
+const userModel = require('../models/userModel');
 async function panelSupervisorView(req, res) {
   try {
     const user = req.user;
@@ -27,7 +31,7 @@ async function panelSupervisorView(req, res) {
       dashboardSupModel.getUserProjects(companyId, supervisorId),
 
       // ✅ todos los proyectos del ÁREA del supervisor
-      projectModel.getProjectsByParticipationSubquery(companyId, user.area_id),
+      projectModel.getAllByCompanyAndArea(companyId, user.area_id),
 
       // ✅ proyectos creados por el supervisor actual
       projectModel.getProjectsByParticipationSubquery(companyId, supervisorId),
@@ -44,6 +48,22 @@ async function panelSupervisorView(req, res) {
       teamLoad
     );
 
+    // Unificar proyectos del área + proyectos donde participa el supervisor
+    // Usamos un Map para eliminar duplicados por ID
+    const allProjectsMap = new Map();
+
+    // 1. Agregar proyectos del área
+    if (projectsArea && projectsArea.length) {
+      projectsArea.forEach(p => allProjectsMap.set(p.id, p));
+    }
+
+    // 2. Agregar proyectos donde participa (puede que algunos ya estén, se sobrescriben)
+    if (projectsCreator && projectsCreator.length) {
+      projectsCreator.forEach(p => allProjectsMap.set(p.id, p));
+    }
+
+    const finalProjects = Array.from(allProjectsMap.values());
+
     res.render('supervisor', {
       title: 'Panel Supervisor',
       user,
@@ -55,8 +75,8 @@ async function panelSupervisorView(req, res) {
       tacticalAlerts,
       kanbanTasks,
 
-      // ✅ si el supervisor tiene proyectos propios, usa esos; si no, usa los del área
-      projects: projectsCreator.length ? projectsCreator : projectsArea,
+      // ✅ Enviamos la lista unificada
+      projects: finalProjects,
 
       users,
       userProjects,
@@ -67,3 +87,7 @@ async function panelSupervisorView(req, res) {
     res.status(500).send('Error al cargar panel del supervisor');
   }
 }
+
+module.exports = {
+  panelSupervisorView
+};
